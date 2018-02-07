@@ -131,6 +131,7 @@ namespace GRPExplorerLib.BigFile
                 for (short i = 0; i < countInfo.Folders; i++)
                 {
                     fs.Read(bytes, 0, tmpFolderInfo.StructSize);
+
                     folderInfos[i] = MarshalUtil.BytesToStruct<BigFileFolderInfo>(bytes);
 
                     folderInfos[i].DebugLog(log);

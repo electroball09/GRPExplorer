@@ -26,12 +26,10 @@ namespace GRPExplorerLib.BigFile
 
         public PackedBigFile(FileInfo _fileInfo) : base(_fileInfo.FullName)
         {
+            log.Info("Creating packed bigfile, file: " + _fileInfo.FullName);
+
             if (!_fileInfo.Exists)
                 throw new Exception("_fileInfo doesn't exist!");
-
-            fileInfo = _fileInfo;
-            fileIO = new BigFileIO(fileInfo);
-            fileUtil = new BigFileUtil();
         }
 
         public override void LoadFromDisk()

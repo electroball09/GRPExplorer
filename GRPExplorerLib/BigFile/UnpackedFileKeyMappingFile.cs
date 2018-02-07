@@ -22,9 +22,11 @@ namespace GRPExplorerLib.BigFile
 
         public void SaveMappingData(UnpackedRenamedFileMapping mapping)
         {
+            log.Info("Saving renamed mapping to file: " + fileInfo.FullName);
+
             using (FileStream fs = File.Create(fileInfo.FullName))
             {
-                foreach (KeyValuePair<int, UnpackedRenamedFileMapping.RenamedFileMappingData> kvp in mapping.Map)
+                foreach (KeyValuePair<int, UnpackedRenamedFileMapping.RenamedFileMappingData> kvp in mapping.KeyMap)
                 {
                     fs.WriteByte(0x1C);
 
@@ -38,6 +40,8 @@ namespace GRPExplorerLib.BigFile
             if (!fileInfo.Exists)
                 throw new Exception("Can't read from null file!");
 
+            log.Info("Loading renamed file mapping from file: " + fileInfo.FullName);
+
             UnpackedRenamedFileMapping mapping = new UnpackedRenamedFileMapping();
 
             using (FileStream fs = File.OpenRead(fileInfo.FullName))
@@ -49,7 +53,7 @@ namespace GRPExplorerLib.BigFile
 
                     data.ReadFromStream(fs, tempBuffer);
 
-                    mapping.Map.Add(data.Key, data);
+                    mapping[data.Key] = data;
 
                     sig = fs.ReadByte();
                 }

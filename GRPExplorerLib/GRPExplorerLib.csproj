@@ -38,7 +38,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Async\Async.cs" />
     <Compile Include="BigFile\BigFile.cs" />
     <Compile Include="BigFile\PackedBigFile.cs" />
     <Compile Include="BigFile\BigFileConst.cs" />
@@ -48,6 +47,7 @@
     <Compile Include="BigFile\BigFileIO.cs" />
     <Compile Include="BigFile\BigFileUnpacker.cs" />
     <Compile Include="BigFile\BigFileUtil.cs" />
+    <Compile Include="BigFile\UnpackedBigFile.cs" />
     <Compile Include="BigFile\UnpackedFileKeyMappingFile.cs" />
     <Compile Include="GRPExplorerLibManager.cs" />
     <Compile Include="Lib\GRPExplorerLibLogInterface.cs" />

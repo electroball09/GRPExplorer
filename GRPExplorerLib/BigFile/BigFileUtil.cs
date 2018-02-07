@@ -116,6 +116,8 @@ namespace GRPExplorerLib.BigFile
                     else
                         log.Error("File number mapping already contains key " + fileInfos[i].FileNumber + " " + filesList[i].Name);
                 }
+                else
+                    log.Error(string.Format("File number is -1! (key:{0:X8})", fileInfos[i].Key));
             }
 
             log.Info("Mappings created!");
@@ -164,6 +166,77 @@ namespace GRPExplorerLib.BigFile
 
             logCount = 0;
         }
+
+        short folderCount = 0;
+        public BigFileFolder CreateFolderTreeFromDirectory(DirectoryInfo dir, BigFileFolder parentFolder = null)
+        {
+            BigFileFolderInfo folderInfo = new BigFileFolderInfo()
+            {
+                Unknown_01 = int.MaxValue,
+                PreviousFolder = -1,
+                NextFolder = -1,
+                Unknown_02 = -1,
+                Name = Encoding.Default.GetBytes(dir.Name)
+            };
+
+            bool isFirst = false;
+            BigFileFolder thisFolder = null;
+            if (parentFolder == null)
+            {
+                isFirst = true;
+                log.Info("Creating BigFileFolder tree from directory " + dir.FullName);
+                folderCount = 0;
+                folderInfo.PreviousFolder = -1;
+                Dictionary<short, BigFileFolder> folderMap = new Dictionary<short, BigFileFolder>();
+                thisFolder = new BigFileFolder(folderCount, folderInfo, folderMap);
+            }
+            else
+            {
+                folderInfo.PreviousFolder = parentFolder.FolderIndex;
+                thisFolder = new BigFileFolder(folderCount, folderInfo, parentFolder.FolderMap);
+            }
+            log.Debug(string.Format("Adding folder " + thisFolder.Name + " with key {0:X4}", thisFolder.FolderIndex));
+            thisFolder.FolderMap.Add(thisFolder.FolderIndex, thisFolder);
+            folderCount++;
+
+            foreach (DirectoryInfo newInfo in dir.GetDirectories())
+            {
+                thisFolder.SubFolders.Add(CreateFolderTreeFromDirectory(newInfo, thisFolder));
+            }
+
+            if (isFirst)
+            {
+                log.Info("Created " + folderCount + " folders");
+            }
+
+            return thisFolder;
+        }
+
+        //public BigFileFileInfo[] CreateUnpackedFileInfos(DirectoryInfo dir, UnpackedRenamedFileMapping mapping)
+        //{
+
+        //}
+
+        public void MapRenamedFilesToFolderTree(DirectoryInfo dir, BigFileFolder rootFolder, UnpackedRenamedFileMapping mapping)
+        //public void MapRenamedFilesToFolderTree(DirectoryInfo dir)
+        {
+
+
+            Action<DirectoryInfo> recursion = null;
+            recursion = (DirectoryInfo directory) =>
+            {
+                foreach (FileInfo fileInfo in directory.GetFiles())
+                {
+                    
+                }
+
+                foreach (DirectoryInfo directory2 in directory.GetDirectories())
+                {
+                    recursion.Invoke(directory2);
+                }
+            };
+            recursion.Invoke(dir);
+        }
     }
 
     public class UnpackedRenamedFileMapping
@@ -205,8 +278,52 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
-        private Dictionary<int, RenamedFileMappingData> map = new Dictionary<int, RenamedFileMappingData>();
-        public Dictionary<int, RenamedFileMappingData> Map { get { return map; } }
+        public RenamedFileMappingData this[int key]
+        {
+            get
+            {
+                return keyMap[key];
+            }
+            set
+            {
+                if (!keyMap.ContainsKey(key))
+                {
+                    keyMap.Add(key, value);
+                    renamedMap.Add(value.FileName, value);
+                }
+                else
+                {
+                    keyMap[key] = value;
+                    renamedMap[value.FileName] = value;
+                }
+            }
+        }
+
+        public RenamedFileMappingData this[string key]
+        {
+            get
+            {
+                return renamedMap[key];
+            }
+            set
+            {
+                if (!renamedMap.ContainsKey(key))
+                {
+                    renamedMap.Add(key, value);
+                    keyMap.Add(value.Key, value);
+                }
+                else
+                {
+                    renamedMap[key] = value;
+                    keyMap[value.Key] = value;
+                }
+            }
+        }
+
+        private Dictionary<int, RenamedFileMappingData> keyMap = new Dictionary<int, RenamedFileMappingData>();
+        public Dictionary<int, RenamedFileMappingData> KeyMap { get { return keyMap; } }
+        private Dictionary<string, RenamedFileMappingData> renamedMap = new Dictionary<string, RenamedFileMappingData>();
+        public Dictionary<string, RenamedFileMappingData> RenamedMap { get { return renamedMap; } }
     }
 
     public class FileMappingData

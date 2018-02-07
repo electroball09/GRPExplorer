@@ -37,6 +37,7 @@ namespace GRPExplorerLib.BigFile
             public int count;
             public int threadID;
             public Action<UnpackThreadInfo> OnWorkDoneCallback;
+            public IOBuffers buffers = new IOBuffers();
             public bool isUnpacking = false;
             public Stopwatch stopwatch = new Stopwatch();
         }
@@ -119,16 +120,16 @@ namespace GRPExplorerLib.BigFile
             log.Info("Divided files into " + NUM_THREADED_TASKS + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
             for (int i = 0; i < NUM_THREADED_TASKS; i++)
             {
-                unpackThreads[i] = new UnpackThreadInfo()
-                {
-                    unpackDir = unpackDir,
-                    bigFile = bigFile,
-                    fileMapping = renamedMapping,
-                    startIndex = i * dividedCount,
-                    count = dividedCount,
-                    threadID = i,
-                    OnWorkDoneCallback = internal_OnThreadFinished
-                };
+                if (unpackThreads[i] == null)
+                    unpackThreads[i] = new UnpackThreadInfo();
+
+                unpackThreads[i].unpackDir = unpackDir;
+                unpackThreads[i].bigFile = bigFile;
+                unpackThreads[i].fileMapping = renamedMapping;
+                unpackThreads[i].startIndex = i * dividedCount;
+                unpackThreads[i].count = dividedCount;
+                unpackThreads[i].threadID = i;
+                unpackThreads[i].OnWorkDoneCallback = internal_OnThreadFinished;
             }
             unpackThreads[3].count += dividedRemainder; //add the remainder onto the last info
 
@@ -154,10 +155,8 @@ namespace GRPExplorerLib.BigFile
             info.stopwatch.Reset();
             info.stopwatch.Start();
 
-            IOBuffers buffers = new IOBuffers();
-
             int dataOffset = info.bigFile.FileIO.CalculateDataOffset(ref info.bigFile.FileHeader, ref info.bigFile.CountInfo);
-            byte[] buffer = buffers[4];
+            byte[] buffer = info.buffers[4];
             using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
             {
                 BigFileFile currFile = null;
@@ -171,11 +170,11 @@ namespace GRPExplorerLib.BigFile
                     }
 
                     log.Info("Unpacking file " + currFile.Name);
-                    info.fileMapping.Map[currFile.FileInfo.Key].DebugLog(log);
+                    info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
 
                     fs.Seek((uint)dataOffset + (uint)(currFile.FileInfo.Offset * 8), SeekOrigin.Begin);
 
-                    buffer = buffers[4];
+                    buffer = info.buffers[4];
                     int fileSize = -1;
 
                     //here we read the data from the bigfile, and decompress it if we need to
@@ -184,7 +183,7 @@ namespace GRPExplorerLib.BigFile
                         fs.Read(buffer, 0, 4); //get the size of the file
                         fileSize = BitConverter.ToInt32(buffer, 0);
 
-                        buffer = buffers[fileSize];
+                        buffer = info.buffers[fileSize];
 
                         fs.Read(buffer, 0, fileSize);
                     }
@@ -197,14 +196,14 @@ namespace GRPExplorerLib.BigFile
 
                         fs.Read(buffer, 0, 2); //we skip the first 2 bytes because it's a zlib header
 
-                        buffer = buffers[fileSize];
+                        buffer = info.buffers[fileSize];
                         using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Decompress, true))
                         {
                             ds.Read(buffer, 0, fileSize);
                         }
                     }
 
-                    string fileName = info.unpackDir.FullName + info.fileMapping.Map[currFile.FileInfo.Key].FileName;
+                    string fileName = info.unpackDir.FullName + info.fileMapping[currFile.FileInfo.Key].FileName;
 
                     //write the read data to the unpacked file
                     using (FileStream newFs = File.Create(fileName))
@@ -302,7 +301,7 @@ namespace GRPExplorerLib.BigFile
                     FileName = fullName
                 };
 
-                mapping.Map.Add(file.FileInfo.Key, data);
+                mapping[file.FileInfo.Key] = data;
             }
 
             foreach (BigFileFolder childFolder in folder.SubFolders)
@@ -317,11 +316,6 @@ namespace GRPExplorerLib.BigFile
             }
 
             return mapping;
-        }
-
-        public void UnpackFiles(DirectoryInfo dir, BigFileFolder folder, UnpackedRenamedFileMapping fileMapping)
-        {
-
         }
     }
 }
