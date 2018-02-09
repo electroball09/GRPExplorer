@@ -50,7 +50,7 @@ namespace GRPExplorerLib.BigFile
             log.Info("Creating folder tree and file mappings...");
 
             rootFolder = fileUtil.CreateRootFolderTree(folders);
-            mappingData = fileUtil.CreateFileMappings(rootFolder, files);
+            mappingData = fileUtil.CreateFileMappingData(rootFolder, files);
             fileUtil.MapFilesToFolders(rootFolder, mappingData);
 
             log.Info("Bigfile loaded!");

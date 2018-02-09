@@ -76,8 +76,9 @@ namespace GRPExplorerLib.BigFile
             return folderMap[0];
         }
 
-        public FileMappingData CreateFileMappings(BigFileFolder rootFolder, BigFileFileInfo[] fileInfos)
+        public FileMappingData CreateFileMappingData(BigFileFolder rootFolder, BigFileFileInfo[] fileInfos)
         {
+            log.Info("Creating mapping data...");
             log.Info("Creating files list...  Count: " + fileInfos.Length);
 
             stopwatch.Reset();
@@ -104,6 +105,9 @@ namespace GRPExplorerLib.BigFile
 
             for (int i = 0; i < filesList.Length; i++)
             {
+                if (fileInfos[i].Name == null)
+                    continue;
+
                 if (!fileKeyMapping.ContainsKey(fileInfos[i].Key))
                     fileKeyMapping.Add(fileInfos[i].Key, filesList[i]);
                 else
@@ -146,97 +150,97 @@ namespace GRPExplorerLib.BigFile
             stopwatch.Reset();
         }
 
-        int logCount = 0;
-        public void DebugLogRootFolderTree(BigFileFolder folder, int depth = 0)
+        public UnpackedFolderMapAndFilesList CreateFolderTreeAndFilesListFromDirectory(DirectoryInfo dir, UnpackedRenamedFileMapping mapping)
         {
-            logCount++;
+            log.Info("Creating folder tree and files list from directory " + dir.FullName);
+            BigFileFileInfo[] fileInfos = new BigFileFileInfo[mapping.KeyMap.Count];
+            Dictionary<short, BigFileFolder> folderMap = new Dictionary<short, BigFileFolder>();
+            short folderCount = 0;
+            int fileCount = 0;
 
-            string folderString = logCount.ToString();
-            string fileString = "     ";
-            for (int i = 0; i < depth; i++)
+            Func<DirectoryInfo, string, BigFileFolder, BigFileFolder> recursion = null;
+            recursion = (directory, dirName, parentFolder) =>
             {
-                folderString += "-";
-                fileString += " ";
-            }
-            foreach (BigFileFile file in folder.Files)
-                log.Debug(fileString + file.Name);
-            log.Debug(folderString + Encoding.Default.GetString(folder.InfoStruct.Name));
-            foreach (BigFileFolder folder2 in folder.SubFolders)
-                DebugLogRootFolderTree(folder2, depth + 1);
-
-            logCount = 0;
-        }
-
-        short folderCount = 0;
-        public BigFileFolder CreateFolderTreeFromDirectory(DirectoryInfo dir, BigFileFolder parentFolder = null)
-        {
-            BigFileFolderInfo folderInfo = new BigFileFolderInfo()
-            {
-                Unknown_01 = int.MaxValue,
-                PreviousFolder = -1,
-                NextFolder = -1,
-                Unknown_02 = -1,
-                Name = Encoding.Default.GetBytes(dir.Name)
-            };
-
-            bool isFirst = false;
-            BigFileFolder thisFolder = null;
-            if (parentFolder == null)
-            {
-                isFirst = true;
-                log.Info("Creating BigFileFolder tree from directory " + dir.FullName);
-                folderCount = 0;
-                folderInfo.PreviousFolder = -1;
-                Dictionary<short, BigFileFolder> folderMap = new Dictionary<short, BigFileFolder>();
-                thisFolder = new BigFileFolder(folderCount, folderInfo, folderMap);
-            }
-            else
-            {
-                folderInfo.PreviousFolder = parentFolder.FolderIndex;
-                thisFolder = new BigFileFolder(folderCount, folderInfo, parentFolder.FolderMap);
-            }
-            log.Debug(string.Format("Adding folder " + thisFolder.Name + " with key {0:X4}", thisFolder.FolderIndex));
-            thisFolder.FolderMap.Add(thisFolder.FolderIndex, thisFolder);
-            folderCount++;
-
-            foreach (DirectoryInfo newInfo in dir.GetDirectories())
-            {
-                thisFolder.SubFolders.Add(CreateFolderTreeFromDirectory(newInfo, thisFolder));
-            }
-
-            if (isFirst)
-            {
-                log.Info("Created " + folderCount + " folders");
-            }
-
-            return thisFolder;
-        }
-
-        //public BigFileFileInfo[] CreateUnpackedFileInfos(DirectoryInfo dir, UnpackedRenamedFileMapping mapping)
-        //{
-
-        //}
-
-        public void MapRenamedFilesToFolderTree(DirectoryInfo dir, BigFileFolder rootFolder, UnpackedRenamedFileMapping mapping)
-        //public void MapRenamedFilesToFolderTree(DirectoryInfo dir)
-        {
-
-
-            Action<DirectoryInfo> recursion = null;
-            recursion = (DirectoryInfo directory) =>
-            {
-                foreach (FileInfo fileInfo in directory.GetFiles())
+                BigFileFolderInfo folderInfo = new BigFileFolderInfo()
                 {
-                    
+                    Unknown_01 = 0,
+                    PreviousFolder = parentFolder != null ? parentFolder.FolderIndex : (short)-1,
+                    NextFolder = -1,
+                    Unknown_02 = 0,
+                    Name = Encoding.Default.GetBytes(directory.Name)
+                };
+
+                BigFileFolder thisFolder = new BigFileFolder(folderCount, folderInfo, folderMap);
+                folderMap.Add(folderCount, thisFolder);
+
+                foreach (FileInfo file in directory.GetFiles())
+                {
+                    string fileName = dirName + "/" + file.Name;
+                    UnpackedRenamedFileMapping.RenamedFileMappingData mappingData = mapping[fileName];
+                    BigFileFileInfo fileInfo = new BigFileFileInfo()
+                    {
+                        Key = mappingData.Key,
+                        FileNumber = fileCount,
+                        Name = Encoding.Default.GetBytes(mappingData.OriginalName),
+                        Folder = folderCount,
+                        Flags = 0x000f0000,
+                    };
+
+                    log.Debug("Add file " + file.FullName);
+
+                    fileInfos[fileCount] = fileInfo;
+                    fileCount++;
                 }
 
-                foreach (DirectoryInfo directory2 in directory.GetDirectories())
+                folderCount++;
+
+                foreach (DirectoryInfo dirInfo in directory.GetDirectories())
                 {
-                    recursion.Invoke(directory2);
+                    if (parentFolder == null)
+                        thisFolder.SubFolders.Add(recursion.Invoke(dirInfo, dirInfo.Name, thisFolder));
+                    else
+                        thisFolder.SubFolders.Add(recursion.Invoke(dirInfo, dirName + "/" + dirInfo.Name, thisFolder));
                 }
+
+                return thisFolder;
             };
-            recursion.Invoke(dir);
+
+            recursion.Invoke(dir, "", null);
+
+            return new UnpackedFolderMapAndFilesList()
+            {
+                folderMap = folderMap,
+                filesList = fileInfos
+            };
         }
+
+        public void DebugLogRootFolderTree(BigFileFolder rootFolder)
+        {
+            Action<BigFileFolder, int> recursion = null;
+            recursion = (folder, depth) =>
+            {
+                string folderString = "";
+                string fileString = "     ";
+                for (int i = 0; i < depth; i++)
+                {
+                    folderString += "-";
+                    fileString += " ";
+                }
+                log.Debug(folderString + Encoding.Default.GetString(folder.InfoStruct.Name));
+                foreach (BigFileFile file in folder.Files)
+                    log.Debug(fileString + file.Name);
+                foreach (BigFileFolder subFolder in folder.SubFolders)
+                    recursion.Invoke(subFolder, depth + 1);
+            };
+
+            recursion.Invoke(rootFolder, 0);
+        }
+    }
+
+    public struct UnpackedFolderMapAndFilesList
+    {
+        public Dictionary<short, BigFileFolder> folderMap;
+        public BigFileFileInfo[] filesList;
     }
 
     public class UnpackedRenamedFileMapping

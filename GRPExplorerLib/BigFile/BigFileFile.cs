@@ -25,7 +25,7 @@ namespace GRPExplorerLib.BigFile
                 string fullName = "";
                 while (folder != null && folder.ParentFolder != null)
                 {
-                    fullName = folder.Name + "\\" + fullName;
+                    fullName = folder.Name + "/" + fullName;
                     folder = folder.ParentFolder;
                 }
                 return fullName;

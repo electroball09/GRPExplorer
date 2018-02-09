@@ -9,17 +9,20 @@ namespace GRPExplorerLib.Util
     {
         public static string EncodeToGoodString(this byte[] bytes)
         {
+            if (bytes == null)
+                return "";
+
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < bytes.Length; i++)
             {
                 if (bytes[i] == 0x00)
                 {
-                    return builder.ToString();
+                    break;
                 }
 
                 builder.Append(Convert.ToChar(bytes[i]));
             }
-            return builder.ToString();
+            return builder.ToString().Trim();
         }
     }
 }

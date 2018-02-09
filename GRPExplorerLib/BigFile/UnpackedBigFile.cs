@@ -21,6 +21,9 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
+        private DirectoryInfo directory;
+        public DirectoryInfo Directory { get { return directory; } }
+
         private LogProxy log = new LogProxy("UnpackedBigFile");
         private Stopwatch stopwatch = new Stopwatch();
 
@@ -28,6 +31,7 @@ namespace GRPExplorerLib.BigFile
 
         public UnpackedBigFile(DirectoryInfo dir) : base(dir.FullName + "\\")
         {
+            directory = dir;
             log.Info("Creating unpacked bigfile, directory: " + dir.FullName);
         }
 
@@ -42,6 +46,13 @@ namespace GRPExplorerLib.BigFile
 
             FileHeader = fileIO.ReadHeader();
             CountInfo = fileIO.ReadFileCountInfo(ref FileHeader);
+
+            UnpackedFolderMapAndFilesList folderAndFiles = fileUtil.CreateFolderTreeAndFilesListFromDirectory(new DirectoryInfo(directory.FullName + "\\" + BigFileConst.UNPACK_DIR), renamedMapping);
+            rootFolder = folderAndFiles.folderMap[0];
+
+            mappingData = fileUtil.CreateFileMappingData(folderAndFiles.folderMap[0], folderAndFiles.filesList);
+
+            fileUtil.MapFilesToFolders(rootFolder, mappingData);
         }
     }
 }
