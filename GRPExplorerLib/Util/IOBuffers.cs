@@ -49,6 +49,14 @@ namespace GRPExplorerLib.Util
             }
         }
 
+        public byte[] this[long size]
+        {
+            get
+            {
+                return GetBuffer(size);
+            }
+        }
+
         public byte[] GetBuffer(int size)
         {
             for (int i = 0; i < buffers.Length; i++)
@@ -61,6 +69,17 @@ namespace GRPExplorerLib.Util
         }
 
         public byte[] GetBuffer(uint size)
+        {
+            for (int i = 0; i < buffers.Length; i++)
+            {
+                if (size <= buffers[i].Length)
+                    return buffers[i];
+            }
+
+            throw new Exception("No buffer found for size: " + size);
+        }
+
+        public byte[] GetBuffer(long size)
         {
             for (int i = 0; i < buffers.Length; i++)
             {

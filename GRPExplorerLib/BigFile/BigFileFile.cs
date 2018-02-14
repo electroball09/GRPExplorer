@@ -12,7 +12,7 @@ namespace GRPExplorerLib.BigFile
         public string Name { get { return name; } }
 
         private BigFileFileInfo fileInfo;
-        public BigFileFileInfo FileInfo { get { return fileInfo; } }
+        public BigFileFileInfo FileInfo { get { return fileInfo; } set { fileInfo = value; } }
 
         private BigFileFolder parentFolder;
         public BigFileFolder ParentFolder { get { return parentFolder; } }

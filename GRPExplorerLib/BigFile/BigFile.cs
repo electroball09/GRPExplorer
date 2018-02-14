@@ -13,8 +13,8 @@ namespace GRPExplorerLib.BigFile
 
         public abstract FileInfo MetadataFileInfo { get; }
 
-        protected BigFileIO fileIO;
-        public BigFileIO FileIO { get { return fileIO; } }
+        protected YetiHeaderFile yetiHeaderFile;
+        public YetiHeaderFile YetiHeaderFile { get { return yetiHeaderFile; } }
         protected BigFileUtil fileUtil;
         public BigFileUtil FileUtil { get { return fileUtil; } }
 
@@ -32,7 +32,7 @@ namespace GRPExplorerLib.BigFile
         {
             fileOrDirectory = _fileOrDirectory;
 
-            fileIO = new BigFileIO(MetadataFileInfo);
+            yetiHeaderFile = new YetiHeaderFile(MetadataFileInfo);
             fileUtil = new BigFileUtil();
         }
 

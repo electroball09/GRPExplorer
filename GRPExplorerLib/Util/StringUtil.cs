@@ -24,5 +24,29 @@ namespace GRPExplorerLib.Util
             }
             return builder.ToString().Trim();
         }
+
+        public static byte[] EncodeToBadString(this string str, byte[] buffer = null, int length = -1)
+        {
+            if (length == -1)
+                length = str.Length;
+
+            if (buffer == null)
+                buffer = new byte[length];
+
+            if (str.Length > length)
+                throw new Exception("String is longer than calculated length! (" + length + ")");
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                buffer[i] = Convert.ToByte(str[i]);
+            }
+
+            for (int i = str.Length; i < buffer.Length; i++)
+            {
+                buffer[i] = 0x00;
+            }
+
+            return buffer;
+        }
     }
 }

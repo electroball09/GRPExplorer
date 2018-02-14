@@ -155,7 +155,7 @@ namespace GRPExplorerLib.BigFile
             info.stopwatch.Reset();
             info.stopwatch.Start();
 
-            int dataOffset = info.bigFile.FileIO.CalculateDataOffset(ref info.bigFile.FileHeader, ref info.bigFile.CountInfo);
+            int dataOffset = info.bigFile.YetiHeaderFile.CalculateDataOffset(ref info.bigFile.FileHeader, ref info.bigFile.CountInfo);
             byte[] buffer = info.buffers[4];
             using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
             {
@@ -242,7 +242,7 @@ namespace GRPExplorerLib.BigFile
             FileInfo metadataFileInfo = new FileInfo(dir.FullName + "\\" + BigFileConst.METADATA_FILE_NAME);
             using (FileStream fs = File.Create(metadataFileInfo.FullName))
             {
-                FileBuffer bytesToWrite = bigfile.FileIO.ReadFileAndFolderMetadataRaw(ref bigFile.FileHeader, ref bigFile.CountInfo);
+                FileBuffer bytesToWrite = bigfile.YetiHeaderFile.ReadFileAndFolderMetadataRaw(ref bigFile.FileHeader, ref bigFile.CountInfo);
                 fs.Write(bytesToWrite.bytes, 0, bytesToWrite.size);
             }
             stopwatch.Stop();

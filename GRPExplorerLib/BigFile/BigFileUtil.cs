@@ -34,6 +34,7 @@ namespace GRPExplorerLib.BigFile
 
         private LogProxy log = new LogProxy("BigFileUtil");
         private Stopwatch stopwatch = new Stopwatch();
+        private IOBuffers buffers = new IOBuffers();
         public DiagData diagData;
 
         public BigFileFolder CreateRootFolderTree(BigFileFolderInfo[] folderInfos)
@@ -164,10 +165,10 @@ namespace GRPExplorerLib.BigFile
                 BigFileFolderInfo folderInfo = new BigFileFolderInfo()
                 {
                     Unknown_01 = 0,
-                    PreviousFolder = parentFolder != null ? parentFolder.FolderIndex : (short)-1,
+                    PreviousFolder = parentFolder != null ? parentFolder.FolderIndex : (short)0xFF,
                     NextFolder = -1,
                     Unknown_02 = 0,
-                    Name = Encoding.Default.GetBytes(directory.Name)
+                    Name = directory.Name.EncodeToBadString(length: 54),
                 };
 
                 BigFileFolder thisFolder = new BigFileFolder(folderCount, folderInfo, folderMap);
@@ -179,9 +180,10 @@ namespace GRPExplorerLib.BigFile
                     UnpackedRenamedFileMapping.RenamedFileMappingData mappingData = mapping[fileName];
                     BigFileFileInfo fileInfo = new BigFileFileInfo()
                     {
+                        CRC32 = new byte[4],
                         Key = mappingData.Key,
                         FileNumber = fileCount,
-                        Name = Encoding.Default.GetBytes(mappingData.OriginalName),
+                        Name = mappingData.OriginalName.EncodeToBadString(length: 60),
                         Folder = folderCount,
                         Flags = 0x000f0000,
                     };

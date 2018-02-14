@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BigFile\BigFile.cs" />
+    <Compile Include="BigFile\BigFilePacker.cs" />
     <Compile Include="BigFile\PackedBigFile.cs" />
     <Compile Include="BigFile\BigFileConst.cs" />
     <Compile Include="BigFile\BigFileFile.cs" />

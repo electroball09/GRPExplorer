@@ -28,6 +28,7 @@ namespace GRPExplorerLib.BigFile
         private Stopwatch stopwatch = new Stopwatch();
 
         private UnpackedRenamedFileMapping renamedMapping;
+        public UnpackedRenamedFileMapping RenamedMapping { get { return renamedMapping; } }
 
         public UnpackedBigFile(DirectoryInfo dir) : base(dir.FullName + "\\")
         {
@@ -44,8 +45,8 @@ namespace GRPExplorerLib.BigFile
             UnpackedFileKeyMappingFile mappingFile = new UnpackedFileKeyMappingFile(new DirectoryInfo(fileOrDirectory));
             renamedMapping = mappingFile.LoadMappingData();
 
-            FileHeader = fileIO.ReadHeader();
-            CountInfo = fileIO.ReadFileCountInfo(ref FileHeader);
+            FileHeader = yetiHeaderFile.ReadHeader();
+            CountInfo = yetiHeaderFile.ReadFileCountInfo(ref FileHeader);
 
             UnpackedFolderMapAndFilesList folderAndFiles = fileUtil.CreateFolderTreeAndFilesListFromDirectory(new DirectoryInfo(directory.FullName + "\\" + BigFileConst.UNPACK_DIR), renamedMapping);
             rootFolder = folderAndFiles.folderMap[0];
@@ -53,6 +54,10 @@ namespace GRPExplorerLib.BigFile
             mappingData = fileUtil.CreateFileMappingData(folderAndFiles.folderMap[0], folderAndFiles.filesList);
 
             fileUtil.MapFilesToFolders(rootFolder, mappingData);
+
+            log.Info("Unpacked bigfile loaded!");
+            log.Info("  Time taken: " + stopwatch.ElapsedMilliseconds + "ms");
+            stopwatch.Stop();
         }
     }
 }

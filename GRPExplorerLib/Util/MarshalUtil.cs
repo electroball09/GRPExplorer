@@ -21,6 +21,15 @@ namespace GRPExplorerLib.Util
             return datas;
         }
 
+        public static void StructToBytes<T>(T structure, byte[] bytes) where T : struct
+        {
+            int size = Marshal.SizeOf(structure);
+            IntPtr dataPtr = Marshal.AllocHGlobal(size);
+            Marshal.StructureToPtr(structure, dataPtr, false);
+            Marshal.Copy(dataPtr, bytes, 0, size);
+            Marshal.FreeHGlobal(dataPtr);
+        }
+
         public static T BytesToStruct<T>(byte[] datas) where T : struct
         {
             T structure = new T();

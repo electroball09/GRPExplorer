@@ -9,7 +9,7 @@ using System.Diagnostics;
 
 namespace GRPExplorerLib.BigFile
 {
-    public class BigFileIO
+    public class YetiHeaderFile
     {
         private LogProxy log;
 
@@ -19,14 +19,14 @@ namespace GRPExplorerLib.BigFile
 
         private IOBuffers buffers = new IOBuffers();
 
-        public BigFileIO(FileInfo _fileInfo)
+        public YetiHeaderFile(FileInfo _fileInfo)
         {
+            log = new LogProxy("YetiHeaderFile");
+
             if (!_fileInfo.Exists)
-                throw new Exception("_fileInfo doesn't exist!");
+                log.Error("_fileInfo doesn't exist!");
 
             fileInfo = _fileInfo;
-
-            log = new LogProxy("BigFileIO");
 
             log.Info("Create BigFileIO, file: " + fileInfo.FullName);
         }
@@ -211,7 +211,76 @@ namespace GRPExplorerLib.BigFile
 
             return new FileBuffer(bytes, size);
         }
+
+        public void WriteYetiHeader(BigFile bigFile)
+        {
+            log.Info("Writing Yeti header to file " + fileInfo.FullName);
+
+            using (FileStream fs = File.OpenWrite(fileInfo.FullName))
+            {
+                byte[] buffer = buffers[bigFile.FileHeader.StructSize];
+                MarshalUtil.StructToBytes<BigFileHeader>(bigFile.FileHeader, buffer);
+                fs.Write(buffer, 0, bigFile.FileHeader.StructSize);
+
+                int blankBytesToWrite = bigFile.FileHeader.InfoOffset - bigFile.FileHeader.StructSize;
+
+                for (int i = 0; i < blankBytesToWrite; i++)
+                {
+                    fs.WriteByte(0x00);
+                }
+
+                BigFileFileCountInfo countInfo = new BigFileFileCountInfo()
+                {
+                    Files = bigFile.MappingData.FilesList.Length,
+                    Folders = (short)bigFile.RootFolder.FolderMap.Count,
+                    Unknown_01 = bigFile.CountInfo.Unknown_01,
+                    Unknown_02 = bigFile.CountInfo.Unknown_02
+                };
+
+                buffer = buffers[countInfo.StructSize];
+                MarshalUtil.StructToBytes(countInfo, buffer);
+                fs.Write(buffer, 0, countInfo.StructSize);
+            }
+
+            log.Info("Header written!");
+        }
+
+        public void WriteYetiFileAndFolderInfo(BigFile bigFile)
+        {
+            log.Info("Writing bigfile file and folder infos to file " + fileInfo.FullName);
+
+            using (FileStream fs = File.OpenWrite(fileInfo.FullName))
+            {
+                fs.Seek(bigFile.FileHeader.InfoOffset + bigFile.CountInfo.StructSize, SeekOrigin.Begin);
+
+                int fileStructSize = bigFile.MappingData.FilesList[0].FileInfo.StructSize;
+                int remainder = (bigFile.MappingData.FilesList.Length * fileStructSize) % 8;
+                log.Info("File struct remainder: " + remainder);
+                byte[] buffer = buffers[fileStructSize];
+                for (int i = 0; i < bigFile.MappingData.FilesList.Length; i++)
+                {
+                    MarshalUtil.StructToBytes(bigFile.MappingData.FilesList[i].FileInfo, buffer);
+                    fs.Write(buffer, 0, fileStructSize);
+                }
+
+                for (int i = 0; i < remainder; i++)
+                    fs.WriteByte(0x00);
+
+                int folderStructSize = bigFile.RootFolder.InfoStruct.StructSize;
+                remainder = (bigFile.RootFolder.FolderMap.Count * folderStructSize) % 8;
+                log.Info("Folder struct remainder: " + remainder);
+                buffer = buffers[folderStructSize];
+                foreach (KeyValuePair<short, BigFileFolder> kvp in bigFile.RootFolder.FolderMap)
+                {
+                    MarshalUtil.StructToBytes(kvp.Value.InfoStruct, buffer);
+                    fs.Write(buffer, 0, folderStructSize);
+                }
+
+                for (int i = 0; i < remainder; i++)
+                    fs.WriteByte(0x00);
+            }
+
+            log.Info("Infos written!");
+        }
     }
-
-
 }

@@ -39,13 +39,13 @@ namespace GRPExplorerLib.BigFile
 
             log.Info("Loading big file into memory: " + fileInfo.FullName);
 
-            FileHeader = fileIO.ReadHeader();
-            CountInfo = fileIO.ReadFileCountInfo(ref FileHeader);
+            FileHeader = yetiHeaderFile.ReadHeader();
+            CountInfo = yetiHeaderFile.ReadFileCountInfo(ref FileHeader);
 
             log.Info("Header and count info read");
 
-            BigFileFolderInfo[] folders = fileIO.ReadFolderInfos(ref FileHeader, ref CountInfo);
-            BigFileFileInfo[] files = fileIO.ReadFileInfos(ref FileHeader, ref CountInfo);
+            BigFileFolderInfo[] folders = yetiHeaderFile.ReadFolderInfos(ref FileHeader, ref CountInfo);
+            BigFileFileInfo[] files = yetiHeaderFile.ReadFileInfos(ref FileHeader, ref CountInfo);
 
             log.Info("Creating folder tree and file mappings...");
 
