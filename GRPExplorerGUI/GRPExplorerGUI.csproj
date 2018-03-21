@@ -86,6 +86,12 @@
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GRPExplorerLib\GRPExplorerLib.csproj">
+      <Project>{2b40ef25-718f-47db-9ed5-efca5dcaab96}</Project>
+      <Name>GRPExplorerLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

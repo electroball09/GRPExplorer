@@ -165,7 +165,7 @@ namespace GRPExplorerLib.BigFile
                 BigFileFolderInfo folderInfo = new BigFileFolderInfo()
                 {
                     Unknown_01 = 0,
-                    PreviousFolder = parentFolder != null ? parentFolder.FolderIndex : (short)0xFF,
+                    PreviousFolder = parentFolder != null ? parentFolder.FolderIndex : (short)-1,
                     NextFolder = -1,
                     Unknown_02 = 0,
                     Name = directory.Name.EncodeToBadString(length: 54),
@@ -340,6 +340,17 @@ namespace GRPExplorerLib.BigFile
         public Dictionary<int, BigFileFile> KeyMapping { get { return keyMapping; } }
         private Dictionary<int, BigFileFile> numMapping;
         public Dictionary<int, BigFileFile> NumMapping { get { return numMapping; } }
+
+        public BigFileFile this[int key]
+        {
+            get
+            {
+                if (keyMapping.ContainsKey(key))
+                    return keyMapping[key];
+                else
+                    return null;
+            }
+        }
 
         public FileMappingData(BigFileFile[] _filesList, Dictionary<int, BigFileFile> _keyMapping, Dictionary<int, BigFileFile> _numMapping)
         {

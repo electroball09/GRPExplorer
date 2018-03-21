@@ -5,8 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GRPExplorerGUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="478.367" Width="899.069">
     <Grid>
-        
+        <TextBox x:Name="txtFileInput" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" TextWrapping="Wrap" Text="C:\GEX_Test\" VerticalAlignment="Top" Width="871.069"/>
+        <Button x:Name="btnOpenBigFile" Content="Open" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="75"/>
+        <TextBox x:Name="txtFindKey" HorizontalAlignment="Left" Height="23" Margin="46.487,104.327,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <Label x:Name="lblFindKey" Content="Key:" HorizontalAlignment="Left" Margin="10,100.327,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnFindKey" Content="Find" HorizontalAlignment="Left" Margin="171.487,106.327,0,0" VerticalAlignment="Top" Width="75"/>
+        <GroupBox x:Name="groupFile" Header="GroupBox" HorizontalAlignment="Left" Margin="14.303,132.327,0,0" VerticalAlignment="Top" Height="104.467" Width="866.766">
+            <StackPanel HorizontalAlignment="Left" Height="166.673" Margin="0,0,-2,-12.96" VerticalAlignment="Top" Width="856.766">
+                <StackPanel Orientation="Horizontal">
+                    <Label x:Name="lblKeyLbl" Content="Key:"/>
+                    <Label x:Name="lblKey" Content=""/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label x:Name="lblPathLbl" Content="Path:"/>
+                    <Label x:Name="lblPath" Content=""/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label x:Name="lblRenamedLbl" Content="Renamed:"/>
+                    <Label x:Name="lblRenamed" Content=""/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <ListBox x:Name="listLog" HorizontalAlignment="Left" Height="184.542" Margin="14.303,252.825,0,0" VerticalAlignment="Top" Width="866.766" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+
     </Grid>
 </Window>
