@@ -22,16 +22,23 @@ namespace GRPExplorerLib.Util
         public const int KB = 1024;
         public const int MB = 1024 * KB;
 
-        private byte[][] buffers = new byte[][]
+        static readonly int[] sizes = new int[]
         {
-            new byte[4],
-            new byte[64],
-            new byte[512],
-            new byte[KB * 4],
-            new byte[KB * 512],
-            new byte[MB * 4],
-            new byte[MB * 36],
+                   4, // 1/2 byte
+                  64, // 8 byte
+                 512, // 1/2 kilobyte
+            KB *   4, // 4 kilobyte
+            KB * 512, // 1/2 megabyte
+            MB *   4, // 4 megabyte
+            MB *  36  // 36 megabyte (who needs RAM anyways)
         };
+
+        private byte[][] buffers;
+
+        public IOBuffers()
+        {
+            buffers = new byte[sizes.Length][];
+        }
 
         public byte[] this[int size]
         {
@@ -59,32 +66,27 @@ namespace GRPExplorerLib.Util
 
         public byte[] GetBuffer(int size)
         {
-            for (int i = 0; i < buffers.Length; i++)
-            {
-                if (size <= buffers[i].Length)
-                    return buffers[i];
-            }
-
-            throw new Exception("No buffer found for size: " + size);
+            return GetBuffer((long)size);
         }
 
         public byte[] GetBuffer(uint size)
         {
-            for (int i = 0; i < buffers.Length; i++)
-            {
-                if (size <= buffers[i].Length)
-                    return buffers[i];
-            }
-
-            throw new Exception("No buffer found for size: " + size);
+            return GetBuffer((long)size);
         }
 
         public byte[] GetBuffer(long size)
         {
-            for (int i = 0; i < buffers.Length; i++)
+            for (int i = 0; i < sizes.Length; i++)
             {
-                if (size <= buffers[i].Length)
+                if (size <= sizes[i])
+                {
+                    if (buffers[i] == null)
+                    {
+                        buffers[i] = new byte[sizes[i]];
+                    }
+
                     return buffers[i];
+                }
             }
 
             throw new Exception("No buffer found for size: " + size);

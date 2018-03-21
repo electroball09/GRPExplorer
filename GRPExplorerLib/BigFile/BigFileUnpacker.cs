@@ -170,38 +170,9 @@ namespace GRPExplorerLib.BigFile
                     }
 
                     log.Info("Unpacking file " + currFile.Name);
-                    info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
+                    //info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
 
-                    fs.Seek((uint)dataOffset + (uint)(currFile.FileInfo.Offset * 8), SeekOrigin.Begin);
-
-                    buffer = info.buffers[4];
-                    int fileSize = -1;
-
-                    //here we read the data from the bigfile, and decompress it if we need to
-                    if (currFile.FileInfo.ZIP == 0) //switch on compression
-                    {
-                        fs.Read(buffer, 0, 4); //get the size of the file
-                        fileSize = BitConverter.ToInt32(buffer, 0);
-
-                        buffer = info.buffers[fileSize];
-
-                        fs.Read(buffer, 0, fileSize);
-                    }
-                    else
-                    {
-                        fs.Read(buffer, 0, 4); //get the compressed size of the file
-                        int compressedSize = BitConverter.ToInt32(buffer, 0);
-                        fs.Read(buffer, 0, 4); //get uncompressed file size
-                        fileSize = BitConverter.ToInt32(buffer, 0);
-
-                        fs.Read(buffer, 0, 2); //we skip the first 2 bytes because it's a zlib header
-
-                        buffer = info.buffers[fileSize];
-                        using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Decompress, true))
-                        {
-                            ds.Read(buffer, 0, fileSize);
-                        }
-                    }
+                    int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, BigFileFlags.None);
 
                     string fileName = info.unpackDir.FullName + info.fileMapping[currFile.FileInfo.Key].FileName;
 

@@ -1,11 +1,14 @@
-﻿<Window x:Class="GRPExplorerGUI.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GRPExplorerGUI"
+        xmlns:View="clr-namespace:GRPExplorerGUI.View" 
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        x:Class="GRPExplorerGUI.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="478.367" Width="899.069">
+        Title="MainWindow" Height="478.367" Width="1514.069">
     <Grid>
         <TextBox x:Name="txtFileInput" HorizontalAlignment="Left" Height="23" Margin="10,10,0,0" TextWrapping="Wrap" Text="C:\GEX_Test\" VerticalAlignment="Top" Width="871.069"/>
         <Button x:Name="btnOpenBigFile" Content="Open" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Width="75"/>
@@ -28,7 +31,9 @@
                 </StackPanel>
             </StackPanel>
         </GroupBox>
-        <ListBox x:Name="listLog" HorizontalAlignment="Left" Height="184.542" Margin="14.303,252.825,0,0" VerticalAlignment="Top" Width="866.766" ScrollViewer.VerticalScrollBarVisibility="Visible"/>
+
+        <View:BigFileView x:Name="bigFileview" HorizontalAlignment="Left" Margin="886,10,0,0" VerticalAlignment="Top" Height="427" Width="610"/>
+        <View:LogView x:Name="logView" HorizontalAlignment="Left" Height="195" Margin="14,242,0,0" VerticalAlignment="Top" Width="867"/>
 
     </Grid>
 </Window>

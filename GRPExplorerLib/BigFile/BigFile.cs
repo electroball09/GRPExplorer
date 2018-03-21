@@ -17,6 +17,8 @@ namespace GRPExplorerLib.BigFile
         public YetiHeaderFile YetiHeaderFile { get { return yetiHeaderFile; } }
         protected BigFileUtil fileUtil;
         public BigFileUtil FileUtil { get { return fileUtil; } }
+        
+        public abstract BigFileFileReader FileReader { get; }
 
         protected BigFileFolder rootFolder;
         public BigFileFolder RootFolder { get { return rootFolder; } }
@@ -25,10 +27,14 @@ namespace GRPExplorerLib.BigFile
 
         public bool IsLoaded { get { return rootFolder != null; } }
 
+        //protected internal BigFileLoadOperationStatus status = new BigFileLoadOperationStatus();
+        //public BigFileOperationStatus LoadOperationStatus { get { return status; } }
+
+
         public BigFileHeader FileHeader;
         public BigFileFileCountInfo CountInfo;
 
-        public BigFile(string _fileOrDirectory)
+        internal BigFile(string _fileOrDirectory)
         {
             fileOrDirectory = _fileOrDirectory;
 
@@ -37,5 +43,11 @@ namespace GRPExplorerLib.BigFile
         }
 
         public abstract void LoadFromDisk();
+    }
+
+    internal sealed class BigFileLoadOperationStatus : BigFileOperationStatus
+    {
+        internal float progress = 0f;
+        public override float Progress { get { return progress; } }
     }
 }

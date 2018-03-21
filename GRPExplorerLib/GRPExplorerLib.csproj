@@ -39,20 +39,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BigFile\BigFile.cs" />
+    <Compile Include="BigFile\BigFileFileReader.cs" />
+    <Compile Include="BigFile\BigFileFlags.cs" />
     <Compile Include="BigFile\BigFilePacker.cs" />
     <Compile Include="BigFile\PackedBigFile.cs" />
     <Compile Include="BigFile\BigFileConst.cs" />
     <Compile Include="BigFile\BigFileFile.cs" />
     <Compile Include="BigFile\BigFileFolder.cs" />
     <Compile Include="BigFile\BigFileInfoStructs.cs" />
-    <Compile Include="BigFile\BigFileIO.cs" />
+    <Compile Include="BigFile\YetiHeaderFile.cs" />
     <Compile Include="BigFile\BigFileUnpacker.cs" />
     <Compile Include="BigFile\BigFileUtil.cs" />
     <Compile Include="BigFile\UnpackedBigFile.cs" />
     <Compile Include="BigFile\UnpackedFileKeyMappingFile.cs" />
     <Compile Include="GRPExplorerLibManager.cs" />
+    <Compile Include="Lib\BigFileOperationStatus.cs" />
     <Compile Include="Lib\GRPExplorerLibLogInterface.cs" />
     <Compile Include="Lib\LogProxy.cs" />
+    <Compile Include="Lib\LogStrings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\ByteUtil.cs" />
     <Compile Include="Util\IOBuffers.cs" />

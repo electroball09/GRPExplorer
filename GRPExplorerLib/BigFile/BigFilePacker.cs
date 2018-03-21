@@ -24,7 +24,7 @@ namespace GRPExplorerLib.BigFile
             public UnpackedBigFile bigFile;
             public bool isPacking = false;
             public FileInfo targetFile;
-            public BigFilePackFlags flags;
+            public BigFileFlags flags = BigFileFlags.Compress;
             public DirectoryInfo sourceDir;
         }
 
@@ -88,7 +88,7 @@ namespace GRPExplorerLib.BigFile
             log.Info("Creating BigFilePacker...");
         }
 
-        public void PackBigFile(DirectoryInfo dir, string fileName = "Yeti.big", BigFilePackFlags flags = BigFilePackFlags.None)
+        public void PackBigFile(DirectoryInfo dir, string fileName = "Yeti.big", BigFileFlags flags = BigFileFlags.Compress)
         {
             FileInfo outputFile = new FileInfo(dir.FullName + "\\" + fileName);
             log.Info("Beginning pack for a bigfile to file " + outputFile.FullName);
@@ -110,11 +110,13 @@ namespace GRPExplorerLib.BigFile
             headerFile.WriteYetiHeader(bigFile);
             headerFile.WriteYetiFileAndFolderInfo(bigFile);
 
-            if ((flags & BigFilePackFlags.UseThreading) != 0)
+            if ((flags & BigFileFlags.UseThreading) != 0)
             {
                 throw new Exception("Packing does not support threading yet!");
 
+#pragma warning disable CS0162 //SHUT UP
                 long requiredSpace = CalculateRequiredSpace(flags);
+#pragma warning restore CS0162
 
                 PreallocateSpace(outputFile, requiredSpace, bigFile.YetiHeaderFile.CalculateDataOffset(ref bigFile.FileHeader, ref bigFile.CountInfo));
 
@@ -135,6 +137,7 @@ namespace GRPExplorerLib.BigFile
                     packThreads[i].bigFile = bigFile;
                     packThreads[i].targetFile = outputFile;
                     packThreads[i].sourceDir = new DirectoryInfo(bigFile.Directory.FullName + "\\" + BigFileConst.UNPACK_DIR);
+                    packThreads[i].flags = flags;
                 }
                 packThreads[NUM_THREADED_TASKS - 1].count += dividedRemainder;
 
@@ -161,7 +164,7 @@ namespace GRPExplorerLib.BigFile
 
                         log.Info("Packing file " + currFile.Name);
 
-                        if ((flags & BigFilePackFlags.UseCompression) != 0)
+                        if ((flags & BigFileFlags.Compress) != 0)
                         {
                             using (FileStream srcStream = File.OpenRead(bigFile.Directory + "\\" + BigFileConst.UNPACK_DIR + bigFile.RenamedMapping[currFile.FileInfo.Key].FileName))
                             {
@@ -253,7 +256,7 @@ namespace GRPExplorerLib.BigFile
 
                         long fileSize = 4; //4 for the size info
 
-                        if ((info.flags & BigFilePackFlags.UseCompression) != 0)
+                        if ((info.flags & BigFileFlags.Compress) != 0)
                         {
                             fileSize += 4; //4 for compressed size info
                             fileSize += 2; //4 for zlib header info
@@ -323,7 +326,7 @@ namespace GRPExplorerLib.BigFile
             stopwatch.Stop();
         }
 
-        public long CalculateRequiredSpace(BigFilePackFlags flags)
+        public long CalculateRequiredSpace(BigFileFlags flags)
         {
             log.Info("Calculating required space for directory " + bigFile.Directory);
             log.Info("Flags: " + flags);
@@ -339,7 +342,7 @@ namespace GRPExplorerLib.BigFile
                     int size = 4; //4 for the size info
                     using (FileStream fs = File.OpenRead(file.FullName))
                     {
-                        if ((flags & BigFilePackFlags.UseCompression) != 0)
+                        if ((flags & BigFileFlags.Compress) != 0)
                         {
                             size += 4; //4 for compressed size info
                             size += 2; //4 for zlib header info
@@ -386,14 +389,5 @@ namespace GRPExplorerLib.BigFile
 
             return space;
         }
-    }
-
-    [Flags]
-    public enum BigFilePackFlags
-    {
-        None = 0x0,
-        UseCompression = 0x1,
-        UseThreading = 0x2,
-        WaitOnThreads = 0x4,
     }
 }

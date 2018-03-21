@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -16,64 +17,30 @@ using GRPExplorerLib;
 using GRPExplorerLib.BigFile;
 using GRPExplorerLib.Util;
 using System.ComponentModel;
+using GRPExplorerGUI.Model;
+using GRPExplorerGUI.ViewModel;
 
 namespace GRPExplorerGUI
 {
     public partial class MainWindow : Window
     {
-        private class LogProxy : IGRPExplorerLibLogInterface
-        {
-            private ObservableCollection<string> _logList;
-
-            public LogProxy(ObservableCollection<string> logList)
-            {
-                _logList = logList;
-            }
-
-            public void Debug(string msg)
-            {
-                lol(msg);
-            }
-
-            public void Error(string msg)
-            {
-                lol(msg);
-            }
-
-            public void Info(string msg)
-            {
-                lol(msg);
-            }
-
-            private void lol(string msg)
-            {
-                Action<string> method = _logList.Add;
-                Application.Current.Dispatcher.BeginInvoke(method, msg);
-            }
-        }
-
         private UnpackedBigFile bigFile;
         private string lastText = "";
-        ObservableCollection<string> logList = new ObservableCollection<string>();
-        private LogProxy log;
-        BackgroundWorker readWorker = new BackgroundWorker();
+
+        IGRPExplorerLibLogInterface logInterface;
 
         public MainWindow()
         {
             InitializeComponent();
+
             btnOpenBigFile.Click += BtnOpenBigFile_Click;
             btnFindKey.Click += BtnFindKey_Click;
-            listLog.ItemsSource = logList;
-            log = new LogProxy(logList);
-            GRPExplorerLibManager.SetLogInterface(log);
+            
+            LogModel logModel = new LogModel();
+            logInterface = logModel.LogProxy;
+            logView.Log = logModel;
+            GRPExplorerLibManager.SetLogInterface(logInterface);
             GRPExplorerLibManager.SetLogFlags(LogFlags.Info | LogFlags.Error);
-            readWorker.DoWork += ReadWorker_DoWork;
-        }
-
-        private void ReadWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            bigFile.LoadFromDisk();
-            bigFile.FileUtil.DebugLogRootFolderTree(bigFile.RootFolder);
         }
 
         private void BtnFindKey_Click(object sender, RoutedEventArgs e)
@@ -95,7 +62,9 @@ namespace GRPExplorerGUI
         private void BtnOpenBigFile_Click(object sender, RoutedEventArgs e)
         {
             bigFile = new UnpackedBigFile(new System.IO.DirectoryInfo(txtFileInput.Text));
-            readWorker.RunWorkerAsync();
+            BigFileViewModel vm = new BigFileViewModel();
+            bigFileview.BigFileViewModel = vm;
+            vm.BigFile = bigFile;
         }
 
         private void SetFile(int key)
@@ -122,7 +91,7 @@ namespace GRPExplorerGUI
 
         private void Log(string msg)
         {
-            log.Info("[GUI] " + msg);
+            logInterface.Info("[GUI] " + msg);
         }
     }
 }

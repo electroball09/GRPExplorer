@@ -9,6 +9,15 @@ namespace GRPExplorerLib.BigFile
 {
     public class PackedBigFile : BigFile
     {
+        private PackedBigFileFileReader fileReader;
+        public override BigFileFileReader FileReader
+        {
+            get
+            {
+                return fileReader;
+            }
+        }
+
         private FileInfo fileInfo;
         public override FileInfo MetadataFileInfo
         {
@@ -20,13 +29,14 @@ namespace GRPExplorerLib.BigFile
                 return fileInfo;
             }
         }
-
-        private Stopwatch stopwatch = new Stopwatch();
+        
         private LogProxy log = new LogProxy("PackedBigFile");
 
         public PackedBigFile(FileInfo _fileInfo) : base(_fileInfo.FullName)
         {
             log.Info("Creating packed bigfile, file: " + _fileInfo.FullName);
+
+            fileReader = new PackedBigFileFileReader(this);
 
             if (!_fileInfo.Exists)
                 throw new Exception("_fileInfo doesn't exist!");
@@ -34,8 +44,8 @@ namespace GRPExplorerLib.BigFile
 
         public override void LoadFromDisk()
         {
-            stopwatch.Reset();
-            stopwatch.Start();
+            BigFileLoadOperationStatus status = new BigFileLoadOperationStatus();
+            status.stopwatch.Start();
 
             log.Info("Loading big file into memory: " + fileInfo.FullName);
 
@@ -57,9 +67,9 @@ namespace GRPExplorerLib.BigFile
 
             fileUtil.diagData.DebugLog(log);
 
-            log.Info("Time taken: " + stopwatch.ElapsedMilliseconds + "ms");
+            status.stopwatch.Stop();
 
-            stopwatch.Stop();
+            log.Info("Time taken: " + status.TimeTaken + "ms");
         }
     }
 }

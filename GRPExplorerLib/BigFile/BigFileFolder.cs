@@ -53,6 +53,18 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
+        public BigFileFolder this[string subFolderName]
+        {
+            get
+            {
+                foreach (BigFileFolder folder in subFolders)
+                    if (folder.Name == subFolderName)
+                        return folder;
+
+                return null;
+            }
+        }
+
         public BigFileFolder(short _folderIndex, BigFileFolderInfo _infoStruct, Dictionary<short, BigFileFolder> _folderMap)
         {
             folderIndex = _folderIndex;

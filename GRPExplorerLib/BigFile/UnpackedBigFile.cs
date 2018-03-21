@@ -21,6 +21,14 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
+        public override BigFileFileReader FileReader
+        {
+            get
+            {
+                throw new NotImplementedException("aaahhhhhhhhhhhhhhhhhhhhhhhhhh");
+            }
+        }
+
         private DirectoryInfo directory;
         public DirectoryInfo Directory { get { return directory; } }
 

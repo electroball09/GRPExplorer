@@ -28,7 +28,7 @@ namespace GRPExplorerLib.BigFile
 
             fileInfo = _fileInfo;
 
-            log.Info("Create BigFileIO, file: " + fileInfo.FullName);
+            log.Info("Create YetiHeaderFile, file: " + fileInfo.FullName);
         }
 
         public int CalculateFolderOffset(ref BigFileHeader header, ref BigFileFileCountInfo countInfo)
