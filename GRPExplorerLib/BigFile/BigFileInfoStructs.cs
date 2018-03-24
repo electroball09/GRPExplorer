@@ -86,7 +86,7 @@ namespace GRPExplorerLib.BigFile
             log.Debug("    FileNumber: " + FileNumber);
             log.Debug("         CRC32: " + Encoding.Default.GetString(CRC32));
             log.Debug("          Name: " + Encoding.Default.GetString(Name));
-            log.Debug("    Unknown_03: " + Unknown_03);
+            //log.Debug("    Unknown_03: " + Unknown_03);
             log.Debug("           ZIP: " +        ZIP);
         }
 

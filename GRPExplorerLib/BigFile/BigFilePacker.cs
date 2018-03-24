@@ -211,7 +211,9 @@ namespace GRPExplorerLib.BigFile
                                     CRC32 = currFile.FileInfo.CRC32,
                                     ZIP = 0,
                                 };
+                                ((int)srcStream.Length).ToByteArray(buffers[4], 0);
                                 fs.Write(((int)srcStream.Length).ToByteArray(buffers[4]), 0, 4);
+                                log.Debug("Wrote file " + currFile.FileInfo.Name + ", length of: " + srcStream.Length + "   wrote length: " + BitConverter.ToInt32(buffers[4], 0));
                                 fs.Write(buffer, 0, (int)srcStream.Length);
                             }
                         }

@@ -159,6 +159,7 @@ namespace GRPExplorerLib.BigFile
             BigFileFileInfo[] fileInfos = new BigFileFileInfo[countInfo.Files];
 
             int baseOffset = header.InfoOffset + countInfo.StructSize;
+            log.Debug("baseOffset: " + baseOffset);
             byte[] bytes = buffers[tmpFileInfo.StructSize];
             using (FileStream fs = File.OpenRead(fileInfo.FullName))
             {

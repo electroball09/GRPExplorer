@@ -168,7 +168,9 @@ namespace GRPExplorerLib.BigFile
                     PreviousFolder = parentFolder != null ? parentFolder.FolderIndex : (short)-1,
                     NextFolder = -1,
                     Unknown_02 = 0,
-                    Name = directory.Name.EncodeToBadString(length: 54),
+                    Name = parentFolder == null ? //oh my lawdy what is this
+                            "/".EncodeToBadString(length: 54) :
+                            directory.Name.EncodeToBadString(length: 54),
                 };
 
                 BigFileFolder thisFolder = new BigFileFolder(folderCount, folderInfo, folderMap);
@@ -198,7 +200,7 @@ namespace GRPExplorerLib.BigFile
 
                 foreach (DirectoryInfo dirInfo in directory.GetDirectories())
                 {
-                    if (parentFolder == null)
+                    if (parentFolder == null) //ONLY THE FIRST RECURSION, PREVENTS ADDING WRONG FOLDERS WHEN PACKING
                         thisFolder.SubFolders.Add(recursion.Invoke(dirInfo, dirInfo.Name, thisFolder));
                     else
                         thisFolder.SubFolders.Add(recursion.Invoke(dirInfo, dirName + "/" + dirInfo.Name, thisFolder));

@@ -71,6 +71,9 @@ namespace GRPExplorerLib.BigFile
                     size = BitConverter.ToInt32(sizeBuffer, 0);
             }
 
+            if (size == 0)
+                throw new Exception("wtf");
+
             return size;
         }
 

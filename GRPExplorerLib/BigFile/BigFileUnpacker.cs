@@ -40,9 +40,10 @@ namespace GRPExplorerLib.BigFile
             public IOBuffers buffers = new IOBuffers();
             public bool isUnpacking = false;
             public Stopwatch stopwatch = new Stopwatch();
+            public BigFileFlags flags;
         }
 
-        public const int NUM_THREADED_TASKS = 4;
+        public const int NUM_THREADED_TASKS = 1;
 
         private LogProxy log = new LogProxy("BigFileUnpacker");
 
@@ -75,7 +76,7 @@ namespace GRPExplorerLib.BigFile
             bigFile = _bigFile;
         }
 
-        public void UnpackBigfile(DirectoryInfo dir)
+        public void UnpackBigfile(DirectoryInfo dir, BigFileFlags flags)
         {
             log.Info("Unpacking a bigfile to directory: \"" + dir.FullName + "\"");
 
@@ -114,28 +115,47 @@ namespace GRPExplorerLib.BigFile
 
             log.Info("Beginning extract...");
 
-            unpackThreads = new UnpackThreadInfo[NUM_THREADED_TASKS];
-            int dividedCount = bigFile.MappingData.FilesList.Length / NUM_THREADED_TASKS;
-            int dividedRemainder = bigFile.MappingData.FilesList.Length % NUM_THREADED_TASKS;
-            log.Info("Divided files into " + NUM_THREADED_TASKS + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
-            for (int i = 0; i < NUM_THREADED_TASKS; i++)
+            if ((flags & BigFileFlags.UseThreading) != 0)
             {
-                if (unpackThreads[i] == null)
-                    unpackThreads[i] = new UnpackThreadInfo();
+                int dividedCount = bigFile.MappingData.FilesList.Length / NUM_THREADED_TASKS;
+                int dividedRemainder = bigFile.MappingData.FilesList.Length % NUM_THREADED_TASKS;
+                log.Info("Divided files into " + NUM_THREADED_TASKS + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
+                for (int i = 0; i < NUM_THREADED_TASKS; i++)
+                {
+                    if (unpackThreads[i] == null)
+                        unpackThreads[i] = new UnpackThreadInfo();
 
-                unpackThreads[i].unpackDir = unpackDir;
-                unpackThreads[i].bigFile = bigFile;
-                unpackThreads[i].fileMapping = renamedMapping;
-                unpackThreads[i].startIndex = i * dividedCount;
-                unpackThreads[i].count = dividedCount;
-                unpackThreads[i].threadID = i;
-                unpackThreads[i].OnWorkDoneCallback = internal_OnThreadFinished;
+                    unpackThreads[i].unpackDir = unpackDir;
+                    unpackThreads[i].bigFile = bigFile;
+                    unpackThreads[i].fileMapping = renamedMapping;
+                    unpackThreads[i].startIndex = i * dividedCount;
+                    unpackThreads[i].count = dividedCount;
+                    unpackThreads[i].threadID = i;
+                    unpackThreads[i].OnWorkDoneCallback = internal_OnThreadFinished;
+                    unpackThreads[i].flags = flags;
+                }
+                unpackThreads[NUM_THREADED_TASKS - 1].count += dividedRemainder; //add the remainder onto the last info
+
+                for (int i = 0; i < NUM_THREADED_TASKS; i++)
+                {
+                    ThreadPool.QueueUserWorkItem(internal_UnpackFiles, unpackThreads[i]);
+                }
             }
-            unpackThreads[3].count += dividedRemainder; //add the remainder onto the last info
-
-            for (int i = 0; i < NUM_THREADED_TASKS; i++)
+            else
             {
-                ThreadPool.QueueUserWorkItem(internal_UnpackFiles, unpackThreads[i]);
+                if (unpackThreads[0] == null)
+                    unpackThreads[0] = new UnpackThreadInfo();
+
+                unpackThreads[0].unpackDir = unpackDir;
+                unpackThreads[0].bigFile = bigFile;
+                unpackThreads[0].fileMapping = renamedMapping;
+                unpackThreads[0].startIndex = 0;
+                unpackThreads[0].count = bigFile.MappingData.FilesList.Length;
+                unpackThreads[0].threadID = 0;
+                unpackThreads[0].OnWorkDoneCallback = internal_OnThreadFinished;
+                unpackThreads[0].flags = flags;
+
+                internal_UnpackFiles(unpackThreads[0]);
             }
 
             diagData.WriteUnpackedFiles = stopwatch.ElapsedMilliseconds;
@@ -155,40 +175,51 @@ namespace GRPExplorerLib.BigFile
             info.stopwatch.Reset();
             info.stopwatch.Start();
 
-            int dataOffset = info.bigFile.YetiHeaderFile.CalculateDataOffset(ref info.bigFile.FileHeader, ref info.bigFile.CountInfo);
-            byte[] buffer = info.buffers[4];
-            using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
-            {
-                BigFileFile currFile = null;
-                for (int i = info.startIndex; i < info.startIndex + info.count; i++)
+            //try
+            //{
+                int dataOffset = info.bigFile.YetiHeaderFile.CalculateDataOffset(ref info.bigFile.FileHeader, ref info.bigFile.CountInfo);
+                byte[] buffer = info.buffers[4];
+                using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
                 {
-                    currFile = bigFile.MappingData.FilesList[i];
-                    if (string.IsNullOrEmpty(currFile.Name))
+                    BigFileFile currFile = null;
+                    for (int i = info.startIndex; i < info.startIndex + info.count; i++)
                     {
-                        log.Error(string.Format("File (key:{0:X8}) does not have a file name!", currFile.FileInfo.Key));
-                        continue;
-                    }
+                        currFile = bigFile.MappingData.FilesList[i];
+                        if (string.IsNullOrEmpty(currFile.Name))
+                        {
+                            log.Error(string.Format("File (key:{0:X8}) does not have a file name!", currFile.FileInfo.Key));
+                            continue;
+                        }
 
-                    log.Info("Unpacking file " + currFile.Name);
-                    //info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
+                        log.Info("Unpacking file " + currFile.Name);
+                        //info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
 
-                    int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, BigFileFlags.None);
+                        int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, info.flags);
 
-                    string fileName = info.unpackDir.FullName + info.fileMapping[currFile.FileInfo.Key].FileName;
+                        buffer = info.buffers[fileSize]; //fuck me
 
-                    //write the read data to the unpacked file
-                    using (FileStream newFs = File.Create(fileName))
-                    {
-                        newFs.Write(buffer, 0, fileSize);
+                        string fileName = info.unpackDir.FullName + info.fileMapping[currFile.FileInfo.Key].FileName;
+
+                        //write the read data to the unpacked file
+                        using (FileStream newFs = File.Create(fileName))
+                        {
+                            newFs.Write(buffer, 0, fileSize);
+                        }
                     }
                 }
-            }
 
-            log.Info("Unpack thread (ID:" + info.threadID + ") finished work!");
-            info.isUnpacking = false;
-            info.stopwatch.Stop();
+                log.Info("Unpack thread (ID:" + info.threadID + ") finished work!");
+                info.isUnpacking = false;
+                info.stopwatch.Stop();
 
-            info.OnWorkDoneCallback.Invoke(info);
+                info.OnWorkDoneCallback.Invoke(info);
+            //}
+            //catch (Exception ex)
+            //{
+            //    log.Error(ex.Message + "\n" + ex.StackTrace);
+            //    if ((info.flags & BigFileFlags.UseThreading) == 0)
+            //        throw ex;
+            //}
         }
 
         private void internal_OnThreadFinished(UnpackThreadInfo info)

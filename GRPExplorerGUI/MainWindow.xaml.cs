@@ -24,7 +24,7 @@ namespace GRPExplorerGUI
 {
     public partial class MainWindow : Window
     {
-        private UnpackedBigFile bigFile;
+        private BigFile bigFile;
         private string lastText = "";
 
         IGRPExplorerLibLogInterface logInterface;
@@ -67,6 +67,14 @@ namespace GRPExplorerGUI
             vm.BigFile = bigFile;
         }
 
+        private void btnOpenBigFile_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            bigFile = new PackedBigFile(new System.IO.FileInfo(txtFileInput.Text));
+            BigFileViewModel vm = new BigFileViewModel();
+            bigFileview.BigFileViewModel = vm;
+            vm.BigFile = bigFile;
+        }
+
         private void SetFile(int key)
         {
             if (bigFile == null)
@@ -81,7 +89,10 @@ namespace GRPExplorerGUI
                 groupFile.Header = file.Name;
                 lblKey.Content = string.Format("{0:X8}", key);
                 lblPath.Content = file.FullFolderPath;
-                lblRenamed.Content = bigFile.RenamedMapping[key].FileName;
+                if (bigFile is UnpackedBigFile)
+                {
+                    lblRenamed.Content = (bigFile as UnpackedBigFile).RenamedMapping[key].FileName;
+                }
             }
             else
             {
