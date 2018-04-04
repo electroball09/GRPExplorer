@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
+using GRPExplorerLib.Logging;
+using GRPExplorerLib.BigFile.Versions;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -30,7 +32,9 @@ namespace GRPExplorerLib.BigFile
             }
         }
         
-        private LogProxy log = new LogProxy("PackedBigFile");
+        private ILogProxy log = LogManager.GetLogProxy("PackedBigFile");
+
+        private IBigFileVersion version;
 
         public PackedBigFile(FileInfo _fileInfo) : base(_fileInfo.FullName)
         {
@@ -54,8 +58,15 @@ namespace GRPExplorerLib.BigFile
 
             log.Info("Header and count info read");
 
-            BigFileFolderInfo[] folders = yetiHeaderFile.ReadFolderInfos(ref FileHeader, ref CountInfo);
-            BigFileFileInfo[] files = yetiHeaderFile.ReadFileInfos(ref FileHeader, ref CountInfo);
+            log.Info(string.Format("Version: {0:X4}", CountInfo.BigFileVersion));
+
+            version = VersionRegistry.GetVersion(CountInfo.BigFileVersion);
+
+            yetiHeaderFile.BigFileVersion = version;
+            fileUtil.BigFileVersion = version;
+
+            IBigFileFolderInfo[] folders = yetiHeaderFile.ReadFolderInfos(ref FileHeader, ref CountInfo);
+            IBigFileFileInfo[] files = yetiHeaderFile.ReadFileInfos(ref FileHeader, ref CountInfo);
 
             log.Info("Creating folder tree and file mappings...");
 

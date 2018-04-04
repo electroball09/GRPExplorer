@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.IO.Compression;
 using GRPExplorerLib.Util;
+using GRPExplorerLib.Logging;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -20,7 +21,7 @@ namespace GRPExplorerLib.BigFile
             bigFile = _bigFile;
         }
 
-        public abstract int GetBytesSizeAndSeekToStartOfFileData(Stream stream, BigFileFile file, BigFileFlags flags = BigFileFlags.None);
+        //public abstract int GetBytesSizeAndSeekToStartOfFileData(Stream stream, BigFileFile file, BigFileFlags flags = BigFileFlags.None);
         public abstract int ReadFile(BigFileFile file, IOBuffers buffers, BigFileFlags flags = BigFileFlags.None);
         public abstract int ReadFile(Stream stream, BigFileFile file, IOBuffers buffers, BigFileFlags flags = BigFileFlags.None);
         public abstract Stream OpenStream(BigFileFile file, BigFileFlags flags = BigFileFlags.None);
@@ -40,7 +41,7 @@ namespace GRPExplorerLib.BigFile
         }
 
         private PackedBigFile packedBigFile;
-        private LogProxy log = new LogProxy("PackedBigFileFileReader");
+        private ILogProxy log = LogManager.GetLogProxy("PackedBigFileFileReader");
         private byte[] sizeBuffer = new byte[10];
 
         public PackedBigFileFileReader(PackedBigFile _bigFile) : base(_bigFile)
@@ -48,8 +49,14 @@ namespace GRPExplorerLib.BigFile
             packedBigFile = _bigFile;
         }
 
-        public override int GetBytesSizeAndSeekToStartOfFileData(Stream stream, BigFileFile file, BigFileFlags flags = DEFAULT_FLAGS)
+        public int GetBytesSizeAndSeekToStartOfFileData(Stream stream, BigFileFile file, BigFileFlags flags = DEFAULT_FLAGS)
         {
+            if (file.FileInfo.Offset == -1)
+            {
+                log.Error(string.Format("Can't seek to file: {0} (key:{1:X8}) because offset is -1!", file.Name, file.FileInfo.Key));
+                return -1;
+            }
+
             int dataOffset = packedBigFile.YetiHeaderFile.CalculateDataOffset(ref packedBigFile.FileHeader, ref packedBigFile.CountInfo);
 
             stream.Seek((uint)dataOffset + (uint)(file.FileInfo.Offset * 8), SeekOrigin.Begin);
@@ -79,9 +86,15 @@ namespace GRPExplorerLib.BigFile
 
         public override int ReadFile(Stream stream, BigFileFile file, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
         {
-            log.Info("Reading file: " + file.Name);
+            log.Debug("Reading file: " + file.Name);
 
             int bytesSize = GetBytesSizeAndSeekToStartOfFileData(stream, file, flags);
+
+            if (bytesSize == -1)
+            {
+                log.Error("There was an error reading the file!");
+                return -1;
+            }
 
             byte[] buffer = buffers[bytesSize];
 

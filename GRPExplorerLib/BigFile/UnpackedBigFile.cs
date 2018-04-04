@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
+using GRPExplorerLib.Logging;
+using GRPExplorerLib.BigFile.Versions;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -32,11 +34,13 @@ namespace GRPExplorerLib.BigFile
         private DirectoryInfo directory;
         public DirectoryInfo Directory { get { return directory; } }
 
-        private LogProxy log = new LogProxy("UnpackedBigFile");
+        private ILogProxy log = LogManager.GetLogProxy("UnpackedBigFile");
         private Stopwatch stopwatch = new Stopwatch();
 
         private UnpackedRenamedFileMapping renamedMapping;
         public UnpackedRenamedFileMapping RenamedMapping { get { return renamedMapping; } }
+
+        private IBigFileVersion version;
 
         public UnpackedBigFile(DirectoryInfo dir) : base(dir.FullName + "\\")
         {
@@ -55,6 +59,12 @@ namespace GRPExplorerLib.BigFile
 
             FileHeader = yetiHeaderFile.ReadHeader();
             CountInfo = yetiHeaderFile.ReadFileCountInfo(ref FileHeader);
+
+            log.Info(string.Format("Version: {0:X4}", CountInfo.BigFileVersion));
+
+            version = VersionRegistry.GetVersion(CountInfo.BigFileVersion);
+
+            fileUtil.BigFileVersion = version;
 
             UnpackedFolderMapAndFilesList folderAndFiles = fileUtil.CreateFolderTreeAndFilesListFromDirectory(new DirectoryInfo(directory.FullName + "\\" + BigFileConst.UNPACK_DIR), renamedMapping);
             rootFolder = folderAndFiles.folderMap[0];

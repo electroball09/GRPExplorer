@@ -1,0 +1,2 @@
+GRP only supports the bigfile version that came with the game
+GRFS dlc bigfile format doesn't support compression it seems

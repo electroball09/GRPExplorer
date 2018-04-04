@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GRPExplorerLib.Util;
+using GRPExplorerLib.BigFile.Versions;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -11,8 +12,8 @@ namespace GRPExplorerLib.BigFile
         private short folderIndex;
         public short FolderIndex { get { return folderIndex; } }
 
-        private BigFileFolderInfo infoStruct;
-        public BigFileFolderInfo InfoStruct { get { return infoStruct; } }
+        private IBigFileFolderInfo infoStruct;
+        public IBigFileFolderInfo InfoStruct { get { return infoStruct; } }
 
         private List<BigFileFolder> subFolders = new List<BigFileFolder>();
         public List<BigFileFolder> SubFolders { get { return subFolders; } }
@@ -65,7 +66,7 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
-        public BigFileFolder(short _folderIndex, BigFileFolderInfo _infoStruct, Dictionary<short, BigFileFolder> _folderMap)
+        public BigFileFolder(short _folderIndex, IBigFileFolderInfo _infoStruct, Dictionary<short, BigFileFolder> _folderMap)
         {
             folderIndex = _folderIndex;
             infoStruct = _infoStruct;

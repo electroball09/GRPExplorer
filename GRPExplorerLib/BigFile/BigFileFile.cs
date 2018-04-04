@@ -3,16 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GRPExplorerLib.Util;
+using GRPExplorerLib.BigFile.Versions;
 
 namespace GRPExplorerLib.BigFile
 {
     public class BigFileFile
     {
         private string name;
-        public string Name { get { return name; } }
+        public string Name
+        {
+            get
+            {
+                return string.IsNullOrEmpty(name) ?
+                    "NULL_FILE_NAME" :
+                    name;
+            }
+        }
 
-        private BigFileFileInfo fileInfo;
-        public BigFileFileInfo FileInfo { get { return fileInfo; } set { fileInfo = value; } }
+        private IBigFileFileInfo fileInfo;
+        public IBigFileFileInfo FileInfo { get { return fileInfo; } set { fileInfo = value; } }
 
         private BigFileFolder parentFolder;
         public BigFileFolder ParentFolder { get { return parentFolder; } }
@@ -32,7 +41,7 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
-        public BigFileFile(BigFileFileInfo _fileInfo, BigFileFolder _parentFolder)
+        public BigFileFile(IBigFileFileInfo _fileInfo, BigFileFolder _parentFolder)
         {
             fileInfo = _fileInfo;
             parentFolder = _parentFolder;

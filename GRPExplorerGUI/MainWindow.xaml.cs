@@ -19,6 +19,7 @@ using GRPExplorerLib.Util;
 using System.ComponentModel;
 using GRPExplorerGUI.Model;
 using GRPExplorerGUI.ViewModel;
+using GRPExplorerLib.Logging;
 
 namespace GRPExplorerGUI
 {
@@ -39,8 +40,8 @@ namespace GRPExplorerGUI
             LogModel logModel = new LogModel();
             logInterface = logModel.LogProxy;
             logView.Log = logModel;
-            GRPExplorerLibManager.SetLogInterface(logInterface);
-            GRPExplorerLibManager.SetLogFlags(LogFlags.Info | LogFlags.Error);
+            LogManager.LogInterface = logInterface;
+            LogManager.LogFlags = LogFlags.Info | LogFlags.Error;
         }
 
         private void BtnFindKey_Click(object sender, RoutedEventArgs e)
@@ -103,6 +104,31 @@ namespace GRPExplorerGUI
         private void Log(string msg)
         {
             logInterface.Info("[GUI] " + msg);
+        }
+
+        BackgroundWorker bgworker;
+        BigFileUnpacker unpacker;
+        string dir = "";
+        private void btnUnpackBigfile_Click(object sender, RoutedEventArgs e)
+        {
+            if (bgworker == null)
+            {
+                bgworker = new BackgroundWorker();
+                bgworker.DoWork += Bgworker_DoWork;
+            }
+
+            if (bgworker.IsBusy)
+                return;
+
+            unpacker = new BigFileUnpacker((PackedBigFile)bigFile);
+            dir = txtUnpackDir.Text;
+
+            bgworker.RunWorkerAsync();
+        }
+
+        private void Bgworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            unpacker.UnpackBigfile(new System.IO.DirectoryInfo(dir), BigFileFlags.Decompress | BigFileFlags.UseThreading);
         }
     }
 }

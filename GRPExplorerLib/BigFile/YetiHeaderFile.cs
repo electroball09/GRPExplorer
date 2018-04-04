@@ -6,12 +6,14 @@ using System.IO;
 using System.Runtime.InteropServices;
 using GRPExplorerLib.Util;
 using System.Diagnostics;
+using GRPExplorerLib.Logging;
+using GRPExplorerLib.BigFile.Versions;
 
 namespace GRPExplorerLib.BigFile
 {
     public class YetiHeaderFile
     {
-        private LogProxy log;
+        private ILogProxy log = LogManager.GetLogProxy("YetiHeaderFile");
 
         private FileInfo fileInfo;
 
@@ -19,10 +21,11 @@ namespace GRPExplorerLib.BigFile
 
         private IOBuffers buffers = new IOBuffers();
 
+        private IBigFileVersion version;
+        public IBigFileVersion BigFileVersion { get { return version; } set { version = value; } }
+
         public YetiHeaderFile(FileInfo _fileInfo)
         {
-            log = new LogProxy("YetiHeaderFile");
-
             if (!_fileInfo.Exists)
                 log.Error("_fileInfo doesn't exist!");
 
@@ -33,15 +36,21 @@ namespace GRPExplorerLib.BigFile
 
         public int CalculateFolderOffset(ref BigFileHeader header, ref BigFileFileCountInfo countInfo)
         {
-            BigFileFileInfo tmpFileInfo = new BigFileFileInfo();
-            int baseSize =(header.InfoOffset + countInfo.StructSize) + (countInfo.Files * tmpFileInfo.StructSize);
+            if (version == null)
+                throw new NullReferenceException("There's no version!  Can't calculate folder offset!");
+
+            IBigFileFileInfo tmpFileInfo = version.CreateFileInfo();
+            int baseSize = (header.InfoOffset + countInfo.StructSize) + (countInfo.Files * tmpFileInfo.StructSize);
             baseSize += baseSize % 8; // align to 8 bytes
             return baseSize;
         }
 
         public int CalculateDataOffset(ref BigFileHeader header, ref BigFileFileCountInfo countInfo)
         {
-            BigFileFolderInfo tmpFolderInfo = new BigFileFolderInfo();
+            if (version == null)
+                throw new NullReferenceException("There's no version!  Can't calculate data offset!");
+
+            IBigFileFolderInfo tmpFolderInfo = version.CreateFolderInfo();
             int folderOffset = CalculateFolderOffset(ref header, ref countInfo);
             int dataOffset = folderOffset + (countInfo.Folders * tmpFolderInfo.StructSize);
             dataOffset += dataOffset % 8; // align to 8 bytes;
@@ -111,9 +120,9 @@ namespace GRPExplorerLib.BigFile
             return countInfo;
         }
 
-        public BigFileFolderInfo[] ReadFolderInfos(ref BigFileHeader header, ref BigFileFileCountInfo countInfo)
+        public IBigFileFolderInfo[] ReadFolderInfos(ref BigFileHeader header, ref BigFileFileCountInfo countInfo)
         {
-            BigFileFolderInfo tmpFolderInfo = new BigFileFolderInfo();
+            IBigFileFolderInfo tmpFolderInfo = version.CreateFolderInfo();
 
             log.Info("Reading folder infos...  Count: " + countInfo.Folders);
             log.Debug("FolderInfo struct size: " + tmpFolderInfo.StructSize);
@@ -121,7 +130,7 @@ namespace GRPExplorerLib.BigFile
             stopwatch.Reset();
             stopwatch.Start();
 
-            BigFileFolderInfo[] folderInfos = new BigFileFolderInfo[countInfo.Folders];
+            IBigFileFolderInfo[] folderInfos = new IBigFileFolderInfo[countInfo.Folders];
 
             int folderOffset = CalculateFolderOffset(ref header, ref countInfo);
             byte[] bytes = buffers[tmpFolderInfo.StructSize];
@@ -132,7 +141,7 @@ namespace GRPExplorerLib.BigFile
                 {
                     fs.Read(bytes, 0, tmpFolderInfo.StructSize);
 
-                    folderInfos[i] = MarshalUtil.BytesToStruct<BigFileFolderInfo>(bytes);
+                    folderInfos[i] = tmpFolderInfo.FromBytes(bytes);
 
                     folderInfos[i].DebugLog(log);
                 }
@@ -146,9 +155,9 @@ namespace GRPExplorerLib.BigFile
             return folderInfos;
         }
 
-        public BigFileFileInfo[] ReadFileInfos(ref BigFileHeader header, ref BigFileFileCountInfo countInfo)
+        public IBigFileFileInfo[] ReadFileInfos(ref BigFileHeader header, ref BigFileFileCountInfo countInfo)
         {
-            BigFileFileInfo tmpFileInfo = new BigFileFileInfo();
+            IBigFileFileInfo tmpFileInfo = version.CreateFileInfo();
 
             log.Info("Reading file infos...  Count: " + countInfo.Files);
             log.Debug("FileInfo struct size: " + tmpFileInfo.StructSize);
@@ -156,7 +165,7 @@ namespace GRPExplorerLib.BigFile
             stopwatch.Reset();
             stopwatch.Start();
 
-            BigFileFileInfo[] fileInfos = new BigFileFileInfo[countInfo.Files];
+            IBigFileFileInfo[] fileInfos = new IBigFileFileInfo[countInfo.Files];
 
             int baseOffset = header.InfoOffset + countInfo.StructSize;
             log.Debug("baseOffset: " + baseOffset);
@@ -167,7 +176,8 @@ namespace GRPExplorerLib.BigFile
                 for (int i = 0; i < countInfo.Files; i++)
                 {
                     fs.Read(bytes, 0, tmpFileInfo.StructSize);
-                    fileInfos[i] = MarshalUtil.BytesToStruct<BigFileFileInfo>(bytes);
+
+                    fileInfos[i] = tmpFileInfo.FromBytes(bytes);
 
                     fileInfos[i].DebugLog(log);
                 }
@@ -194,25 +204,6 @@ namespace GRPExplorerLib.BigFile
             return new FileBuffer(bytes, dataOffset);
         }
 
-        public FileBuffer ReadFileRaw(BigFileFileInfo file, ref BigFileHeader header, ref BigFileFileCountInfo countInfo)
-        {
-            int dataOffset = CalculateDataOffset(ref header, ref countInfo);
-
-            byte[] bytes = buffers[4];
-            int size = 0;
-            using (FileStream fs = File.OpenRead(fileInfo.FullName))
-            {
-                uint offset = (uint)dataOffset + ((uint)file.Offset * 8);
-                fs.Seek(offset, SeekOrigin.Begin);
-                fs.Read(bytes, 0, 4);
-                size = BitConverter.ToInt32(bytes, 0);
-                bytes = buffers[size];
-                fs.Read(bytes, 0, size);
-            }
-
-            return new FileBuffer(bytes, size);
-        }
-
         public void WriteYetiHeader(BigFile bigFile)
         {
             log.Info("Writing Yeti header to file " + fileInfo.FullName);
@@ -234,7 +225,7 @@ namespace GRPExplorerLib.BigFile
                 {
                     Files = bigFile.MappingData.FilesList.Length,
                     Folders = (short)bigFile.RootFolder.FolderMap.Count,
-                    Unknown_01 = bigFile.CountInfo.Unknown_01,
+                    BigFileVersion = bigFile.CountInfo.BigFileVersion,
                     Unknown_02 = bigFile.CountInfo.Unknown_02
                 };
 
@@ -260,7 +251,7 @@ namespace GRPExplorerLib.BigFile
                 byte[] buffer = buffers[fileStructSize];
                 for (int i = 0; i < bigFile.MappingData.FilesList.Length; i++)
                 {
-                    MarshalUtil.StructToBytes(bigFile.MappingData.FilesList[i].FileInfo, buffer);
+                    bigFile.MappingData.FilesList[i].FileInfo.ToBytes(buffer);
                     fs.Write(buffer, 0, fileStructSize);
                 }
 
@@ -273,7 +264,7 @@ namespace GRPExplorerLib.BigFile
                 buffer = buffers[folderStructSize];
                 foreach (KeyValuePair<short, BigFileFolder> kvp in bigFile.RootFolder.FolderMap)
                 {
-                    MarshalUtil.StructToBytes(kvp.Value.InfoStruct, buffer);
+                    kvp.Value.InfoStruct.ToBytes(buffer);
                     fs.Write(buffer, 0, folderStructSize);
                 }
 

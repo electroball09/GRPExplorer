@@ -6,6 +6,8 @@ using GRPExplorerLib;
 using System.Diagnostics;
 using System.IO;
 using GRPExplorerLib.Util;
+using GRPExplorerLib.Logging;
+using GRPExplorerLib.BigFile.Versions;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -19,7 +21,7 @@ namespace GRPExplorerLib.BigFile
             public float CreateKeyAndNumMappings;
             public float MapFilesToFolders;
 
-            internal void DebugLog(LogProxy log)
+            internal void DebugLog(ILogProxy log)
             {
                 log.Debug("");
                 log.Debug(" > DiagData Dump:");
@@ -32,12 +34,15 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
-        private LogProxy log = new LogProxy("BigFileUtil");
+        private ILogProxy log = LogManager.GetLogProxy("BigFileUtil");
         private Stopwatch stopwatch = new Stopwatch();
         private IOBuffers buffers = new IOBuffers();
         public DiagData diagData;
 
-        public BigFileFolder CreateRootFolderTree(BigFileFolderInfo[] folderInfos)
+        private IBigFileVersion version;
+        public IBigFileVersion BigFileVersion { get { return version; } set { version = value; } }
+
+        public BigFileFolder CreateRootFolderTree(IBigFileFolderInfo[] folderInfos)
         {
             log.Info("Creating root folder tree...");
 
@@ -77,7 +82,7 @@ namespace GRPExplorerLib.BigFile
             return folderMap[0];
         }
 
-        public FileMappingData CreateFileMappingData(BigFileFolder rootFolder, BigFileFileInfo[] fileInfos)
+        public FileMappingData CreateFileMappingData(BigFileFolder rootFolder, IBigFileFileInfo[] fileInfos)
         {
             log.Info("Creating mapping data...");
             log.Info("Creating files list...  Count: " + fileInfos.Length);
@@ -89,7 +94,10 @@ namespace GRPExplorerLib.BigFile
 
             for (int i = 0; i < fileInfos.Length; i++)
             {
-                filesList[i] = new BigFileFile(fileInfos[i], rootFolder.FolderMap[fileInfos[i].Folder]);
+                if (fileInfos[i] != null)
+                    filesList[i] = new BigFileFile(fileInfos[i], rootFolder.FolderMap[fileInfos[i].Folder]);
+                else
+                    log.Error(string.Format("File info at index {0} is null!", i));
             }
 
             diagData.CreateFilesList = stopwatch.ElapsedMilliseconds;
@@ -122,7 +130,7 @@ namespace GRPExplorerLib.BigFile
                         log.Error("File number mapping already contains key " + fileInfos[i].FileNumber + " " + filesList[i].Name);
                 }
                 else
-                    log.Error(string.Format("File number is -1! (key:{0:X8})", fileInfos[i].Key));
+                    log.Error(string.Format("File number is -1! (key:{0:X8}) (offset:{1:X8})", fileInfos[i].Key, fileInfos[i].Offset));
             }
 
             log.Info("Mappings created!");
@@ -154,24 +162,24 @@ namespace GRPExplorerLib.BigFile
         public UnpackedFolderMapAndFilesList CreateFolderTreeAndFilesListFromDirectory(DirectoryInfo dir, UnpackedRenamedFileMapping mapping)
         {
             log.Info("Creating folder tree and files list from directory " + dir.FullName);
-            BigFileFileInfo[] fileInfos = new BigFileFileInfo[mapping.KeyMap.Count];
+            IBigFileFileInfo[] fileInfos = new IBigFileFileInfo[mapping.KeyMap.Count];
             Dictionary<short, BigFileFolder> folderMap = new Dictionary<short, BigFileFolder>();
             short folderCount = 0;
             int fileCount = 0;
 
+            Dictionary<string, UnpackedRenamedFileMapping.RenamedFileMappingData> temp = new Dictionary<string, UnpackedRenamedFileMapping.RenamedFileMappingData>(mapping.RenamedMap);
+
             Func<DirectoryInfo, string, BigFileFolder, BigFileFolder> recursion = null;
             recursion = (directory, dirName, parentFolder) =>
             {
-                BigFileFolderInfo folderInfo = new BigFileFolderInfo()
-                {
-                    Unknown_01 = 0,
-                    PreviousFolder = parentFolder != null ? parentFolder.FolderIndex : (short)-1,
-                    NextFolder = -1,
-                    Unknown_02 = 0,
-                    Name = parentFolder == null ? //oh my lawdy what is this
-                            "/".EncodeToBadString(length: 54) :
-                            directory.Name.EncodeToBadString(length: 54),
-                };
+                IBigFileFolderInfo folderInfo = version.CreateFolderInfo();
+                folderInfo.Unknown_01 = 0;
+                folderInfo.PreviousFolder = parentFolder != null ? parentFolder.FolderIndex : (short)-1;
+                folderInfo.NextFolder = -1;
+                folderInfo.Unknown_02 = 0;
+                folderInfo.Name = parentFolder == null ? //oh my lawdy what is this
+                        "/".EncodeToBadString(length: 54) :
+                        directory.Name.EncodeToBadString(length: 54);
 
                 BigFileFolder thisFolder = new BigFileFolder(folderCount, folderInfo, folderMap);
                 folderMap.Add(folderCount, thisFolder);
@@ -180,15 +188,14 @@ namespace GRPExplorerLib.BigFile
                 {
                     string fileName = dirName + "/" + file.Name;
                     UnpackedRenamedFileMapping.RenamedFileMappingData mappingData = mapping[fileName];
-                    BigFileFileInfo fileInfo = new BigFileFileInfo()
-                    {
-                        CRC32 = new byte[4],
-                        Key = mappingData.Key,
-                        FileNumber = fileCount,
-                        Name = mappingData.OriginalName.EncodeToBadString(length: 60),
-                        Folder = folderCount,
-                        Flags = 0x000f0000,
-                    };
+                    temp.Remove(fileName);
+                    IBigFileFileInfo fileInfo = version.CreateFileInfo();
+                    fileInfo.CRC32 = new byte[4];
+                    fileInfo.Key = mappingData.Key;
+                    fileInfo.FileNumber = fileCount;
+                    fileInfo.Name = mappingData.OriginalName.EncodeToBadString(length: 60);
+                    fileInfo.Folder = folderCount;
+                    fileInfo.Flags = 0x000f0000;
 
                     log.Debug("Add file " + file.FullName);
 
@@ -210,6 +217,9 @@ namespace GRPExplorerLib.BigFile
             };
 
             recursion.Invoke(dir, "", null);
+
+            if (fileCount != mapping.KeyMap.Count)
+                throw new Exception("File count is invalid!");
 
             return new UnpackedFolderMapAndFilesList()
             {
@@ -244,7 +254,7 @@ namespace GRPExplorerLib.BigFile
     public struct UnpackedFolderMapAndFilesList
     {
         public Dictionary<short, BigFileFolder> folderMap;
-        public BigFileFileInfo[] filesList;
+        public IBigFileFileInfo[] filesList;
     }
 
     public class UnpackedRenamedFileMapping
@@ -277,7 +287,7 @@ namespace GRPExplorerLib.BigFile
                 FileName = Encoding.Default.GetString(buffer, 12 + origLength, nameLength);
             }
 
-            internal void DebugLog(LogProxy log)
+            internal void DebugLog(ILogProxy log)
             {
                 log.Debug(" > RenamedFileMappingData Dump:");
                 log.Debug("             Key: " + Key);

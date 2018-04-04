@@ -1,12 +1,15 @@
-﻿using System;
+﻿#pragma warning disable CS0649
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GRPExplorerLib.Util;
+using GRPExplorerLib.Logging;
 using System.Threading;
 using System.IO;
 using System.IO.Compression;
 using System.Diagnostics;
+using GRPExplorerLib.BigFile.Versions;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -60,7 +63,7 @@ namespace GRPExplorerLib.BigFile
         }
 
         private UnpackedBigFile bigFile;
-        private LogProxy log;
+        private ILogProxy log = LogManager.GetLogProxy("BigFilePacker");
         private IOBuffers buffers = new IOBuffers();
         private Stopwatch stopwatch = new Stopwatch();
         private FileOffsetThreadedRegister register = new FileOffsetThreadedRegister();
@@ -83,156 +86,155 @@ namespace GRPExplorerLib.BigFile
         public BigFilePacker(UnpackedBigFile _bigFile)
         {
             bigFile = _bigFile;
-            log = new LogProxy("BigFilePacker");
 
             log.Info("Creating BigFilePacker...");
         }
 
         public void PackBigFile(DirectoryInfo dir, string fileName = "Yeti.big", BigFileFlags flags = BigFileFlags.Compress)
         {
-            FileInfo outputFile = new FileInfo(dir.FullName + "\\" + fileName);
-            log.Info("Beginning pack for a bigfile to file " + outputFile.FullName);
-            log.Info("Flags: " + flags.ToString());
+//            FileInfo outputFile = new FileInfo(dir.FullName + "\\" + fileName);
+//            log.Info("Beginning pack for a bigfile to file " + outputFile.FullName);
+//            log.Info("Flags: " + flags.ToString());
 
-            if (outputFile.Exists)
-            {
-                log.Error("Cannot continue, file already exists!");
-                return;
-            }
+//            if (outputFile.Exists)
+//            {
+//                log.Error("Cannot continue, file already exists!");
+//                return;
+//            }
 
-            if (!dir.Exists)
-            {
-                log.Info("Creating directory " + dir.FullName);
-                Directory.CreateDirectory(dir.FullName);
-            }
+//            if (!dir.Exists)
+//            {
+//                log.Info("Creating directory " + dir.FullName);
+//                Directory.CreateDirectory(dir.FullName);
+//            }
 
-            YetiHeaderFile headerFile = new YetiHeaderFile(outputFile);
-            headerFile.WriteYetiHeader(bigFile);
-            headerFile.WriteYetiFileAndFolderInfo(bigFile);
+//            YetiHeaderFile headerFile = new YetiHeaderFile(outputFile);
+//            headerFile.WriteYetiHeader(bigFile);
+//            headerFile.WriteYetiFileAndFolderInfo(bigFile);
 
-            if ((flags & BigFileFlags.UseThreading) != 0)
-            {
-                throw new Exception("Packing does not support threading yet!");
+//            if ((flags & BigFileFlags.UseThreading) != 0)
+//            {
+//                throw new Exception("Packing does not support threading yet!");
 
-#pragma warning disable CS0162 //SHUT UP
-                long requiredSpace = CalculateRequiredSpace(flags);
-#pragma warning restore CS0162
+//#pragma warning disable CS0162 //SHUT UP
+//                long requiredSpace = CalculateRequiredSpace(flags);
+//#pragma warning restore CS0162
 
-                PreallocateSpace(outputFile, requiredSpace, bigFile.YetiHeaderFile.CalculateDataOffset(ref bigFile.FileHeader, ref bigFile.CountInfo));
+//                PreallocateSpace(outputFile, requiredSpace, bigFile.YetiHeaderFile.CalculateDataOffset(ref bigFile.FileHeader, ref bigFile.CountInfo));
 
-                log.Info("Calculating each threads' file count...");
-                int dividedCount = bigFile.MappingData.FilesList.Length / NUM_THREADED_TASKS;
-                int dividedRemainder = bigFile.MappingData.FilesList.Length % NUM_THREADED_TASKS;
-                log.Info("Divided files into " + NUM_THREADED_TASKS + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
-                for (int i = 0; i < NUM_THREADED_TASKS; i++)
-                {
-                    if (packThreads[i] == null)
-                        packThreads[i] = new PackThreadInfo();
+//                log.Info("Calculating each threads' file count...");
+//                int dividedCount = bigFile.MappingData.FilesList.Length / NUM_THREADED_TASKS;
+//                int dividedRemainder = bigFile.MappingData.FilesList.Length % NUM_THREADED_TASKS;
+//                log.Info("Divided files into " + NUM_THREADED_TASKS + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
+//                for (int i = 0; i < NUM_THREADED_TASKS; i++)
+//                {
+//                    if (packThreads[i] == null)
+//                        packThreads[i] = new PackThreadInfo();
 
-                    packThreads[i].threadID = i;
-                    packThreads[i].start = i * dividedCount;
-                    packThreads[i].count = dividedCount;
-                    packThreads[i].register = register;
-                    packThreads[i].isPacking = false;
-                    packThreads[i].bigFile = bigFile;
-                    packThreads[i].targetFile = outputFile;
-                    packThreads[i].sourceDir = new DirectoryInfo(bigFile.Directory.FullName + "\\" + BigFileConst.UNPACK_DIR);
-                    packThreads[i].flags = flags;
-                }
-                packThreads[NUM_THREADED_TASKS - 1].count += dividedRemainder;
+//                    packThreads[i].threadID = i;
+//                    packThreads[i].start = i * dividedCount;
+//                    packThreads[i].count = dividedCount;
+//                    packThreads[i].register = register;
+//                    packThreads[i].isPacking = false;
+//                    packThreads[i].bigFile = bigFile;
+//                    packThreads[i].targetFile = outputFile;
+//                    packThreads[i].sourceDir = new DirectoryInfo(bigFile.Directory.FullName + "\\" + BigFileConst.UNPACK_DIR);
+//                    packThreads[i].flags = flags;
+//                }
+//                packThreads[NUM_THREADED_TASKS - 1].count += dividedRemainder;
 
-                register.Reset();
+//                register.Reset();
 
-                for (int i = 0; i < NUM_THREADED_TASKS; i++)
-                {
-                    ThreadPool.QueueUserWorkItem(internal_PackFiles, packThreads[i]);
-                }
-            }
-            else
-            {
-                using (FileStream fs = File.OpenWrite(outputFile.FullName))
-                {
-                    byte[] buffer = buffers[4];
-                    int dataOffset = bigFile.YetiHeaderFile.CalculateDataOffset(ref bigFile.FileHeader, ref bigFile.CountInfo);
-                    fs.Seek(dataOffset, SeekOrigin.Begin);
-                    BigFileFile currFile = null;
-                    for (int i = 0; i < bigFile.MappingData.FilesList.Length; i++)
-                    {
-                        currFile = bigFile.MappingData.FilesList[i];
-                        if (currFile.FileInfo.Key == 0)
-                            continue;
+//                for (int i = 0; i < NUM_THREADED_TASKS; i++)
+//                {
+//                    ThreadPool.QueueUserWorkItem(internal_PackFiles, packThreads[i]);
+//                }
+//            }
+//            else
+//            {
+//                using (FileStream fs = File.OpenWrite(outputFile.FullName))
+//                {
+//                    byte[] buffer = buffers[4];
+//                    int dataOffset = bigFile.YetiHeaderFile.CalculateDataOffset(ref bigFile.FileHeader, ref bigFile.CountInfo);
+//                    fs.Seek(dataOffset, SeekOrigin.Begin);
+//                    BigFileFile currFile = null;
+//                    for (int i = 0; i < bigFile.MappingData.FilesList.Length; i++)
+//                    {
+//                        currFile = bigFile.MappingData.FilesList[i];
+//                        if (currFile.FileInfo.Key == 0)
+//                            continue;
 
-                        log.Info("Packing file " + currFile.Name);
+//                        log.Info("Packing file " + currFile.Name);
 
-                        if ((flags & BigFileFlags.Compress) != 0)
-                        {
-                            using (FileStream srcStream = File.OpenRead(bigFile.Directory + "\\" + BigFileConst.UNPACK_DIR + bigFile.RenamedMapping[currFile.FileInfo.Key].FileName))
-                            {
-                                buffer = buffers[srcStream.Length];
-                                srcStream.Read(buffer, 0, (int)srcStream.Length);
-                                currFile.FileInfo = new BigFileFileInfo()
-                                {
-                                    Offset = (int)fs.Position - dataOffset,
-                                    Key = currFile.FileInfo.Key,
-                                    Name = currFile.FileInfo.Name,
-                                    Folder = currFile.FileInfo.Folder,
-                                    FileNumber = currFile.FileInfo.FileNumber,
-                                    CRC32 = currFile.FileInfo.CRC32,
-                                    ZIP = 1,
-                                };
-                                long compressedSizeOffset = fs.Position;
-                                fs.Write((0x00000000).ToByteArray(buffers[4]), 0, 4);
-                                fs.Write(((int)srcStream.Length).ToByteArray(buffers[4]), 0, 4);
-                                fs.WriteByte(0x78);
-                                fs.WriteByte(0x9C);
-                                using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Compress, true))
-                                {
-                                    ds.Write(buffer, 0, (int)srcStream.Length);
-                                }
-                                long currOffset = fs.Position;
-                                fs.Seek(compressedSizeOffset, SeekOrigin.Begin);
-                                fs.Write(((int)(currOffset - compressedSizeOffset - 8)).ToByteArray(buffers[4]), 0, 0);
-                                fs.Seek(currOffset, SeekOrigin.Begin);
-                            }
-                        }
-                        else
-                        {
-                            using (FileStream srcStream = File.OpenRead(bigFile.Directory + "\\" + BigFileConst.UNPACK_DIR + bigFile.RenamedMapping[currFile.FileInfo.Key].FileName))
-                            {
-                                buffer = buffers[srcStream.Length];
-                                srcStream.Read(buffer, 0, (int)srcStream.Length);
-                                currFile.FileInfo = new BigFileFileInfo()
-                                {
-                                    Offset = (int)fs.Position - dataOffset,
-                                    Key = currFile.FileInfo.Key,
-                                    Name = currFile.FileInfo.Name,
-                                    Folder = currFile.FileInfo.Folder,
-                                    FileNumber = currFile.FileInfo.FileNumber,
-                                    CRC32 = currFile.FileInfo.CRC32,
-                                    ZIP = 0,
-                                };
-                                ((int)srcStream.Length).ToByteArray(buffers[4], 0);
-                                fs.Write(((int)srcStream.Length).ToByteArray(buffers[4]), 0, 4);
-                                log.Debug("Wrote file " + currFile.FileInfo.Name + ", length of: " + srcStream.Length + "   wrote length: " + BitConverter.ToInt32(buffers[4], 0));
-                                fs.Write(buffer, 0, (int)srcStream.Length);
-                            }
-                        }
-                    }
-                }
+//                        if ((flags & BigFileFlags.Compress) != 0)
+//                        {
+//                            using (FileStream srcStream = File.OpenRead(bigFile.Directory + "\\" + BigFileConst.UNPACK_DIR + bigFile.RenamedMapping[currFile.FileInfo.Key].FileName))
+//                            {
+//                                buffer = buffers[srcStream.Length];
+//                                srcStream.Read(buffer, 0, (int)srcStream.Length);
+//                                currFile.FileInfo = new BigFileFileInfo()
+//                                {
+//                                    Offset = (int)fs.Position - dataOffset,
+//                                    Key = currFile.FileInfo.Key,
+//                                    Name = currFile.FileInfo.Name,
+//                                    Folder = currFile.FileInfo.Folder,
+//                                    FileNumber = currFile.FileInfo.FileNumber,
+//                                    CRC32 = currFile.FileInfo.CRC32,
+//                                    ZIP = 1,
+//                                };
+//                                long compressedSizeOffset = fs.Position;
+//                                fs.Write((0x00000000).ToByteArray(buffers[4]), 0, 4);
+//                                fs.Write(((int)srcStream.Length).ToByteArray(buffers[4]), 0, 4);
+//                                fs.WriteByte(0x78);
+//                                fs.WriteByte(0x9C);
+//                                using (DeflateStream ds = new DeflateStream(fs, CompressionMode.Compress, true))
+//                                {
+//                                    ds.Write(buffer, 0, (int)srcStream.Length);
+//                                }
+//                                long currOffset = fs.Position;
+//                                fs.Seek(compressedSizeOffset, SeekOrigin.Begin);
+//                                fs.Write(((int)(currOffset - compressedSizeOffset - 8)).ToByteArray(buffers[4]), 0, 0);
+//                                fs.Seek(currOffset, SeekOrigin.Begin);
+//                            }
+//                        }
+//                        else
+//                        {
+//                            using (FileStream srcStream = File.OpenRead(bigFile.Directory + "\\" + BigFileConst.UNPACK_DIR + bigFile.RenamedMapping[currFile.FileInfo.Key].FileName))
+//                            {
+//                                buffer = buffers[srcStream.Length];
+//                                srcStream.Read(buffer, 0, (int)srcStream.Length);
+//                                currFile.FileInfo = new BigFileFileInfo()
+//                                {
+//                                    Offset = (int)fs.Position - dataOffset,
+//                                    Key = currFile.FileInfo.Key,
+//                                    Name = currFile.FileInfo.Name,
+//                                    Folder = currFile.FileInfo.Folder,
+//                                    FileNumber = currFile.FileInfo.FileNumber,
+//                                    CRC32 = currFile.FileInfo.CRC32,
+//                                    ZIP = 0,
+//                                };
+//                                ((int)srcStream.Length).ToByteArray(buffers[4], 0);
+//                                fs.Write(((int)srcStream.Length).ToByteArray(buffers[4]), 0, 4);
+//                                log.Debug("Wrote file " + currFile.FileInfo.Name + ", length of: " + srcStream.Length + "   wrote length: " + BitConverter.ToInt32(buffers[4], 0));
+//                                fs.Write(buffer, 0, (int)srcStream.Length);
+//                            }
+//                        }
+//                    }
+//                }
 
-                log.Info("Files packed!");
-            }
+//                log.Info("Files packed!");
+//            }
 
-            headerFile.WriteYetiHeader(bigFile);
-            headerFile.WriteYetiFileAndFolderInfo(bigFile);
+//            headerFile.WriteYetiHeader(bigFile);
+//            headerFile.WriteYetiFileAndFolderInfo(bigFile);
 
-            //if ((flags & BigFilePackFlags.WaitOnThreads) != 0)
-            //{
-            //    while (IsPacking)
-            //    {
-            //        Thread.Sleep(10);
-            //    }
-            //}
+//            //if ((flags & BigFilePackFlags.WaitOnThreads) != 0)
+//            //{
+//            //    while (IsPacking)
+//            //    {
+//            //        Thread.Sleep(10);
+//            //    }
+//            //}
         }
 
         private void internal_PackFiles(object obj)

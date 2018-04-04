@@ -7,6 +7,7 @@ using GRPExplorerLib.Util;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Threading;
+using GRPExplorerLib.Logging;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -19,7 +20,7 @@ namespace GRPExplorerLib.BigFile
             public float CreateRenamedFileMapping;
             public float WriteUnpackedFiles;
 
-            internal void DebugLog(LogProxy log)
+            internal void DebugLog(ILogProxy log)
             {
                 log.Debug(" > BigFileUnpacker.DiagData Dump: ");
                 log.Debug("    GenerateYetiMetadataFile: " + GenerateYetiMetadataFile + "ms");
@@ -45,7 +46,7 @@ namespace GRPExplorerLib.BigFile
 
         public const int NUM_THREADED_TASKS = 1;
 
-        private LogProxy log = new LogProxy("BigFileUnpacker");
+        private ILogProxy log = LogManager.GetLogProxy("BigFileUnpacker");
 
         private PackedBigFile bigFile;
 
@@ -177,42 +178,45 @@ namespace GRPExplorerLib.BigFile
 
             //try
             //{
-                int dataOffset = info.bigFile.YetiHeaderFile.CalculateDataOffset(ref info.bigFile.FileHeader, ref info.bigFile.CountInfo);
-                byte[] buffer = info.buffers[4];
-                using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
+            int dataOffset = info.bigFile.YetiHeaderFile.CalculateDataOffset(ref info.bigFile.FileHeader, ref info.bigFile.CountInfo);
+            byte[] buffer = info.buffers[4];
+            using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
+            {
+                BigFileFile currFile = null;
+                for (int i = info.startIndex; i < info.startIndex + info.count; i++)
                 {
-                    BigFileFile currFile = null;
-                    for (int i = info.startIndex; i < info.startIndex + info.count; i++)
+                    currFile = bigFile.MappingData.FilesList[i];
+                    if (string.IsNullOrEmpty(currFile.Name))
                     {
-                        currFile = bigFile.MappingData.FilesList[i];
-                        if (string.IsNullOrEmpty(currFile.Name))
+                        log.Error(string.Format("File (key:{0:X8}) does not have a file name!", currFile.FileInfo.Key));
+                        continue;
+                    }
+
+                    log.Info("Unpacking file " + currFile.Name);
+                    //info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
+
+                    int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, info.flags);
+
+                    string fileName = info.unpackDir.FullName + info.fileMapping[currFile.FileInfo.Key].FileName;
+
+                    //write the read data to the unpacked file
+                    using (FileStream newFs = File.Create(fileName))
+                    {
+                        if (fileSize != -1) //if the offset is bad, only create the file, don't write anything
                         {
-                            log.Error(string.Format("File (key:{0:X8}) does not have a file name!", currFile.FileInfo.Key));
-                            continue;
-                        }
-
-                        log.Info("Unpacking file " + currFile.Name);
-                        //info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
-
-                        int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, info.flags);
-
-                        buffer = info.buffers[fileSize]; //fuck me
-
-                        string fileName = info.unpackDir.FullName + info.fileMapping[currFile.FileInfo.Key].FileName;
-
-                        //write the read data to the unpacked file
-                        using (FileStream newFs = File.Create(fileName))
-                        {
+                            buffer = info.buffers[fileSize]; //fuck me
                             newFs.Write(buffer, 0, fileSize);
                         }
                     }
+
                 }
+            }
 
-                log.Info("Unpack thread (ID:" + info.threadID + ") finished work!");
-                info.isUnpacking = false;
-                info.stopwatch.Stop();
+            log.Info("Unpack thread (ID:" + info.threadID + ") finished work!");
+            info.isUnpacking = false;
+            info.stopwatch.Stop();
 
-                info.OnWorkDoneCallback.Invoke(info);
+            info.OnWorkDoneCallback.Invoke(info);
             //}
             //catch (Exception ex)
             //{
@@ -283,15 +287,16 @@ namespace GRPExplorerLib.BigFile
             foreach (BigFileFile file in folder.Files)
             {
                 string fullName = file.FullFolderPath + file.Name;
+                string fullNameLower = fullName.ToLowerInvariant();
 
-                if (fileRenameCounts.ContainsKey(fullName))
+                if (fileRenameCounts.ContainsKey(fullNameLower))
                 {
-                    fileRenameCounts[fullName]++;
-                    fullName += "_" + fileRenameCounts[fullName];
+                    fileRenameCounts[fullNameLower]++;
+                    fullName += "_" + fileRenameCounts[fullNameLower];
                 }
                 else
                 {
-                    fileRenameCounts.Add(fullName, 1);
+                    fileRenameCounts.Add(fullNameLower, 1);
                 }
 
                 log.Debug(file.Name + " remapped to " + fullName);

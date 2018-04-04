@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using GRPExplorerLib.Util;
+using GRPExplorerLib.Logging;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -11,7 +12,7 @@ namespace GRPExplorerLib.BigFile
     {
         private FileInfo fileInfo;
 
-        private LogProxy log = new LogProxy("UnpackedFileKeyMappingFile");
+        private ILogProxy log = LogManager.GetLogProxy("UnpackedFileKeyMappingFile");
 
         byte[] tempBuffer = new byte[300];
 
