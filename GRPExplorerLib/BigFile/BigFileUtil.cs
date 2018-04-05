@@ -114,7 +114,7 @@ namespace GRPExplorerLib.BigFile
 
             for (int i = 0; i < filesList.Length; i++)
             {
-                if (fileInfos[i].Name == null)
+                if (fileInfos[i]?.Name == null)
                     continue;
 
                 if (!fileKeyMapping.ContainsKey(fileInfos[i].Key))
@@ -151,7 +151,13 @@ namespace GRPExplorerLib.BigFile
 
             for (int i = 0; i < mapping.FilesList.Length; i++)
             {
-                rootFolder.FolderMap[mapping.FilesList[i].FileInfo.Folder].Files.Add(mapping.FilesList[i]);
+                BigFileFile file = mapping.FilesList[i];
+                if (file != null)
+                {
+                    BigFileFolder folder = rootFolder.FolderMap[mapping.FilesList[i].FileInfo.Folder];
+                    if (folder != null)
+                        folder.Files.Add(mapping.FilesList[i]);
+                }
             }
 
             diagData.MapFilesToFolders = stopwatch.ElapsedMilliseconds;
@@ -219,7 +225,11 @@ namespace GRPExplorerLib.BigFile
             recursion.Invoke(dir, "", null);
 
             if (fileCount != mapping.KeyMap.Count)
-                throw new Exception("File count is invalid!");
+            {
+                log.Error(string.Format("Missing {0} files!", temp.Count));
+                foreach (KeyValuePair<string, UnpackedRenamedFileMapping.RenamedFileMappingData> kvp in temp)
+                    log.Error(string.Format("     >{0}", kvp.Value.FileName));
+            }
 
             return new UnpackedFolderMapAndFilesList()
             {

@@ -44,7 +44,7 @@ namespace GRPExplorerLib.BigFile
             public BigFileFlags flags;
         }
 
-        public const int NUM_THREADED_TASKS = 1;
+        public const int NUM_THREADED_TASKS = 4;
 
         private ILogProxy log = LogManager.GetLogProxy("BigFileUnpacker");
 
@@ -200,15 +200,21 @@ namespace GRPExplorerLib.BigFile
                     string fileName = info.unpackDir.FullName + info.fileMapping[currFile.FileInfo.Key].FileName;
 
                     //write the read data to the unpacked file
-                    using (FileStream newFs = File.Create(fileName))
+                    try
                     {
-                        if (fileSize != -1) //if the offset is bad, only create the file, don't write anything
+                        using (FileStream newFs = File.Create(fileName))
                         {
-                            buffer = info.buffers[fileSize]; //fuck me
-                            newFs.Write(buffer, 0, fileSize);
+                            if (fileSize != -1) //if the offset is bad, only create the file, don't write anything
+                            {
+                                buffer = info.buffers[fileSize]; //fuck me
+                                newFs.Write(buffer, 0, fileSize);
+                            }
                         }
                     }
-
+                    catch (Exception ex)
+                    {
+                        log.Error("God Damnit.");
+                    }
                 }
             }
 
