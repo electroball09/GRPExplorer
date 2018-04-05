@@ -183,7 +183,7 @@ namespace GRPExplorerLib.BigFile
                 folderInfo.PreviousFolder = parentFolder != null ? parentFolder.FolderIndex : (short)-1;
                 folderInfo.NextFolder = -1;
                 folderInfo.Unknown_02 = 0;
-                folderInfo.Name = parentFolder == null ? //oh my lawdy what is this
+                folderInfo.Name = parentFolder == null ? //oh my lawdy what is this EDIT 4/5/2018: what the fuck
                         "/".EncodeToBadString(length: 54) :
                         directory.Name.EncodeToBadString(length: 54);
 

@@ -20,6 +20,9 @@ namespace GRPExplorerLib.Util
                     break;
                 }
 
+                if (bytes[i] == 0x3A)
+                    bytes[i] = 0x20;
+
                 builder.Append(Convert.ToChar(bytes[i]));
             }
             return builder.ToString().Trim();
