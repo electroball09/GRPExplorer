@@ -19,6 +19,8 @@ namespace GRPExplorerLib.BigFile
             log.Debug("    Signature: " + Encoding.Default.GetString(Signature));
             log.Debug("    Unknown_01: " + Unknown_01);
             log.Debug("    Unknown_02: " + Unknown_02);
+            log.Debug("    Num_Segments: " + Num_Segments);
+            log.Debug("    Segment: " + Segment);
             log.Debug("    Unknown_03: " + Unknown_03);
             log.Debug("    InfoOffset: " + InfoOffset);
             log.Debug("    Unknown_04: " + Unknown_04);
@@ -28,24 +30,30 @@ namespace GRPExplorerLib.BigFile
             log.Debug("    Unknown_08: " + Unknown_08);
             log.Debug("    Unknown_09: " + Unknown_09);
             log.Debug("    Unknown_10: " + Unknown_10);
+            log.Debug("    Unknown_11: " + Unknown_11);
         }
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public byte[] Signature;
 
         public int Unknown_01;
-        public int Unknown_02;
-        public int Unknown_03;
+        public byte Unknown_02;
+
+        public byte Num_Segments;
+        public byte Segment;
+
+        public byte Unknown_03;
+        public int Unknown_04;
 
         public int InfoOffset;
 
-        public int Unknown_04;
         public int Unknown_05;
         public int Unknown_06;
         public int Unknown_07;
         public int Unknown_08;
         public int Unknown_09;
         public int Unknown_10;
+        public int Unknown_11;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 2)]

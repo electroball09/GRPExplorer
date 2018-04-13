@@ -7,7 +7,7 @@
              xmlns:local="clr-namespace:GRPExplorerGUI.View"
              DataContext="{Binding Path=BigFileViewModel, RelativeSource={RelativeSource Self}}"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" Width="363.706">
     <Grid Background="White">
         <StackPanel Margin="0,0,0,0">
             <GroupBox x:Name="groupBox" Header="{Binding Path=BigFile.MetadataFileInfo.FullName}">
@@ -15,7 +15,7 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <Button x:Name="btnLoadFromDisk" Content="Load from disk" Click="LoadFromDiskBtnClick"/>
-                            <ProgressBar x:Name="progLoadFromDisk" Value="50" Width="50" Height="15" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0">
+                            <ProgressBar x:Name="progLoadFromDisk" Value="{Binding Path=LoadProgress, Mode=OneWay}" Width="98" Height="15" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0">
                                 <ProgressBar.Style>
                                     <Style TargetType="ProgressBar">
                                         <Style.Triggers>

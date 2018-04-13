@@ -48,8 +48,9 @@ namespace GRPExplorerLib.BigFile
 
         public override void LoadFromDisk()
         {
-            BigFileLoadOperationStatus status = new BigFileLoadOperationStatus();
+            status.stopwatch.Reset();
             status.stopwatch.Start();
+            status.UpdateProgress(0f);
 
             log.Info("Loading big file into memory: " + fileInfo.FullName);
 
@@ -62,6 +63,8 @@ namespace GRPExplorerLib.BigFile
 
             version = VersionRegistry.GetVersion(CountInfo.BigFileVersion);
 
+            status.UpdateProgress(0.2f);
+
             yetiHeaderFile.BigFileVersion = version;
             fileUtil.BigFileVersion = version;
 
@@ -70,16 +73,20 @@ namespace GRPExplorerLib.BigFile
 
             log.Info("Creating folder tree and file mappings...");
 
+            status.UpdateProgress(0.4f);
+
             rootFolder = fileUtil.CreateRootFolderTree(folders);
+            status.UpdateProgress(0.6f);
             mappingData = fileUtil.CreateFileMappingData(rootFolder, files);
+            status.UpdateProgress(0.8f);
             fileUtil.MapFilesToFolders(rootFolder, mappingData);
+            status.UpdateProgress(1f);
+            status.stopwatch.Stop();
 
             log.Info("Bigfile loaded!");
 
             fileUtil.diagData.DebugLog(log);
-
-            status.stopwatch.Stop();
-
+            
             log.Info("Time taken: " + status.TimeTaken + "ms");
         }
     }

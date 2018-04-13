@@ -27,10 +27,9 @@ namespace GRPExplorerLib.BigFile
 
         public bool IsLoaded { get { return rootFolder != null; } }
 
-        //protected internal BigFileLoadOperationStatus status = new BigFileLoadOperationStatus();
-        //public BigFileOperationStatus LoadOperationStatus { get { return status; } }
-
-
+        protected BigFileLoadOperationStatus status = new BigFileLoadOperationStatus();
+        public BigFileOperationStatus LoadStatus { get { return status; } }
+        
         public BigFileHeader FileHeader;
         public BigFileFileCountInfo CountInfo;
 
@@ -45,9 +44,14 @@ namespace GRPExplorerLib.BigFile
         public abstract void LoadFromDisk();
     }
 
-    internal sealed class BigFileLoadOperationStatus : BigFileOperationStatus
+    public sealed class BigFileLoadOperationStatus : BigFileOperationStatus
     {
-        internal float progress = 0f;
-        public override float Progress { get { return progress; } }
+        public override string OperationName
+        {
+            get
+            {
+                return "Load";
+            }
+        }
     }
 }

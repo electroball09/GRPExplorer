@@ -35,7 +35,6 @@ namespace GRPExplorerLib.BigFile
         public DirectoryInfo Directory { get { return directory; } }
 
         private ILogProxy log = LogManager.GetLogProxy("UnpackedBigFile");
-        private Stopwatch stopwatch = new Stopwatch();
 
         private UnpackedRenamedFileMapping renamedMapping;
         public UnpackedRenamedFileMapping RenamedMapping { get { return renamedMapping; } }
@@ -50,32 +49,44 @@ namespace GRPExplorerLib.BigFile
 
         public override void LoadFromDisk()
         {
-            stopwatch.Reset();
-            stopwatch.Start();
+            status.stopwatch.Reset();
+            status.stopwatch.Start();
+            status.UpdateProgress(0f);
             log.Info("Loading unpacked bigfile from disk...");
 
             UnpackedFileKeyMappingFile mappingFile = new UnpackedFileKeyMappingFile(new DirectoryInfo(fileOrDirectory));
             renamedMapping = mappingFile.LoadMappingData();
+
+            status.UpdateProgress(0.2f);
 
             FileHeader = yetiHeaderFile.ReadHeader();
             CountInfo = yetiHeaderFile.ReadFileCountInfo(ref FileHeader);
 
             log.Info(string.Format("Version: {0:X4}", CountInfo.BigFileVersion));
 
+            log.Info(string.Format("Count info offset: {0:X8}", FileHeader.InfoOffset));
             version = VersionRegistry.GetVersion(CountInfo.BigFileVersion);
 
             fileUtil.BigFileVersion = version;
 
+            status.UpdateProgress(0.4f);
+
             UnpackedFolderMapAndFilesList folderAndFiles = fileUtil.CreateFolderTreeAndFilesListFromDirectory(new DirectoryInfo(directory.FullName + "\\" + BigFileConst.UNPACK_DIR), renamedMapping);
             rootFolder = folderAndFiles.folderMap[0];
 
+            status.UpdateProgress(0.6f);
+
             mappingData = fileUtil.CreateFileMappingData(folderAndFiles.folderMap[0], folderAndFiles.filesList);
+
+            status.UpdateProgress(0.8f);
 
             fileUtil.MapFilesToFolders(rootFolder, mappingData);
 
+            status.UpdateProgress(1.0f);
+
+            status.stopwatch.Stop();
             log.Info("Unpacked bigfile loaded!");
-            log.Info("  Time taken: " + stopwatch.ElapsedMilliseconds + "ms");
-            stopwatch.Stop();
+            log.Info("  Time taken: " + status.TimeTaken + "ms");
         }
     }
 }

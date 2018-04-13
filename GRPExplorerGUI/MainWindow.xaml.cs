@@ -105,30 +105,20 @@ namespace GRPExplorerGUI
         {
             logInterface.Info("[GUI] " + msg);
         }
-
-        BackgroundWorker bgworker;
+        
         BigFileUnpacker unpacker;
-        string dir = "";
         private void btnUnpackBigfile_Click(object sender, RoutedEventArgs e)
         {
-            if (bgworker == null)
+            BigFileUnpackOptions options = new BigFileUnpackOptions
             {
-                bgworker = new BackgroundWorker();
-                bgworker.DoWork += Bgworker_DoWork;
-            }
-
-            if (bgworker.IsBusy)
-                return;
+                Directory = new System.IO.DirectoryInfo(txtUnpackDir.Text),
+                Flags = BigFileFlags.Decompress | BigFileFlags.UseThreading,
+                Threads = 4,
+            };
 
             unpacker = new BigFileUnpacker((PackedBigFile)bigFile);
-            dir = txtUnpackDir.Text;
 
-            bgworker.RunWorkerAsync();
-        }
-
-        private void Bgworker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            unpacker.UnpackBigfile(new System.IO.DirectoryInfo(dir), BigFileFlags.Decompress | BigFileFlags.UseThreading);
+            BigFileUnpackOperationStatus status = unpacker.UnpackBigfile(options);
         }
     }
 }

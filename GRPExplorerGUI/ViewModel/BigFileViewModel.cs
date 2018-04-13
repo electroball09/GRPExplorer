@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using GRPExplorerLib;
 using GRPExplorerLib.BigFile;
+using GRPExplorerLib.Logging;
+using System.Windows;
 
 namespace GRPExplorerGUI.ViewModel
 {
@@ -30,6 +32,16 @@ namespace GRPExplorerGUI.ViewModel
                 BigFileType = "lol";
             }
         }
+        
+        public float LoadProgress
+        {
+            get
+            {
+                if (bigFile == null)
+                    return 0f;
+                return bigFile.LoadStatus.Progress * 100;
+            }
+        }
 
         public bool? BigFileLoaded
         {
@@ -44,16 +56,36 @@ namespace GRPExplorerGUI.ViewModel
         }
 
         private BackgroundWorker bgworker = new BackgroundWorker();
+        private ILogProxy log;
         
         public BigFileViewModel()
         {
             bgworker.DoWork += Bgworker_DoWork;
+            log = LogManager.GetLogProxy("BigFileViewModel");
         }
 
         private void Bgworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            bigFile?.LoadFromDisk();
-            BigFile = bigFile;
+            log.Info("BGWorker loading bigfile");
+            try
+            {
+                bigFile.LoadStatus.OnProgressUpdated +=
+                    (BigFileOperationStatus status) =>
+                        {
+                            Action action = () =>
+                            {
+                                NotifyPropertyChanged("LoadProgress");
+                            };
+                            Application.Current.Dispatcher.BeginInvoke(action);
+                        };
+                bigFile.LoadFromDisk();
+                BigFile = bigFile;
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex.Message);
+                MessageBox.Show(ex.Message + "\n\n" + ex.StackTrace);
+            }
         }
 
         public void LoadFromDisk()

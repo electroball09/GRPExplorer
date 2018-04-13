@@ -11,6 +11,53 @@ using GRPExplorerLib.Logging;
 
 namespace GRPExplorerLib.BigFile
 {
+    public struct BigFileUnpackOptions
+    {
+        public DirectoryInfo Directory;
+        public BigFileFlags Flags;
+        public int Threads;
+
+        internal void Log(ILogProxy log)
+        {
+            log.Info(">BigFileUnpackOptions:");
+            log.Info("    Directory: " + Directory?.FullName);
+            log.Info("    Flags: " + Flags);
+            log.Info("    Threads: " + Threads.ToString());
+        }
+    }
+
+    public class BigFileUnpackOperationStatus : BigFileOperationStatus
+    {
+        private List<BigFileUnpacker.UnpackThreadInfo> threads;
+
+        internal BigFileUnpackOperationStatus(List<BigFileUnpacker.UnpackThreadInfo> infos)
+        {
+            threads = infos;
+        }
+
+        public override string OperationName
+        {
+            get
+            {
+                return "Unpack";
+            }
+        }
+
+        public override float Progress
+        {
+            get
+            {
+                float val = 0f;
+                foreach (BigFileUnpacker.UnpackThreadInfo info in threads)
+                {
+                    float threadProgress = info.count / ((float)info.progress);
+                    val += threadProgress * (1 / threads.Count);
+                }
+                return val;
+            }
+        }
+    }
+
     public class BigFileUnpacker
     {
         public struct DiagData
@@ -29,9 +76,9 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
-        private class UnpackThreadInfo
+        internal class UnpackThreadInfo
         {
-            public DirectoryInfo unpackDir;
+            public BigFileUnpackOptions options;
             public BigFile bigFile;
             public UnpackedRenamedFileMapping fileMapping;
             public int startIndex;
@@ -41,10 +88,11 @@ namespace GRPExplorerLib.BigFile
             public IOBuffers buffers = new IOBuffers();
             public bool isUnpacking = false;
             public Stopwatch stopwatch = new Stopwatch();
-            public BigFileFlags flags;
+
+            public int progress;
         }
 
-        public const int NUM_THREADED_TASKS = 4;
+        public const int NUM_THREADED_TASKS = 16;
 
         private ILogProxy log = LogManager.GetLogProxy("BigFileUnpacker");
 
@@ -63,7 +111,7 @@ namespace GRPExplorerLib.BigFile
             {
                 for (int i = 0; i < NUM_THREADED_TASKS; i++)
                 {
-                    if (unpackThreads[i].isUnpacking)
+                    if (unpackThreads[i] != null && unpackThreads[i].isUnpacking)
                         return true;
                 }
 
@@ -77,28 +125,29 @@ namespace GRPExplorerLib.BigFile
             bigFile = _bigFile;
         }
 
-        public void UnpackBigfile(DirectoryInfo dir, BigFileFlags flags)
+        //public void UnpackBigfile(DirectoryInfo dir, BigFileFlags flags)
+        public BigFileUnpackOperationStatus UnpackBigfile(BigFileUnpackOptions options)
         {
-            log.Info("Unpacking a bigfile to directory: \"" + dir.FullName + "\"");
+            if (options.Threads > NUM_THREADED_TASKS)
+            {
+                log.Error(string.Format("Can't have more threads than the max! ({0} > {1})", options.Threads, NUM_THREADED_TASKS));
+                log.Error("    Threads will be clamped to the max!");
+                options.Threads = NUM_THREADED_TASKS;
+            }
+            
+            log.Info("Unpacking a bigfile to directory: \"" + options.Directory.FullName + "\"");
 
-            if (!dir.Exists)
-                Directory.CreateDirectory(dir.FullName);
+            options.Log(log);
 
-            //if (dir.GetDirectories().Length != 0 && dir.GetFiles().Length != 0)
-            //{
-            //    log.Error("Unpacking directory must be empty!");
-            //    return;
-            //}
-
-            if (!dir.Exists)
+            if (!options.Directory.Exists)
             {
                 log.Info("Directory does not exist, creating it...");
-                Directory.CreateDirectory(dir.FullName);
+                Directory.CreateDirectory(options.Directory.FullName);
             }
 
-            GenerateYetiMetadataFile(dir, bigFile);
+            GenerateYetiMetadataFile(options.Directory, bigFile);
 
-            DirectoryInfo unpackDir = new DirectoryInfo(dir.FullName + "\\" + BigFileConst.UNPACK_DIR);
+            DirectoryInfo unpackDir = new DirectoryInfo(options.Directory.FullName + "\\" + BigFileConst.UNPACK_DIR);
             log.Info("Creating unpack dir: " + unpackDir.FullName);
             Directory.CreateDirectory(unpackDir.FullName);
 
@@ -107,7 +156,7 @@ namespace GRPExplorerLib.BigFile
 
             log.Info("Creating renamed mapping file...");
             UnpackedRenamedFileMapping renamedMapping = CreateRenamedFileMapping(bigFile.RootFolder);
-            UnpackedFileKeyMappingFile mappingFile = new UnpackedFileKeyMappingFile(dir);
+            UnpackedFileKeyMappingFile mappingFile = new UnpackedFileKeyMappingFile(options.Directory);
             mappingFile.SaveMappingData(renamedMapping);
             log.Info("Mapping file saved!");
 
@@ -116,24 +165,24 @@ namespace GRPExplorerLib.BigFile
 
             log.Info("Beginning extract...");
 
-            if ((flags & BigFileFlags.UseThreading) != 0)
+            verifyAndResetThreads(options.Threads);
+
+            if ((options.Flags & BigFileFlags.UseThreading) != 0)
             {
                 int dividedCount = bigFile.MappingData.FilesList.Length / NUM_THREADED_TASKS;
                 int dividedRemainder = bigFile.MappingData.FilesList.Length % NUM_THREADED_TASKS;
                 log.Info("Divided files into " + NUM_THREADED_TASKS + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
+
+                List<UnpackThreadInfo> usingThreads = new List<UnpackThreadInfo>();
                 for (int i = 0; i < NUM_THREADED_TASKS; i++)
                 {
-                    if (unpackThreads[i] == null)
-                        unpackThreads[i] = new UnpackThreadInfo();
-
-                    unpackThreads[i].unpackDir = unpackDir;
+                    unpackThreads[i].options = options;
                     unpackThreads[i].bigFile = bigFile;
                     unpackThreads[i].fileMapping = renamedMapping;
                     unpackThreads[i].startIndex = i * dividedCount;
                     unpackThreads[i].count = dividedCount;
                     unpackThreads[i].threadID = i;
                     unpackThreads[i].OnWorkDoneCallback = internal_OnThreadFinished;
-                    unpackThreads[i].flags = flags;
                 }
                 unpackThreads[NUM_THREADED_TASKS - 1].count += dividedRemainder; //add the remainder onto the last info
 
@@ -141,32 +190,59 @@ namespace GRPExplorerLib.BigFile
                 {
                     ThreadPool.QueueUserWorkItem(internal_UnpackFiles, unpackThreads[i]);
                 }
-            }
-            else
-            {
-                if (unpackThreads[0] == null)
-                    unpackThreads[0] = new UnpackThreadInfo();
 
-                unpackThreads[0].unpackDir = unpackDir;
+                return new BigFileUnpackOperationStatus(usingThreads);
+            }
+            else //use the function for threads even without one
+            {
+                unpackThreads[0].options = options;
                 unpackThreads[0].bigFile = bigFile;
                 unpackThreads[0].fileMapping = renamedMapping;
                 unpackThreads[0].startIndex = 0;
                 unpackThreads[0].count = bigFile.MappingData.FilesList.Length;
                 unpackThreads[0].threadID = 0;
                 unpackThreads[0].OnWorkDoneCallback = internal_OnThreadFinished;
-                unpackThreads[0].flags = flags;
 
-                internal_UnpackFiles(unpackThreads[0]);
+                internal_UnpackFiles(unpackThreads[0]); //teehee
+
+                diagData.WriteUnpackedFiles = stopwatch.ElapsedMilliseconds;
+                stopwatch.Stop();
+
+                log.Info("Extract complete!");
+
+                diagData.DebugLog(log);
+
+                log.Info("Unpack complete!");
+
+                return null;
             }
+        }
 
-            diagData.WriteUnpackedFiles = stopwatch.ElapsedMilliseconds;
-            stopwatch.Stop();
+        private void verifyAndResetThreads(int threads)
+        {
+            for (int i = 0; i < NUM_THREADED_TASKS; i++)
+            {
+                if (unpackThreads[i] == null)
+                {
+                    if (i <= threads)
+                    {
+                        unpackThreads[i] = new UnpackThreadInfo();
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
 
-            log.Info("Extract complete!");
-
-            diagData.DebugLog(log);
-
-            log.Info("Unpack complete!");
+                unpackThreads[i].options = new BigFileUnpackOptions();
+                unpackThreads[i].bigFile = null;
+                unpackThreads[i].fileMapping = null;
+                unpackThreads[i].startIndex = 0;
+                unpackThreads[i].count = 0;
+                unpackThreads[i].threadID = i;
+                unpackThreads[i].progress = 0;
+                unpackThreads[i].OnWorkDoneCallback = internal_OnThreadFinished;
+            }
         }
 
         private void internal_UnpackFiles(object state)
@@ -175,9 +251,7 @@ namespace GRPExplorerLib.BigFile
             info.isUnpacking = true;
             info.stopwatch.Reset();
             info.stopwatch.Start();
-
-            //try
-            //{
+            
             int dataOffset = info.bigFile.YetiHeaderFile.CalculateDataOffset(ref info.bigFile.FileHeader, ref info.bigFile.CountInfo);
             byte[] buffer = info.buffers[4];
             using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
@@ -195,9 +269,9 @@ namespace GRPExplorerLib.BigFile
                     log.Info("Unpacking file " + currFile.Name);
                     //info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
 
-                    int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, info.flags);
+                    int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, info.options.Flags);
 
-                    string fileName = info.unpackDir.FullName + info.fileMapping[currFile.FileInfo.Key].FileName;
+                    string fileName = info.options.Directory.FullName + info.fileMapping[currFile.FileInfo.Key].FileName;
 
                     //write the read data to the unpacked file
                     try
@@ -213,7 +287,7 @@ namespace GRPExplorerLib.BigFile
                     }
                     catch (Exception ex)
                     {
-                        log.Error("God Damnit.");
+                        log.Error("God Damnit.\n\n" + ex.Message);
                     }
                 }
             }
@@ -223,13 +297,6 @@ namespace GRPExplorerLib.BigFile
             info.stopwatch.Stop();
 
             info.OnWorkDoneCallback.Invoke(info);
-            //}
-            //catch (Exception ex)
-            //{
-            //    log.Error(ex.Message + "\n" + ex.StackTrace);
-            //    if ((info.flags & BigFileFlags.UseThreading) == 0)
-            //        throw ex;
-            //}
         }
 
         private void internal_OnThreadFinished(UnpackThreadInfo info)
