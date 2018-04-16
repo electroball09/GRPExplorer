@@ -169,12 +169,12 @@ namespace GRPExplorerLib.BigFile
 
             if ((options.Flags & BigFileFlags.UseThreading) != 0)
             {
-                int dividedCount = bigFile.MappingData.FilesList.Length / NUM_THREADED_TASKS;
-                int dividedRemainder = bigFile.MappingData.FilesList.Length % NUM_THREADED_TASKS;
-                log.Info("Divided files into " + NUM_THREADED_TASKS + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
+                int dividedCount = bigFile.MappingData.FilesList.Length / options.Threads;
+                int dividedRemainder = bigFile.MappingData.FilesList.Length % options.Threads;
+                log.Info("Divided files into " + options.Threads + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
 
                 List<UnpackThreadInfo> usingThreads = new List<UnpackThreadInfo>();
-                for (int i = 0; i < NUM_THREADED_TASKS; i++)
+                for (int i = 0; i < options.Threads; i++)
                 {
                     unpackThreads[i].options = options;
                     unpackThreads[i].bigFile = bigFile;
@@ -184,11 +184,12 @@ namespace GRPExplorerLib.BigFile
                     unpackThreads[i].threadID = i;
                     unpackThreads[i].OnWorkDoneCallback = internal_OnThreadFinished;
                 }
-                unpackThreads[NUM_THREADED_TASKS - 1].count += dividedRemainder; //add the remainder onto the last info
+                unpackThreads[options.Threads - 1].count += dividedRemainder; //add the remainder onto the last info
 
-                for (int i = 0; i < NUM_THREADED_TASKS; i++)
+                for (int i = 0; i < options.Threads; i++)
                 {
                     ThreadPool.QueueUserWorkItem(internal_UnpackFiles, unpackThreads[i]);
+                    usingThreads.Add(unpackThreads[i]);
                 }
 
                 return new BigFileUnpackOperationStatus(usingThreads);
@@ -271,7 +272,10 @@ namespace GRPExplorerLib.BigFile
 
                     int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, info.options.Flags);
 
-                    string fileName = info.options.Directory.FullName + info.fileMapping[currFile.FileInfo.Key].FileName;
+                    //********************************************//
+                    //DON'T FUCKING FORGET THE UNPACK SUBDIRECTORY//
+                    //********************************************//
+                    string fileName = info.options.Directory.FullName + "\\" + BigFileConst.UNPACK_DIR + "\\" + info.fileMapping[currFile.FileInfo.Key].FileName;
 
                     //write the read data to the unpacked file
                     try
@@ -308,8 +312,11 @@ namespace GRPExplorerLib.BigFile
                 log.Info(formatted_diag_msg);
                 for (int i = 0; i < NUM_THREADED_TASKS; i++)
                 {
-                    string str = string.Format("  {0,6}        {1,4}s  {2,6}   {3,6}", i, unpackThreads[i].stopwatch.ElapsedMilliseconds / 1000, unpackThreads[i].startIndex, unpackThreads[i].count);
-                    log.Info(str);
+                    if (unpackThreads[i] != null)
+                    {
+                        string str = string.Format("  {0,6}        {1,4}s  {2,6}   {3,6}", i, unpackThreads[i].stopwatch.ElapsedMilliseconds / 1000, unpackThreads[i].startIndex, unpackThreads[i].count);
+                        log.Info(str);
+                    }
                 }
             }
         }
