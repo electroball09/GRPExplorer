@@ -45,7 +45,7 @@ namespace GRPExplorerGUI.View
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            BigFileFolderTreeComponent.CurrentFolder = BigFileViewModel.BigFile.RootFolder;
+            BigFileFolderTreeComponent.RootFolder = BigFileViewModel.BigFile.RootFolder;
         }
     }
 }

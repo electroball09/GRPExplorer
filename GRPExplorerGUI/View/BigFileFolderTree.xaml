@@ -7,24 +7,37 @@
              xmlns:local="clr-namespace:GRPExplorerGUI.View"
              DataContext="{Binding RelativeSource={RelativeSource Self}}"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="1500">
     <Grid Background="White">
-        <DockPanel LastChildFill="True" Margin="0">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="btnUpFolder" Content="Up" Click="btnUpFolder_Click"/>
-                    <Label Content="{Binding Path=CurrentFolder.FullDirectoryName}" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-                </StackPanel>
-                <ListBox x:Name="listBox" ItemsSource="{Binding Path=CurrentFolder.SubFolders}" ScrollViewer.VerticalScrollBarVisibility="Visible">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Button Content="{Binding Path=Name}" Click="Button_Click"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </StackPanel>
-            <DockPanel Height="300" LastChildFill="False" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-        </DockPanel>
-
+        <TreeView x:Name="treeFolderView" ItemsSource="{Binding Path=RootFolder.SubFolders}"
+                  ScrollViewer.VerticalScrollBarVisibility="Visible"
+                  ScrollViewer.CanContentScroll="True"
+                  Width="300" MinHeight="300" MaxHeight="300" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate  ItemsSource="{Binding Path=SubFolders}">
+                        <StackPanel Orientation="Vertical">
+                            <Label Content="{Binding Path=Name}" Padding="0" Margin="0"/>
+                            <ListBox x:Name="listFiles" ItemsSource="{Binding Path=Files}" 
+                                     SelectedItem="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=SelectedFile, Mode=TwoWay}"
+                                     LostFocus="listFiles_LostFocus"
+                                     Margin="5,0,0,0" Padding="0" ScrollViewer.CanContentScroll="False">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Label Content="{Binding Path=Name}" ToolTip="{Binding Path=Name}" MaxWidth="150" Margin="0" Padding="0"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                        <HierarchicalDataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Path=Files.Count}" Value="0">
+                                <Setter TargetName="listFiles" Property="Visibility" Value="Hidden"/>
+                            </DataTrigger>
+                        </HierarchicalDataTemplate.Triggers>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        <StackPanel Orientation="Vertical" Margin="300,0,0,0" HorizontalAlignment="Left">
+            <local:BigFileFileView x:Name="bigFileView" Height="500" Width="200" Margin="0"/>
+        </StackPanel>
     </Grid>
 </UserControl>

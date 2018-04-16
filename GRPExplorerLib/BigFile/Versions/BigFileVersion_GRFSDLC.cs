@@ -35,7 +35,7 @@ namespace GRPExplorerLib.BigFile.Versions
         int offset;
         int key;
         int unknown_01;
-        short unknown_02;
+        short fileType;
         short folder;
         int timeStamp;
         int flags;
@@ -45,12 +45,11 @@ namespace GRPExplorerLib.BigFile.Versions
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 60)]
         byte[] name;
         int unknown_03;
-        //int zip;
 
         public int Offset { get { return offset; } set { offset = value; } }
         public int Key { get { return key; } set { key = value; } }
         public int Unknown_01 { get { return unknown_01; } set { unknown_01 = value; } }
-        public short Unknown_02 { get { return unknown_02; } set { unknown_02 = value; } }
+        public short FileType { get { return fileType; } set { fileType = value; } }
         public short Folder { get { return folder; } set { folder = value; } }
         public int TimeStamp { get { return timeStamp; } set { timeStamp = value; } }
         public int Flags { get { return flags; } set { flags = value; } }
@@ -68,7 +67,7 @@ namespace GRPExplorerLib.BigFile.Versions
             log.Debug("        Offset: " + Offset);
             log.Debug("           Key: " + Key);
             log.Debug("    Unknown_01: " + Unknown_01);
-            log.Debug("    Unknown_02: " + Unknown_02);
+            log.Debug("      FileType: " + FileType);
             log.Debug("        Folder: " + Folder);
             log.Debug("     TimeStamp: " + TimeStamp.UnixTime());
             log.Debug("         Flags: " + Flags);

@@ -18,13 +18,29 @@ namespace GRPExplorerGUI.View
 {
     public partial class BigFileFolderTree : UserControl
     {
-        public static DependencyProperty CurrentFolderProperty =
-            DependencyProperty.Register("CurrentFolder", typeof(BigFileFolder), typeof(BigFileFolderTree));
+        static DependencyProperty RootFolderProperty =
+            DependencyProperty.Register("RootFolder", typeof(BigFileFolder), typeof(BigFileFolderTree));
+        static DependencyProperty SelectedFolderProperty =
+            DependencyProperty.Register("SelectedFolder", typeof(BigFileFolder), typeof(BigFileFolderTree));
+        static DependencyProperty SelectedFileProperty =
+            DependencyProperty.Register("SelectedFile_", typeof(BigFileFile), typeof(BigFileFolderTree));
 
-        public BigFileFolder CurrentFolder
+        public BigFileFolder RootFolder
         {
-            get { return (BigFileFolder)GetValue(CurrentFolderProperty); }
-            set { SetValue(CurrentFolderProperty, value); }
+            get { return (BigFileFolder)GetValue(RootFolderProperty); }
+            set { SetValue(RootFolderProperty, value); }
+        }
+
+        public BigFileFolder SelectedFolder
+        {
+            get { return (BigFileFolder)GetValue(SelectedFolderProperty); }
+            set { SetValue(SelectedFolderProperty, value); }
+        }
+
+        public BigFileFile SelectedFile
+        {
+            get { return (BigFileFile)GetValue(SelectedFileProperty); }
+            set { SetValue(SelectedFileProperty, value); bigFileView.File = value; }
         }
 
         public BigFileFolderTree()
@@ -32,16 +48,9 @@ namespace GRPExplorerGUI.View
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void listFiles_LostFocus(object sender, RoutedEventArgs e)
         {
-            CurrentFolder = CurrentFolder[(e.OriginalSource as Button).Content.ToString()];
-        }
-
-        private void btnUpFolder_Click(object sender, RoutedEventArgs e)
-        {
-            BigFileFolder parent = CurrentFolder?.ParentFolder;
-            if (parent != null)
-                CurrentFolder = parent;
+            (sender as ListBox).SelectedIndex = -1;
         }
     }
 }
