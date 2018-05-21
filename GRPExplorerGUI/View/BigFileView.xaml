@@ -30,6 +30,7 @@
                                 </ProgressBar.Style>
                             </ProgressBar>
                             <Button x:Name="button" Content="Do Thing" Width="75" Click="button_Click"/>
+                            <Button x:Name="btnLoadXtra" Content="Load Xtra" Width="75" Click="btnLoadXtra_Click"/>
                         </StackPanel>
                         <local:BigFileFolderTree x:Name="BigFileFolderTreeComponent"/>
                     </StackPanel>

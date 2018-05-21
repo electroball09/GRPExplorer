@@ -27,7 +27,10 @@ namespace GRPExplorerLib.BigFile
         public BigFileFolder ParentFolder { get { return parentFolder; } }
 
         private BigFileFile[] fileReferences;
-        public BigFileFile[] FileReferences { get { return fileReferences; } }
+        public BigFileFile[] FileReferences { get { return fileReferences; } set { fileReferences = value; } }
+
+        private FileMappingData mappingData;
+        public FileMappingData MappingData { get { return mappingData; } set { mappingData = value; } }
 
         public string FullFolderPath
         {

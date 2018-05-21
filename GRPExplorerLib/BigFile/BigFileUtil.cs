@@ -37,6 +37,7 @@ namespace GRPExplorerLib.BigFile
         private ILogProxy log = LogManager.GetLogProxy("BigFileUtil");
         private Stopwatch stopwatch = new Stopwatch();
         private IOBuffers buffers = new IOBuffers();
+        public IOBuffers IOBuffers { get { return buffers; } }
         public DiagData diagData;
 
         private IBigFileVersion version;
@@ -90,12 +91,19 @@ namespace GRPExplorerLib.BigFile
             stopwatch.Reset();
             stopwatch.Start();
 
+            FileMappingData mappingData = new FileMappingData();
+
             BigFileFile[] filesList = new BigFileFile[fileInfos.Length];
 
             for (int i = 0; i < fileInfos.Length; i++)
             {
+                BigFileFile newFile = null;
                 if (fileInfos[i] != null)
-                    filesList[i] = new BigFileFile(fileInfos[i], rootFolder.FolderMap[fileInfos[i].Folder]);
+                {
+                    newFile = new BigFileFile(fileInfos[i], rootFolder.FolderMap[fileInfos[i].Folder]);
+                    newFile.MappingData = mappingData;
+                    filesList[i] = newFile;
+                }
                 else
                     log.Error(string.Format("File info at index {0} is null!", i));
             }
@@ -110,7 +118,6 @@ namespace GRPExplorerLib.BigFile
             stopwatch.Start();
 
             Dictionary<int, BigFileFile> fileKeyMapping = new Dictionary<int, BigFileFile>();
-            Dictionary<int, BigFileFile> fileNumMapping = new Dictionary<int, BigFileFile>();
 
             for (int i = 0; i < filesList.Length; i++)
             {
@@ -122,24 +129,27 @@ namespace GRPExplorerLib.BigFile
                 else
                     log.Error("File key mapping already contains key " + fileInfos[i].Key + " (File: " + filesList[i].Name + ")");
 
-                if (filesList[i].FileInfo.FileNumber != -1)
+                if (filesList[i].FileInfo.FileNumber == -1)
                 {
-                    if (!fileNumMapping.ContainsKey(fileInfos[i].FileNumber))
-                        fileNumMapping.Add(fileInfos[i].FileNumber, filesList[i]);
-                    else
-                        log.Error("File number mapping already contains key " + fileInfos[i].FileNumber + " " + filesList[i].Name);
-                }
-                else
                     log.Error(string.Format("File number is -1! (key:{0:X8}) (offset:{1:X8})", fileInfos[i].Key, fileInfos[i].Offset));
+                }
             }
 
             log.Info("Mappings created!");
+
+            foreach (KeyValuePair<short, BigFileFolder> kvp in rootFolder.FolderMap)
+            {
+                kvp.Value.MappingData = mappingData;
+            }
 
             diagData.CreateKeyAndNumMappings = stopwatch.ElapsedMilliseconds;
 
             stopwatch.Reset();
 
-            return new FileMappingData(filesList, fileKeyMapping, fileNumMapping);
+            mappingData.FilesList = filesList;
+            mappingData.KeyMapping = fileKeyMapping;
+
+            return mappingData;
         }
 
         public void MapFilesToFolders(BigFileFolder rootFolder, FileMappingData mapping)
@@ -236,6 +246,27 @@ namespace GRPExplorerLib.BigFile
                 folderMap = folderMap,
                 filesList = fileInfos
             };
+        }
+
+        public void AddFileReferencesToFile(BigFileFile file, IOBuffers buffers, int fileSize)
+        {
+            byte[] fileBuffer = buffers[fileSize];
+
+            int referenceCount = BitConverter.ToInt32(fileBuffer, 0);
+
+            log.Info("Loading file references for file: " + file.Name);
+            log.Info("  Reference count: " + referenceCount.ToString());
+
+            BigFileFile[] references = new BigFileFile[referenceCount];
+
+            for (int i = 0; i < referenceCount; i++)
+            {
+                int key = BitConverter.ToInt32(fileBuffer, (i * 4) + 4);
+
+                references[i] = file.MappingData[key];
+            }
+
+            file.FileReferences = references;
         }
 
         public void DebugLogRootFolderTree(BigFileFolder rootFolder)
@@ -357,11 +388,9 @@ namespace GRPExplorerLib.BigFile
     public class FileMappingData
     {
         private BigFileFile[] filesList;
-        public BigFileFile[] FilesList { get { return filesList; } }
+        public BigFileFile[] FilesList { get { return filesList; } set { filesList = value; } }
         private Dictionary<int, BigFileFile> keyMapping;
-        public Dictionary<int, BigFileFile> KeyMapping { get { return keyMapping; } }
-        private Dictionary<int, BigFileFile> numMapping;
-        public Dictionary<int, BigFileFile> NumMapping { get { return numMapping; } }
+        public Dictionary<int, BigFileFile> KeyMapping { get { return keyMapping; } set { keyMapping = value; } }
 
         public BigFileFile this[int key]
         {
@@ -374,11 +403,15 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
-        public FileMappingData(BigFileFile[] _filesList, Dictionary<int, BigFileFile> _keyMapping, Dictionary<int, BigFileFile> _numMapping)
+        public FileMappingData()
+        {
+
+        }
+
+        public FileMappingData(BigFileFile[] _filesList, Dictionary<int, BigFileFile> _keyMapping)
         {
             filesList = _filesList;
             keyMapping = _keyMapping;
-            numMapping = _numMapping;
         }
     }
 }

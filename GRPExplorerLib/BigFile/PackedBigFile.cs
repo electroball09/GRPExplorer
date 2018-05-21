@@ -89,5 +89,18 @@ namespace GRPExplorerLib.BigFile
             
             log.Info("Time taken: " + status.TimeTaken + "ms");
         }
+
+        public override void LoadExtraData(BigFileOperationStatus statusToUse)
+        {
+            BigFileFile[] files = mappingData.KeyMapping.Values.ToArray();
+
+            int count = 0;
+            foreach (int size in fileReader.ReadAll(files, fileUtil.IOBuffers))
+            {
+                statusToUse.UpdateProgress((float)files.Length / (float)count);
+                fileUtil.AddFileReferencesToFile(files[count], fileUtil.IOBuffers, size);
+                count++;
+            }
+        }
     }
 }

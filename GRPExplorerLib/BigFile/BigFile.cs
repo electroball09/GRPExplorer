@@ -27,6 +27,9 @@ namespace GRPExplorerLib.BigFile
 
         public bool IsLoaded { get { return rootFolder != null; } }
 
+        protected bool isExtraDataLoaded = false;
+        public bool IsExtraDataLoaded { get { return isExtraDataLoaded; } }
+
         protected BigFileLoadOperationStatus status = new BigFileLoadOperationStatus();
         public BigFileOperationStatus LoadStatus { get { return status; } }
         
@@ -42,6 +45,7 @@ namespace GRPExplorerLib.BigFile
         }
 
         public abstract void LoadFromDisk();
+        public abstract void LoadExtraData(BigFileOperationStatus statusToUse);
     }
 
     public sealed class BigFileLoadOperationStatus : BigFileOperationStatus
@@ -51,6 +55,17 @@ namespace GRPExplorerLib.BigFile
             get
             {
                 return "Load";
+            }
+        }
+    }
+
+    public sealed class BigFileExtraDataLoadOperationStatus : BigFileOperationStatus
+    {
+        public override string OperationName
+        {
+            get
+            {
+                return "Extra Data Load";
             }
         }
     }

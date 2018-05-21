@@ -47,5 +47,10 @@ namespace GRPExplorerGUI.View
         {
             BigFileFolderTreeComponent.RootFolder = BigFileViewModel.BigFile.RootFolder;
         }
+
+        private void btnLoadXtra_Click(object sender, RoutedEventArgs e)
+        {
+            BigFileViewModel.LoadExtraData();
+        }
     }
 }

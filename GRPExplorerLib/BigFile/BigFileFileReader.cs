@@ -24,6 +24,7 @@ namespace GRPExplorerLib.BigFile
         //public abstract int GetBytesSizeAndSeekToStartOfFileData(Stream stream, BigFileFile file, BigFileFlags flags = BigFileFlags.None);
         public abstract int ReadFile(BigFileFile file, IOBuffers buffers, BigFileFlags flags = BigFileFlags.None);
         public abstract int ReadFile(Stream stream, BigFileFile file, IOBuffers buffers, BigFileFlags flags = BigFileFlags.None);
+        public abstract IEnumerable<int> ReadAll(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags = BigFileFlags.None);
         public abstract Stream OpenStream(BigFileFile file, BigFileFlags flags = BigFileFlags.None);
         public abstract Stream OpenStream(Stream stream, BigFileFile file, BigFileFlags flags = BigFileFlags.None);
     }
@@ -130,6 +131,19 @@ namespace GRPExplorerLib.BigFile
                 size = ReadFile(fs, file, buffers, flags);
             }
             return size;
+        }
+
+        public override IEnumerable<int> ReadAll(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
+        {
+            int size = -1;
+            using (FileStream fs = File.OpenRead(packedBigFile.MetadataFileInfo.FullName))
+            {
+                for (int i = 0; i < filesToRead.Length; i++)
+                {
+                    size = ReadFile(fs, filesToRead[i], buffers, flags);
+                    yield return size;
+                }
+            }
         }
 
         public override Stream OpenStream(BigFileFile file, BigFileFlags flags = DEFAULT_FLAGS)

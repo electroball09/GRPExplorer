@@ -88,5 +88,10 @@ namespace GRPExplorerLib.BigFile
             log.Info("Unpacked bigfile loaded!");
             log.Info("  Time taken: " + status.TimeTaken + "ms");
         }
+
+        public override void LoadExtraData(BigFileOperationStatus statusToUse)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

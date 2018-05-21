@@ -9,7 +9,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Rectangle Fill="#FFF4F4F5" Margin="0" Stroke="Black"/>
-        <GroupBox x:Name="groupBox" Header="{Binding Path=BigFileFile.Name}" Height="200" Margin="0" VerticalAlignment="Top">
+        <GroupBox x:Name="groupBox" Header="{Binding Path=BigFileFile.Name}" Margin="0">
             <StackPanel Orientation="Vertical">
                 <StackPanel.Triggers>
                     
@@ -18,6 +18,26 @@
                     <Label Content="Key: "/>
                     <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Key, StringFormat='0x{0:X8}'}"/>
                 </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Offset: "/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Offset, StringFormat='0x{0:X8}'}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="FileType: "/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.FileType, StringFormat='0x{0:X2}'}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="ZIP: "/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.ZIP}"/>
+                </StackPanel>
+                <Label Content="{Binding Path=BigFileFile.FileReferences.Length}"/>
+                <ListBox x:Name="listFileReferences" ItemsSource="{Binding Path=BigFileFile.FileReferences}" ScrollViewer.HorizontalScrollBarVisibility="Visible">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path=FileInfo.Key, StringFormat=0x{0:X8}}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </StackPanel>
         </GroupBox>
 

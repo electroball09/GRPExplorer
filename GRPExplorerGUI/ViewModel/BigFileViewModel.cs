@@ -15,9 +15,15 @@ namespace GRPExplorerGUI.ViewModel
     public class BigFileViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+        static Action<PropertyChangedEventHandler, BigFileViewModel, string> propChangedAction = 
+            (ev, vm, prop) => 
+            {
+                //MessageBox.Show("wat lol");
+                ev?.Invoke(vm, new PropertyChangedEventArgs(prop));
+            };
         protected void NotifyPropertyChanged([CallerMemberName] string prop = "")
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+            Application.Current.Dispatcher.Invoke(propChangedAction, PropertyChanged, this, prop);
         }
 
         private BigFile bigFile;
@@ -32,14 +38,29 @@ namespace GRPExplorerGUI.ViewModel
                 BigFileType = "lol";
             }
         }
+
+        private BigFileOperationStatus currentOperation;
+        public BigFileOperationStatus CurrentOperationStatus
+        {
+            get { return currentOperation; }
+            private set { currentOperation = value;  NotifyPropertyChanged(); }
+        }
         
         public float LoadProgress
         {
             get
             {
-                if (bigFile == null)
+                if (bigFile == null || currentOperation == null)
                     return 0f;
-                return bigFile.LoadStatus.Progress * 100;
+                return currentOperation.Progress;
+            }
+        }
+
+        public bool IsOperationHappening
+        {
+            get
+            {
+                return currentOperation != null;
             }
         }
 
@@ -56,12 +77,19 @@ namespace GRPExplorerGUI.ViewModel
         }
 
         private BackgroundWorker bgworker = new BackgroundWorker();
+        private BackgroundWorker extraDataWorker = new BackgroundWorker();
         private ILogProxy log;
         
         public BigFileViewModel()
         {
             bgworker.DoWork += Bgworker_DoWork;
+            extraDataWorker.DoWork += ExtraDataWorker_DoWork;
             log = LogManager.GetLogProxy("BigFileViewModel");
+        }
+
+        private void ExtraDataWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            bigFile?.LoadExtraData(e.Argument as BigFileOperationStatus);
         }
 
         private void Bgworker_DoWork(object sender, DoWorkEventArgs e)
@@ -72,12 +100,9 @@ namespace GRPExplorerGUI.ViewModel
                 bigFile.LoadStatus.OnProgressUpdated +=
                     (BigFileOperationStatus status) =>
                         {
-                            Action action = () =>
-                            {
-                                NotifyPropertyChanged("LoadProgress");
-                            };
-                            Application.Current.Dispatcher.BeginInvoke(action);
+                            NotifyPropertyChanged("LoadProgress");
                         };
+                CurrentOperationStatus = bigFile.LoadStatus;
                 bigFile.LoadFromDisk();
                 BigFile = bigFile;
             }
@@ -94,6 +119,17 @@ namespace GRPExplorerGUI.ViewModel
                 return;
 
             bgworker.RunWorkerAsync();
+        }
+
+        public void LoadExtraData()
+        {
+            if (extraDataWorker.IsBusy)
+                return;
+
+            BigFileExtraDataLoadOperationStatus status = new BigFileExtraDataLoadOperationStatus();
+            CurrentOperationStatus = status;
+
+            extraDataWorker.RunWorkerAsync(status);
         }
     }
 }

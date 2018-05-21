@@ -14,9 +14,9 @@
                   ScrollViewer.CanContentScroll="True"
                   Width="300" MinHeight="300" MaxHeight="300" HorizontalAlignment="Left" VerticalAlignment="Top">
             <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate  ItemsSource="{Binding Path=SubFolders}">
+                <HierarchicalDataTemplate ItemsSource="{Binding Path=SubFolders}">
                         <StackPanel Orientation="Vertical">
-                            <Label Content="{Binding Path=Name}" Padding="0" Margin="0"/>
+                            <Label x:Name="lblHeader" Content="{Binding Path=Name}" Padding="0" Margin="0"/>
                             <ListBox x:Name="listFiles" ItemsSource="{Binding Path=Files}" 
                                      SelectedItem="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=SelectedFile, Mode=TwoWay}"
                                      LostFocus="listFiles_LostFocus"
@@ -29,9 +29,12 @@
                             </ListBox>
                         </StackPanel>
                         <HierarchicalDataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Path=Files.Count}" Value="0">
-                                <Setter TargetName="listFiles" Property="Visibility" Value="Hidden"/>
-                            </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=Files.Count}" Value="0">
+                            <Setter TargetName="listFiles" Property="Visibility" Value="Hidden"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=IsExpanded}" Value="False">
+                            <Setter TargetName="listFiles" Property="Visibility" Value="Hidden"/>
+                        </DataTrigger>
                         </HierarchicalDataTemplate.Triggers>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
