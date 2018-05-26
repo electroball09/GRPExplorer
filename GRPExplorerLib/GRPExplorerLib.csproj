@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DotNetZip, Version=1.11.0.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetZip.1.11.0\lib\net20\DotNetZip.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,6 +47,7 @@
     <Compile Include="BigFile\BigFileFlags.cs" />
     <Compile Include="BigFile\BigFileMetadata.cs" />
     <Compile Include="BigFile\BigFilePacker.cs" />
+    <Compile Include="BigFile\_BigFilePacker.cs" />
     <Compile Include="BigFile\PackedBigFile.cs" />
     <Compile Include="BigFile\BigFileConst.cs" />
     <Compile Include="BigFile\BigFileFile.cs" />
@@ -75,7 +80,9 @@
     <Compile Include="Util\StructConverter.cs" />
     <Compile Include="Util\TimeUtil.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using GRPExplorerLib.Util;
+using GRPExplorerLib.BigFile.Versions;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -32,6 +33,8 @@ namespace GRPExplorerLib.BigFile
 
         protected BigFileLoadOperationStatus status = new BigFileLoadOperationStatus();
         public BigFileOperationStatus LoadStatus { get { return status; } }
+
+        public abstract IBigFileVersion Version { get; }
         
         public BigFileHeader FileHeader;
         public BigFileFileCountInfo CountInfo;

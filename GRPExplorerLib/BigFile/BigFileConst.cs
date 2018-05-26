@@ -7,6 +7,7 @@ namespace GRPExplorerLib.BigFile
 {
     public class BigFileConst
     {
+        public const string BIGFILE_EXTENSION = ".big";
         public const string GRP_EXPLORER_EXTENSION = ".gex";
         public const string METADATA_FILE_NAME = "metadata" + GRP_EXPLORER_EXTENSION;
         public const string UNPACK_DIR = "Unpack\\";

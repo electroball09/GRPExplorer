@@ -40,6 +40,13 @@ namespace GRPExplorerLib.BigFile
         public UnpackedRenamedFileMapping RenamedMapping { get { return renamedMapping; } }
 
         private IBigFileVersion version;
+        public override IBigFileVersion Version
+        {
+            get
+            {
+                return version;
+            }
+        }
 
         public UnpackedBigFile(DirectoryInfo dir) : base(dir.FullName + "\\")
         {

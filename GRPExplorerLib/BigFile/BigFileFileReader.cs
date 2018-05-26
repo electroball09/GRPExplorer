@@ -6,6 +6,7 @@ using System.IO;
 using System.IO.Compression;
 using GRPExplorerLib.Util;
 using GRPExplorerLib.Logging;
+using Ionic.Zlib;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -71,7 +72,7 @@ namespace GRPExplorerLib.BigFile
             }
             else
             {
-                stream.Read(sizeBuffer, 0, 10); //4 bytes for on disk size, 4 bytes for decompressed size, 2 bytes for zlib header
+                stream.Read(sizeBuffer, 0, 8); //4 bytes for on disk size, 4 bytes for decompressed size
 
                 if ((flags & BigFileFlags.Decompress) != 0)
                     size = BitConverter.ToInt32(sizeBuffer, 4);
@@ -109,9 +110,9 @@ namespace GRPExplorerLib.BigFile
             {
                 if ((flags & BigFileFlags.Decompress) != 0)
                 {
-                    using (DeflateStream ds = new DeflateStream(stream, CompressionMode.Decompress, true))
+                    using (ZlibStream zs = new ZlibStream(stream, Ionic.Zlib.CompressionMode.Decompress, true))
                     {
-                        ds.Read(buffer, 0, bytesSize); //deflatestream reads decompressed bytes
+                        zs.Read(buffer, 0, bytesSize);
                     }
                 }
                 else

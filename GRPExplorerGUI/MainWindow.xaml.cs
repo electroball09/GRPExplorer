@@ -120,5 +120,21 @@ namespace GRPExplorerGUI
 
             BigFileUnpackOperationStatus status = unpacker.UnpackBigfile(options);
         }
+
+        BigFilePacker packer;
+        private void btnPackBigFile_Click(object sender, RoutedEventArgs e)
+        {
+            BigFilePackOptions options = new BigFilePackOptions
+            {
+                Directory = new System.IO.DirectoryInfo(txtUnpackDir.Text),
+                Flags = BigFileFlags.Compress | BigFileFlags.UseThreading,
+                Threads = 4,
+                BigFileName = "Yeti"
+            };
+
+            packer = new BigFilePacker(bigFile);
+
+            BigFilePackOperationStatus status = packer.PackBigFile(options);
+        }
     }
 }

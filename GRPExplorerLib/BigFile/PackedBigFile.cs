@@ -35,6 +35,13 @@ namespace GRPExplorerLib.BigFile
         private ILogProxy log = LogManager.GetLogProxy("PackedBigFile");
 
         private IBigFileVersion version;
+        public override IBigFileVersion Version
+        {
+            get
+            {
+                return version;
+            }
+        }
 
         public PackedBigFile(FileInfo _fileInfo) : base(_fileInfo.FullName)
         {

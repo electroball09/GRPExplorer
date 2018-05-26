@@ -92,7 +92,7 @@ namespace GRPExplorerLib.BigFile
             public int progress;
         }
 
-        public const int NUM_THREADED_TASKS = 16;
+        public const int MAX_UNPACK_THREADS = 16;
 
         private ILogProxy log = LogManager.GetLogProxy("BigFileUnpacker");
 
@@ -104,12 +104,12 @@ namespace GRPExplorerLib.BigFile
 
         private readonly string formatted_diag_msg = string.Format("     {0,6}   {1,6}   {2,6}   {3,6}", "Thread", "Time", "Index", "Count");
 
-        private UnpackThreadInfo[] unpackThreads = new UnpackThreadInfo[NUM_THREADED_TASKS];
+        private UnpackThreadInfo[] unpackThreads = new UnpackThreadInfo[MAX_UNPACK_THREADS];
         public bool IsUnpacking
         {
             get
             {
-                for (int i = 0; i < NUM_THREADED_TASKS; i++)
+                for (int i = 0; i < MAX_UNPACK_THREADS; i++)
                 {
                     if (unpackThreads[i] != null && unpackThreads[i].isUnpacking)
                         return true;
@@ -119,20 +119,18 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
-
         public BigFileUnpacker(PackedBigFile _bigFile)
         {
             bigFile = _bigFile;
         }
-
-        //public void UnpackBigfile(DirectoryInfo dir, BigFileFlags flags)
+        
         public BigFileUnpackOperationStatus UnpackBigfile(BigFileUnpackOptions options)
         {
-            if (options.Threads > NUM_THREADED_TASKS)
+            if (options.Threads > MAX_UNPACK_THREADS)
             {
-                log.Error(string.Format("Can't have more threads than the max! ({0} > {1})", options.Threads, NUM_THREADED_TASKS));
+                log.Error(string.Format("Can't have more threads than the max! ({0} > {1})", options.Threads, MAX_UNPACK_THREADS));
                 log.Error("    Threads will be clamped to the max!");
-                options.Threads = NUM_THREADED_TASKS;
+                options.Threads = MAX_UNPACK_THREADS;
             }
             
             log.Info("Unpacking a bigfile to directory: \"" + options.Directory.FullName + "\"");
@@ -221,7 +219,7 @@ namespace GRPExplorerLib.BigFile
 
         private void verifyAndResetThreads(int threads)
         {
-            for (int i = 0; i < NUM_THREADED_TASKS; i++)
+            for (int i = 0; i < MAX_UNPACK_THREADS; i++)
             {
                 if (unpackThreads[i] == null)
                 {
@@ -235,7 +233,7 @@ namespace GRPExplorerLib.BigFile
                     }
                 }
 
-                unpackThreads[i].options = new BigFileUnpackOptions();
+                unpackThreads[i].options = default(BigFileUnpackOptions);
                 unpackThreads[i].bigFile = null;
                 unpackThreads[i].fileMapping = null;
                 unpackThreads[i].startIndex = 0;
@@ -260,6 +258,7 @@ namespace GRPExplorerLib.BigFile
                 BigFileFile currFile = null;
                 for (int i = info.startIndex; i < info.startIndex + info.count; i++)
                 {
+                    info.progress = i;
                     currFile = bigFile.MappingData.FilesList[i];
                     if (string.IsNullOrEmpty(currFile.Name))
                     {
@@ -273,7 +272,7 @@ namespace GRPExplorerLib.BigFile
                     int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, info.options.Flags);
 
                     //********************************************//
-                    //DON'T FUCKING FORGET THE UNPACK SUBDIRECTORY//
+                    //DON'T FORGET THE FUCKING UNPACK SUBDIRECTORY//
                     //********************************************//
                     string fileName = info.options.Directory.FullName + "\\" + BigFileConst.UNPACK_DIR + "\\" + info.fileMapping[currFile.FileInfo.Key].FileName;
 
@@ -299,7 +298,7 @@ namespace GRPExplorerLib.BigFile
             log.Info("Unpack thread (ID:" + info.threadID + ") finished work!");
             info.isUnpacking = false;
             info.stopwatch.Stop();
-
+            
             info.OnWorkDoneCallback.Invoke(info);
         }
 
@@ -310,7 +309,7 @@ namespace GRPExplorerLib.BigFile
                 log.Info("All unpacking threads finished their work!");
                 log.Info(" > Time taken: ");
                 log.Info(formatted_diag_msg);
-                for (int i = 0; i < NUM_THREADED_TASKS; i++)
+                for (int i = 0; i < MAX_UNPACK_THREADS; i++)
                 {
                     if (unpackThreads[i] != null)
                     {
