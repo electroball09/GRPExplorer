@@ -251,7 +251,7 @@ namespace GRPExplorerLib.BigFile
             info.stopwatch.Reset();
             info.stopwatch.Start();
             
-            int dataOffset = info.bigFile.YetiHeaderFile.CalculateDataOffset(ref info.bigFile.FileHeader, ref info.bigFile.CountInfo);
+            int dataOffset = info.bigFile.FileUtil.CalculateDataOffset(ref info.bigFile.SegmentHeader, ref info.bigFile.FileHeader);
             byte[] buffer = info.buffers[4];
             using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
             {
@@ -327,8 +327,12 @@ namespace GRPExplorerLib.BigFile
             FileInfo metadataFileInfo = new FileInfo(dir.FullName + "\\" + BigFileConst.METADATA_FILE_NAME);
             using (FileStream fs = File.Create(metadataFileInfo.FullName))
             {
-                FileBuffer bytesToWrite = bigfile.YetiHeaderFile.ReadFileAndFolderMetadataRaw(ref bigFile.FileHeader, ref bigFile.CountInfo);
-                fs.Write(bytesToWrite.bytes, 0, bytesToWrite.size);
+                //FileBuffer bytesToWrite = bigfile.Segment.ReadFileAndFolderMetadataRaw(ref bigFile.SegmentHeader, ref bigFile.FileHeader);
+                bigFile.Segment.WriteSegmentHeader(fs, ref bigFile.SegmentHeader);
+                bigFile.Header.WriteHeader(fs, ref bigFile.FileHeader);
+                bigFile.FilesAndFolders.WriteFileInfos(fs, bigFile.RawFileInfos);
+                bigFile.FilesAndFolders.WriteFolderInfos(fs, bigFile.RawFolderInfos);
+                //fs.Write(bytesToWrite.bytes, 0, bytesToWrite.size);
             }
             stopwatch.Stop();
             diagData.GenerateYetiMetadataFile = stopwatch.ElapsedMilliseconds;

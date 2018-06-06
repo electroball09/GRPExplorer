@@ -18,14 +18,27 @@ namespace GRPExplorerLib.BigFile.Versions
             }
         }
 
+        public string VersionName
+        {
+            get
+            {
+                return "GRP";
+            }
+        }
+
         public IBigFileFileInfo CreateFileInfo()
         {
-            return new BigFileFileInfo_GRP();
+            IBigFileFileInfo newStruct = new BigFileFileInfo_GRP();
+            newStruct.CRC32 = new byte[4];
+            newStruct.Name = new byte[60];
+            return newStruct;
         }
 
         public IBigFileFolderInfo CreateFolderInfo()
         {
-            return new BigFileFolderInfo_GRP();
+            IBigFileFolderInfo newStruct = new BigFileFolderInfo_GRP();
+            newStruct.Name = new byte[54];
+            return newStruct;
         }
     }
 

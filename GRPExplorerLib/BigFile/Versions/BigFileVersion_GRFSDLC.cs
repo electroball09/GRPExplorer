@@ -18,14 +18,27 @@ namespace GRPExplorerLib.BigFile.Versions
             }
         }
 
+        public string VersionName
+        {
+            get
+            {
+                return "GRFS DLC";
+            }
+        }
+
         public IBigFileFileInfo CreateFileInfo()
         {
-            return new BigFileFileInfo_GRFSDLC();
+            IBigFileFileInfo newStruct = new BigFileFileInfo_GRFSDLC();
+            newStruct.CRC32 = new byte[4];
+            newStruct.Name = new byte[60];
+            return newStruct;
         }
 
         public IBigFileFolderInfo CreateFolderInfo()
         {
-            return new BigFileFolderInfo_GRFSDLC();
+            IBigFileFolderInfo newStruct = new BigFileFolderInfo_GRFSDLC();
+            newStruct.Name = new byte[54];
+            return newStruct;
         }
     }
 

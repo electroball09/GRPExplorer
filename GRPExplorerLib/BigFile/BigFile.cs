@@ -14,8 +14,12 @@ namespace GRPExplorerLib.BigFile
 
         public abstract FileInfo MetadataFileInfo { get; }
 
-        protected YetiHeaderFile yetiHeaderFile;
-        public YetiHeaderFile YetiHeaderFile { get { return yetiHeaderFile; } }
+        protected BigFileSegment segment;
+        public BigFileSegment Segment { get { return segment; } }
+        protected BigFileHeader header;
+        public BigFileHeader Header { get { return header; } }
+        protected BigFileFilesAndFolders filesAndFolders;
+        public BigFileFilesAndFolders FilesAndFolders { get { return filesAndFolders; } }
         protected BigFileUtil fileUtil;
         public BigFileUtil FileUtil { get { return fileUtil; } }
         
@@ -35,15 +39,22 @@ namespace GRPExplorerLib.BigFile
         public BigFileOperationStatus LoadStatus { get { return status; } }
 
         public abstract IBigFileVersion Version { get; }
+
+        protected IBigFileFileInfo[] rawFileInfos;
+        public IBigFileFileInfo[] RawFileInfos { get { return rawFileInfos; } }
+        protected IBigFileFolderInfo[] rawFolderInfos;
+        public IBigFileFolderInfo[] RawFolderInfos { get { return rawFolderInfos; } }
         
-        public BigFileHeader FileHeader;
-        public BigFileFileCountInfo CountInfo;
+        public BigFileSegmentHeader SegmentHeader;
+        public BigFileHeaderStruct FileHeader;
 
         internal BigFile(string _fileOrDirectory)
         {
             fileOrDirectory = _fileOrDirectory;
 
-            yetiHeaderFile = new YetiHeaderFile(MetadataFileInfo);
+            segment = new BigFileSegment(MetadataFileInfo);
+            header = new BigFileHeader(MetadataFileInfo);
+            filesAndFolders = new BigFileFilesAndFolders(MetadataFileInfo);
             fileUtil = new BigFileUtil();
         }
 

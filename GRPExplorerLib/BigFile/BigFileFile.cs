@@ -43,6 +43,7 @@ namespace GRPExplorerLib.BigFile
                     fullName = folder.Name + "/" + fullName;
                     folder = folder.ParentFolder;
                 }
+                fullName += "/";
                 return fullName;
             }
         }

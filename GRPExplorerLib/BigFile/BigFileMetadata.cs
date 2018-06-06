@@ -9,13 +9,13 @@ using GRPExplorerLib.Logging;
 namespace GRPExplorerLib.BigFile
 {
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct BigFileHeader //: IBigFileStruct 
+    public struct BigFileSegmentHeader //: IBigFileStruct 
     {
         public int StructSize { get { return Marshal.SizeOf(this); } }
 
         public void DebugLog(ILogProxy log)
         {
-            log.Debug("> BigFileHeader Dump: ");
+            log.Debug("> BigFileSegmentHeader Dump: ");
             log.Debug("    Signature: " + Encoding.Default.GetString(Signature));
             log.Debug("    Unknown_01: " + Unknown_01);
             log.Debug("    Unknown_02: " + Unknown_02);
@@ -57,13 +57,13 @@ namespace GRPExplorerLib.BigFile
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
-    public struct BigFileFileCountInfo
+    public struct BigFileHeaderStruct
     {
         public int StructSize { get { return Marshal.SizeOf(this); } }
 
         internal void DebugLog(ILogProxy log)
         {
-            log.Debug("> BigFileFileCountInfo Dump:");
+            log.Debug("> BigFileHeader Dump:");
             log.Debug("    BigFileVersion: " + BigFileVersion);
             log.Debug("       Folders: " + Folders);
             log.Debug("         Files: " + Files);

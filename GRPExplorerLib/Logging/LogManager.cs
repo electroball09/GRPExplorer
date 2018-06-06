@@ -11,8 +11,8 @@ namespace GRPExplorerLib.Logging
         {
             private string prefix = "";
             private IGRPExplorerLibLogInterface logInterface;
-            private bool isSuppressed = false;
-            public bool IsSuppressed { get { return isSuppressed; } set { isSuppressed = value; } }
+            private LogFlags logFlags = LogFlags.All;
+            public LogFlags LogFlags { get { return logFlags; } set { logFlags = value; } }
 
             internal LogProxy(string _prefix, IGRPExplorerLibLogInterface _logInterface)
             {
@@ -22,7 +22,7 @@ namespace GRPExplorerLib.Logging
 
             public void Debug(string msg)
             {
-                if (!isSuppressed && (LogManager.LogFlags & LogFlags.Debug) != 0)
+                if ((logFlags & LogFlags.Debug) != 0 && (LogManager.GlobalLogFlags & LogFlags.Debug) != 0)
                 {
                     if (logInterface == null)
                         LogManager.Debug(prefix + " " + msg);
@@ -31,9 +31,14 @@ namespace GRPExplorerLib.Logging
                 }
             }
 
+            public void Debug(string formattedMsg, params object[] args)
+            {
+                Debug(string.Format(formattedMsg, args));
+            }
+
             public void Info(string msg)
             {
-                if (!isSuppressed && (LogManager.LogFlags & LogFlags.Info) != 0)
+                if ((logFlags & LogFlags.Info) != 0 && (LogManager.GlobalLogFlags & LogFlags.Info) != 0)
                 {
                     if (logInterface == null)
                         LogManager.Info(prefix + " " + msg);
@@ -42,15 +47,25 @@ namespace GRPExplorerLib.Logging
                 }
             }
 
+            public void Info(string formattedMsg, params object[] args)
+            {
+                Info(string.Format(formattedMsg, args));
+            }
+
             public void Error(string msg)
             {
-                if (!isSuppressed && (LogManager.LogFlags & LogFlags.Error) != 0)
+                if ((logFlags & LogFlags.Error) != 0 && (LogManager.GlobalLogFlags & LogFlags.Error) != 0)
                 {
                     if (logInterface == null)
                         LogManager.Error(prefix + " " + msg);
                     else
                         logInterface.Error(prefix + " " + msg);
                 }
+            }
+
+            public void Error(string formattedMsg, params object[] args)
+            {
+                Error(string.Format(formattedMsg, args));
             }
         }
         static Dictionary<string, LogProxy> registeredProxies = new Dictionary<string, LogProxy>();
@@ -67,33 +82,36 @@ namespace GRPExplorerLib.Logging
 
         private static IGRPExplorerLibLogInterface logInterface = new ConsoleLogInterface();
         public static IGRPExplorerLibLogInterface LogInterface { get { return logInterface; } set { logInterface = value; } }
-        private static LogFlags logFlags = LogFlags.Debug | LogFlags.Info | LogFlags.Error;
-        public static LogFlags LogFlags { get { return logFlags; } set { logFlags = value; } }
+        private static LogFlags globalLogFlags = LogFlags.Debug | LogFlags.Info | LogFlags.Error;
+        public static LogFlags GlobalLogFlags { get { return globalLogFlags; } set { globalLogFlags = value; } }
 
         public static void Debug(string msg)
         {
-            if ((logFlags & LogFlags.Debug) != 0)
+            if ((globalLogFlags & LogFlags.Debug) != 0)
                 logInterface.Debug(msg);
         }
 
         public static void Info(string msg)
         {
-            if ((logFlags & LogFlags.Info) != 0)
+            if ((globalLogFlags & LogFlags.Info) != 0)
                 logInterface.Info(msg);
         }
 
         public static void Error(string msg)
         {
-            if ((logFlags & LogFlags.Error) != 0)
+            if ((globalLogFlags & LogFlags.Error) != 0)
                 logInterface.Error(msg);
         }
     }
 
     public interface ILogProxy
     {
-        bool IsSuppressed { get; set; }
+        LogFlags LogFlags { get; set; }
         void Debug(string msg);
+        void Debug(string formattedMsg, params object[] args);
         void Info(string msg);
+        void Info(string formattedMsg, params object[] args);
         void Error(string msg);
+        void Error(string formattedMsg, params object[] args);
     }
 }

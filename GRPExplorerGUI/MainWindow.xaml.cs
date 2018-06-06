@@ -41,7 +41,7 @@ namespace GRPExplorerGUI
             logInterface = logModel.LogProxy;
             logView.Log = logModel;
             LogManager.LogInterface = logInterface;
-            LogManager.LogFlags = LogFlags.Info | LogFlags.Error;
+            LogManager.GlobalLogFlags = LogFlags.Info | LogFlags.Error;
         }
 
         private void BtnFindKey_Click(object sender, RoutedEventArgs e)
@@ -128,9 +128,12 @@ namespace GRPExplorerGUI
             {
                 Directory = new System.IO.DirectoryInfo(txtUnpackDir.Text),
                 Flags = BigFileFlags.Compress | BigFileFlags.UseThreading,
-                Threads = 4,
-                BigFileName = "Yeti"
+                Threads = (int)sldThreads.Value,
+                BigFileName = "Yeti",
+                DeleteChunks = true
             };
+
+            logInterface.Info("[GUI] Threads: " + options.Threads);
 
             packer = new BigFilePacker(bigFile);
 

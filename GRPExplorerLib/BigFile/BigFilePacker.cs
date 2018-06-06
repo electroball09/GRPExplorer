@@ -19,6 +19,7 @@ namespace GRPExplorerLib.BigFile
         public string BigFileName;
         public BigFileFlags Flags;
         public int Threads;
+        public bool DeleteChunks;
 
         internal void Log(ILogProxy log)
         {
@@ -72,11 +73,19 @@ namespace GRPExplorerLib.BigFile
             public int count;
             public IOBuffers IOBuffers = new IOBuffers();
             public bool isPacking = false;
-            public Stopwatch stopwatch = new Stopwatch();
+            public DiagTools diag = new DiagTools();
             public BigFile bigFile;
             public Action<BigFilePackInfo> OnCompleted;
+            public int filesChunked = 0;
 
-            public int progress;
+            public int progress = 0;
+        }
+
+        private struct ChunkedFileMetadata
+        {
+            public int Number;
+            public int Key;
+            public int Offset;
         }
 
         public const int MAX_PACK_THREADS = 16;
@@ -120,6 +129,10 @@ namespace GRPExplorerLib.BigFile
             }
 
             log.Info("Packing a big file to directory: " + options.Directory.FullName);
+
+            //MAKE SURE DECOMPRESS FLAG IS SET
+            // otherwise we run the risk of not decompressing files when we need to
+            options.Flags |= BigFileFlags.Decompress; 
 
             options.Log(log);
 
@@ -165,9 +178,9 @@ namespace GRPExplorerLib.BigFile
                 packInfos[i].startIndex = i * dividedCount;
                 packInfos[i].count = dividedCount;
                 packInfos[i].bigFile = bigFile;
-                packInfos[i].OnCompleted = internal_OnPackFinished;
             }
             packInfos[options.Threads - 1].count += dividedRemainder;
+            packInfos[options.Threads - 1].OnCompleted = internal_OnPackFinished; //the last thread gets the job of stitching together the chunks
 
             for (int i = 0; i < options.Threads; i++)
             {
@@ -181,26 +194,27 @@ namespace GRPExplorerLib.BigFile
         private void internal_GenBigFileChunk(object state)
         {
             BigFilePackInfo info = state as BigFilePackInfo;
+
             info.isPacking = true;
+            info.diag.StartStopwatch();
 
+            string tempDir = Environment.CurrentDirectory + BigFileConst.PACK_STAGING_DIR;
+            Directory.CreateDirectory(tempDir);
+            string chunkFileName = tempDir + info.Options.BigFileName + ".chunk" + info.ThreadID.ToString();
+            string metadataFilename = tempDir + info.Options.BigFileName + ".meta" + info.ThreadID.ToString();
 
-            string targetFileName = info.Options.Directory.FullName + @"\" + info.Options.BigFileName + ".chunk" + info.ThreadID.ToString();
-            string metadataFilename = info.Options.Directory.FullName + @"\" + info.Options.BigFileName + ".meta" + info.ThreadID.ToString();
-
-            log.Info("Generating bigfile chunk: " + targetFileName);
-
-            using (FileStream chunkFS = new FileStream(targetFileName, FileMode.Create, FileAccess.Write))
+            log.Info("Generating bigfile chunk: " + chunkFileName);
+            
+            using (FileStream chunkFS = new FileStream(chunkFileName, FileMode.Create, FileAccess.Write))
             using (FileStream metaFS = new FileStream(metadataFilename, FileMode.Create, FileAccess.Write))
             {
-                //prefix metadata file with number of files
-                byte[] countBytes = BitConverter.GetBytes(info.count);
-                metaFS.Write(countBytes, 0, 4);
+                //fill 8 bytes to be filled with number of files chunked and final size later
+                metaFS.Write(BitConverter.GetBytes((long)0), 0, 8);
 
                 BigFileFile[] filesToWrite = new BigFileFile[info.count];
                 Array.Copy(bigFile.MappingData.FilesList, info.startIndex, filesToWrite, 0, info.count);
                 
                 BigFileFile currFile = null;
-                IBigFileFileInfo fileInfo;
                 byte[] currentBuffer;
 
                 int index = info.startIndex;
@@ -217,20 +231,12 @@ namespace GRPExplorerLib.BigFile
 
                     currentBuffer = info.IOBuffers[size];
 
-                    fileInfo = bigFile.Version.CreateFileInfo();
-                    fileInfo.Key = currFile.FileInfo.Key;
-                    fileInfo.Name = currFile.FileInfo.Name;
-                    fileInfo.FileNumber = index;
-                    fileInfo.FileType = currFile.FileInfo.FileType;
-                    fileInfo.Flags = currFile.FileInfo.Flags;
-                    fileInfo.Folder = currFile.FileInfo.Folder;
-                    fileInfo.Unknown_01 = currFile.FileInfo.Unknown_01;
-                    fileInfo.Unknown_03 = currFile.FileInfo.Unknown_03;
-                    fileInfo.TimeStamp = currFile.FileInfo.TimeStamp;
-                    fileInfo.ZIP = currFile.FileInfo.ZIP;
-                    fileInfo.Offset = (int)chunkFS.Position;
+                    //write the file number, key, and offset to metadata file
+                    metaFS.Write(BitConverter.GetBytes(index), 0, 4);
+                    metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.Key), 0, 4);
+                    metaFS.Write(BitConverter.GetBytes((int)chunkFS.Position), 0, 4);
 
-                    if (fileInfo.ZIP == 1 && (info.Options.Flags & BigFileFlags.Compress) != 0)
+                    if (currFile.FileInfo.ZIP == 1 && (info.Options.Flags & BigFileFlags.Compress) != 0)
                     {
                         int sizePos = (int)chunkFS.Position;
                         chunkFS.Write(info.IOBuffers[8], 0, 8); //write 8 bytes of garbage to fill the space for decompressed and compressed size
@@ -238,8 +244,17 @@ namespace GRPExplorerLib.BigFile
                         {
                             zs.Write(info.IOBuffers[size], 0, size);
                         }
+
                         int newPos = (int)chunkFS.Position;
-                        int compressedSize = newPos - sizePos - 8;
+                        int remainder = 8 - ((newPos - sizePos) % 8);
+
+                        if (remainder != 8)
+                            for (int i = 0; i < remainder; i++)
+                                chunkFS.WriteByte(0x00);
+
+                        int compressedSize = newPos - sizePos - 4;
+
+                        newPos = (int)chunkFS.Position;
 
                         //go back to the file offset and write the compressed and decompressed sizes
                         chunkFS.Seek(sizePos, SeekOrigin.Begin);
@@ -249,25 +264,195 @@ namespace GRPExplorerLib.BigFile
                     }
                     else
                     {
+                        int sizePos = (int)chunkFS.Position;
                         chunkFS.Write(BitConverter.GetBytes(size), 0, 4);
                         chunkFS.Write(info.IOBuffers[size], 0, size);
+                        int remainder = 8 - (((int)chunkFS.Position - sizePos) % 8);
+                        if (remainder != 8)
+                            for (int i = 0; i < remainder; i++)
+                                chunkFS.WriteByte(0x00);
                     }
 
-                    byte[] infoBuffer = info.IOBuffers[fileInfo.StructSize];
-                    fileInfo.ToBytes(infoBuffer);
-
-                    metaFS.Write(infoBuffer, 0, fileInfo.StructSize);
-
+                    info.filesChunked++;
                     index++;
                 }
+
+                //write number of files chunked and final file size
+                metaFS.Seek(0, SeekOrigin.Begin);
+                metaFS.Write(BitConverter.GetBytes(info.filesChunked), 0, 4);
+                metaFS.Write(BitConverter.GetBytes(chunkFS.Length), 0, 4);
             }
+
+            info.isPacking = false;
+            info.diag.StopStopwatch();
+
+            log.Info("Thread (ID: {0}) finished chunking work, time: {1,5}s", info.ThreadID, info.diag.StopwatchTime / 1000);
+
+            if (info.OnCompleted != null)
+                info.OnCompleted.Invoke(info);
         }
 
         private void internal_OnPackFinished(BigFilePackInfo info)
         {
-            log.Info("Thread finished: " + info.ThreadID);
-        }
+            while (IsPacking)
+                Thread.Sleep(500); //wait for all threads to finish
 
+            log.Info("All chunking threads finished their work!");
+            log.Info(" >Chunking result:");
+            log.Info("   {0,6}   {1,6}   {2,6}   {3,6}", "Thread", "Time", "Start", "Count");
+            for (int i = 0; i < info.Options.Threads; i++)
+                log.Info("   {0,6}        {1,4}s  {2,6}   {3,6}", packInfos[i].ThreadID, packInfos[i].diag.StopwatchTime / 1000, packInfos[i].startIndex, packInfos[i].count);
+
+            log.Info("Starting packaging");
+
+            string targetFileName = info.Options.Directory.FullName + @"\" + info.Options.BigFileName + BigFileConst.BIGFILE_EXTENSION;
+            FileInfo targetFileInfo = new FileInfo(targetFileName);
+            if (targetFileInfo.Exists)
+            {
+                WinMessageBoxResult overwriteResult = WinMessageBox.Show("The file\n" + targetFileName + "\n already exists.\n\nOverwrite?", "File already exists", WinMessageBoxFlags.btnYesNo);
+                if (overwriteResult != WinMessageBoxResult.Yes)
+                {
+                    log.Error("Target file already exists and the user chose not to overwrite!");
+                    if (info.Options.DeleteChunks)
+                    {
+                        log.Info("Deleting generated chunks!");
+
+                        for (int threadID = 0; threadID < info.Options.Threads; threadID++)
+                        {
+                            string metadataFilename = Environment.CurrentDirectory + BigFileConst.PACK_STAGING_DIR + info.Options.BigFileName + ".meta" + packInfos[threadID].ThreadID.ToString();
+                            string chunkFileName = Environment.CurrentDirectory + BigFileConst.PACK_STAGING_DIR + info.Options.BigFileName + ".chunk" + packInfos[threadID].ThreadID.ToString();
+                            File.Delete(metadataFilename);
+                            File.Delete(chunkFileName);
+                            log.Info("Deleted metadata file {0}", metadataFilename);
+                            log.Info("Deleted chunk file {0}", chunkFileName);
+                        }
+                    }
+
+                    return;
+                }
+            }
+
+            info.diag.StartStopwatch();
+            
+            using (FileStream targetFS = new FileStream(targetFileName, FileMode.Create, FileAccess.Write))
+            {
+                //Dictionary<int, ChunkedFileMetadata> metadataMap = new Dictionary<int, ChunkedFileMetadata>();
+                List<ChunkedFileMetadata> metadataList = new List<ChunkedFileMetadata>();
+                int chunkedFileOffsetInTargetFile = 0;
+                for (int threadID = 0; threadID < info.Options.Threads; threadID++)
+                {
+                    string metadataFilename = Environment.CurrentDirectory + BigFileConst.PACK_STAGING_DIR + info.Options.BigFileName + ".meta" + packInfos[threadID].ThreadID.ToString();
+
+                    log.Info("Collating metadata from file " + metadataFilename);
+                    
+                    //extract the metadata from the metadata files
+                    using (FileStream metaFS = new FileStream(metadataFilename, FileMode.Open, FileAccess.Read))
+                    {
+                        byte[] tmpBuffer = info.IOBuffers[8];
+                        metaFS.Read(tmpBuffer, 0, 8);
+                        int fileCount = BitConverter.ToInt32(tmpBuffer, 0);
+                        int chunkFileSize = BitConverter.ToInt32(tmpBuffer, 4);
+
+                        tmpBuffer = info.IOBuffers[12];
+                        for (int j = 0; j < fileCount; j++)
+                        {
+                            metaFS.Read(tmpBuffer, 0, 12);
+                            ChunkedFileMetadata mdata = new ChunkedFileMetadata()
+                            {
+                                Number = BitConverter.ToInt32(tmpBuffer, 0),
+                                Key = BitConverter.ToInt32(tmpBuffer, 4),
+                                Offset = BitConverter.ToInt32(tmpBuffer, 8) + chunkedFileOffsetInTargetFile
+                            };
+                            metadataList.Add(mdata);
+                        }
+
+                        chunkedFileOffsetInTargetFile += chunkFileSize;
+                    }
+
+                    if (info.Options.DeleteChunks)
+                    {
+                        log.Info("Deleting metadata file...");
+                        File.Delete(metadataFilename);
+                    }
+                }
+
+                log.Info("Metadata collation took {0,4}s", info.diag.StopwatchTime / 1000);
+                info.diag.StartStopwatch();
+                
+                //write the segment header to the target bigfile
+                log.Info("Writing segment header to new bigfile...");
+                info.bigFile.Segment.WriteSegmentHeader(targetFS, ref info.bigFile.SegmentHeader);
+                log.Info("Segment header written!");
+
+                //create a new header with the number of files we're packing
+                log.Info("Writing file header to new bigfile...");
+                BigFileHeaderStruct header = new BigFileHeaderStruct()
+                {
+                    Files = metadataList.Count,
+                    Folders = (short)info.bigFile.RawFolderInfos.Length, //oh boy
+                    BigFileVersion = info.bigFile.Version.Identifier,
+                    Unknown_02 = info.bigFile.FileHeader.Unknown_02,
+                };
+                header.DebugLog(log);
+                info.bigFile.Header.WriteHeader(targetFS, ref header);
+                log.Info("File header written!");
+
+                //create a list of file infos to write, copying all but the offset and file number from the original file info
+                log.Info("Creating new file info list...");
+                IBigFileFileInfo[] newFileInfos = new IBigFileFileInfo[metadataList.Count];
+                for (int i = 0; i < metadataList.Count; i++)
+                {
+                    newFileInfos[i] = info.bigFile.Version.CreateFileInfo();
+                    info.bigFile.MappingData[metadataList[i].Key].FileInfo.Copy(newFileInfos[i]);
+                    newFileInfos[i].Offset = metadataList[i].Offset / 8;
+                    newFileInfos[i].FileNumber = metadataList[i].Number;
+                }
+                log.Info("New file info list created!");
+
+                log.Info("Writing file and folder infos to new bigfile...");
+                //write file infos to file
+                info.bigFile.FilesAndFolders.WriteFileInfos(targetFS, newFileInfos);
+                //write folder infos to file
+                info.bigFile.FilesAndFolders.WriteFolderInfos(targetFS, info.bigFile.RawFolderInfos);
+                log.Info("File and folder infos written!");
+
+                log.Info("File metadata generation took {0,4}s", info.diag.StopwatchTime / 1000);
+                info.diag.StartStopwatch();
+
+                //copy chunk file data to target bigfile
+                for (int threadID = 0; threadID < info.Options.Threads; threadID++)
+                {
+                    string chunkFileName = Environment.CurrentDirectory + BigFileConst.PACK_STAGING_DIR + info.Options.BigFileName + ".chunk" + packInfos[threadID].ThreadID.ToString();
+
+                    log.Info("Copying chunk data from chunk {0}", chunkFileName);
+                    log.Info(" Current offset: {0:X8}", targetFS.Position);
+
+                    byte[] buffer = info.IOBuffers[IOBuffers.MB * 36];
+                    using (FileStream chunkFS = new FileStream(chunkFileName, FileMode.Open, FileAccess.Read))
+                    {
+                        int readSize = -1;
+                        while ((readSize = chunkFS.Read(buffer, 0, IOBuffers.MB * 36)) != 0)
+                        {
+                            
+                             targetFS.Write(buffer, 0, readSize);
+                        }
+                    }
+
+                    log.Info("Chunk data copied!  Current offset: {0:X8}", targetFS.Position);
+
+                    if (info.Options.DeleteChunks)
+                    {
+                        log.Info("Deleting chunk...");
+                        File.Delete(chunkFileName);
+                    }
+                }
+
+                log.Info("All chunk data written!");
+                log.Info("Chunk data copying time taken: {0,4}s", info.diag.StopwatchTime / 1000);
+                log.Info("Bigfile packing finished!");
+            }
+        }
+        
         private void VerifyAndResetPackInfos(int threads)
         {
             for (int i = 0; i < MAX_PACK_THREADS; i++)
@@ -286,6 +471,7 @@ namespace GRPExplorerLib.BigFile
                 packInfos[i].Options = default(BigFilePackOptions);
                 packInfos[i].bigFile = null;
                 packInfos[i].OnCompleted = null;
+                packInfos[i].filesChunked = 0;
             }
         }
     }

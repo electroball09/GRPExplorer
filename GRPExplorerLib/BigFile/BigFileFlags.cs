@@ -12,6 +12,5 @@ namespace GRPExplorerLib.BigFile
         UseThreading = 0x1,
         Compress = 0x2,
         Decompress = 0x4,
-
     }
 }

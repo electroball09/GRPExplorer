@@ -242,7 +242,7 @@ namespace GRPExplorerLib.BigFile
             PackThreadInfo info = obj as PackThreadInfo;
             info.isPacking = true;
 
-            int dataOffset = info.bigFile.YetiHeaderFile.CalculateDataOffset(ref info.bigFile.FileHeader, ref info.bigFile.CountInfo);
+            int dataOffset = info.bigFile.FileUtil.CalculateDataOffset(ref info.bigFile.SegmentHeader, ref info.bigFile.FileHeader);
             using (FileStream fs = File.OpenWrite(info.targetFile.FullName))
             {
                 BigFileFile currFile = null;

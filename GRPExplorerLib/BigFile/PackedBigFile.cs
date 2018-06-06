@@ -61,30 +61,30 @@ namespace GRPExplorerLib.BigFile
 
             log.Info("Loading big file into memory: " + fileInfo.FullName);
 
-            FileHeader = yetiHeaderFile.ReadHeader();
-            CountInfo = yetiHeaderFile.ReadFileCountInfo(ref FileHeader);
+            SegmentHeader = segment.ReadSegmentHeader();
+            FileHeader = header.ReadHeader(ref SegmentHeader);
 
             log.Info("Header and count info read");
 
-            log.Info(string.Format("Version: {0:X4}", CountInfo.BigFileVersion));
+            log.Info(string.Format("Version: {0:X4}", FileHeader.BigFileVersion));
 
-            version = VersionRegistry.GetVersion(CountInfo.BigFileVersion);
+            version = BigFileVersions.GetVersion(FileHeader.BigFileVersion);
 
             status.UpdateProgress(0.2f);
-
-            yetiHeaderFile.BigFileVersion = version;
+            
             fileUtil.BigFileVersion = version;
+            filesAndFolders.Version = version;
 
-            IBigFileFolderInfo[] folders = yetiHeaderFile.ReadFolderInfos(ref FileHeader, ref CountInfo);
-            IBigFileFileInfo[] files = yetiHeaderFile.ReadFileInfos(ref FileHeader, ref CountInfo);
+            rawFolderInfos = filesAndFolders.ReadFolderInfos(ref SegmentHeader, ref FileHeader);
+            rawFileInfos = filesAndFolders.ReadFileInfos(ref SegmentHeader, ref FileHeader);
 
             log.Info("Creating folder tree and file mappings...");
 
             status.UpdateProgress(0.4f);
 
-            rootFolder = fileUtil.CreateRootFolderTree(folders);
+            rootFolder = fileUtil.CreateRootFolderTree(rawFolderInfos);
             status.UpdateProgress(0.6f);
-            mappingData = fileUtil.CreateFileMappingData(rootFolder, files);
+            mappingData = fileUtil.CreateFileMappingData(rootFolder, rawFileInfos);
             status.UpdateProgress(0.8f);
             fileUtil.MapFilesToFolders(rootFolder, mappingData);
             status.UpdateProgress(1f);

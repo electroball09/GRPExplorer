@@ -59,7 +59,7 @@ namespace GRPExplorerLib.BigFile
                 return -1;
             }
 
-            int dataOffset = packedBigFile.YetiHeaderFile.CalculateDataOffset(ref packedBigFile.FileHeader, ref packedBigFile.CountInfo);
+            int dataOffset = packedBigFile.FileUtil.CalculateDataOffset(ref packedBigFile.SegmentHeader, ref packedBigFile.FileHeader);
 
             stream.Seek((uint)dataOffset + (uint)(file.FileInfo.Offset * 8), SeekOrigin.Begin);
 
@@ -77,7 +77,7 @@ namespace GRPExplorerLib.BigFile
                 if ((flags & BigFileFlags.Decompress) != 0)
                     size = BitConverter.ToInt32(sizeBuffer, 4);
                 else
-                    size = BitConverter.ToInt32(sizeBuffer, 0);
+                    size = BitConverter.ToInt32(sizeBuffer, 0) - 4; //subtract 4 because yeti engine takes the decompressed size with the actual file data
             }
 
             if (size == 0)

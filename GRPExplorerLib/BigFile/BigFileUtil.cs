@@ -43,6 +43,39 @@ namespace GRPExplorerLib.BigFile
         private IBigFileVersion version;
         public IBigFileVersion BigFileVersion { get { return version; } set { version = value; } }
 
+        public int CalculateFolderOffset(ref BigFileSegmentHeader segmentHeader, ref BigFileHeaderStruct header)
+        {
+            return CalculateFolderOffset(this.version, ref segmentHeader, ref header);
+        }
+
+        public static int CalculateFolderOffset(IBigFileVersion version, ref BigFileSegmentHeader segmentHeader, ref BigFileHeaderStruct header)
+        {
+            if (version == null)
+                throw new NullReferenceException("There's no version!  Can't calculate folder offset!");
+
+            IBigFileFileInfo tmpFileInfo = version.CreateFileInfo();
+            int baseSize = (segmentHeader.InfoOffset + header.StructSize) + (header.Files * tmpFileInfo.StructSize);
+            baseSize += baseSize % 8; // align to 8 bytes
+            return baseSize;
+        }
+
+        public int CalculateDataOffset(ref BigFileSegmentHeader segmentHeader, ref BigFileHeaderStruct header)
+        {
+            return CalculateDataOffset(this.version, ref segmentHeader, ref header);
+        }
+
+        public static int CalculateDataOffset(IBigFileVersion version, ref BigFileSegmentHeader segmentHeader, ref BigFileHeaderStruct header)
+        {
+            if (version == null)
+                throw new NullReferenceException("There's no version!  Can't calculate data offset!");
+
+            IBigFileFolderInfo tmpFolderInfo = version.CreateFolderInfo();
+            int folderOffset = CalculateFolderOffset(version, ref segmentHeader, ref header);
+            int dataOffset = folderOffset + (header.Folders * tmpFolderInfo.StructSize);
+            dataOffset += dataOffset % 8; // align to 8 bytes;
+            return dataOffset;
+        }
+
         public BigFileFolder CreateRootFolderTree(IBigFileFolderInfo[] folderInfos)
         {
             log.Info("Creating root folder tree...");
@@ -179,6 +212,7 @@ namespace GRPExplorerLib.BigFile
         {
             log.Info("Creating folder tree and files list from directory " + dir.FullName);
             IBigFileFileInfo[] fileInfos = new IBigFileFileInfo[mapping.KeyMap.Count];
+            List<IBigFileFolderInfo> folderInfos = new List<IBigFileFolderInfo>();
             Dictionary<short, BigFileFolder> folderMap = new Dictionary<short, BigFileFolder>();
             short folderCount = 0;
             int fileCount = 0;
@@ -196,6 +230,7 @@ namespace GRPExplorerLib.BigFile
                 folderInfo.Name = parentFolder == null ? //oh my lawdy what is this EDIT 4/5/2018: what the fuck
                         "/".EncodeToBadString(length: 54) :
                         directory.Name.EncodeToBadString(length: 54);
+                folderInfos.Add(folderInfo);
 
                 BigFileFolder thisFolder = new BigFileFolder(folderCount, folderInfo, folderMap);
                 folderMap.Add(folderCount, thisFolder);
@@ -244,7 +279,8 @@ namespace GRPExplorerLib.BigFile
             return new UnpackedFolderMapAndFilesList()
             {
                 folderMap = folderMap,
-                filesList = fileInfos
+                filesList = fileInfos,
+                foldersList = folderInfos.ToArray(),
             };
         }
 
@@ -255,7 +291,7 @@ namespace GRPExplorerLib.BigFile
             int referenceCount = BitConverter.ToInt32(fileBuffer, 0);
 
             log.Info("Loading file references for file: " + file.Name);
-            log.Info("  Reference count: " + referenceCount.ToString());
+            log.Debug("  Reference count: " + referenceCount.ToString());
 
             BigFileFile[] references = new BigFileFile[referenceCount];
 
@@ -296,6 +332,7 @@ namespace GRPExplorerLib.BigFile
     {
         public Dictionary<short, BigFileFolder> folderMap;
         public IBigFileFileInfo[] filesList;
+        public IBigFileFolderInfo[] foldersList;
     }
 
     public class UnpackedRenamedFileMapping
