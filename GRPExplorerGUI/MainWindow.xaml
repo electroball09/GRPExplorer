@@ -35,10 +35,11 @@
         <View:BigFileView x:Name="bigFileview" HorizontalAlignment="Left" Margin="886,10,0,0" VerticalAlignment="Top" Height="427" Width="610"/>
         <View:LogView x:Name="logView" HorizontalAlignment="Left" Height="195" Margin="14,242,0,0" VerticalAlignment="Top" Width="867"/>
         <Button x:Name="btnOpenBigFile_Copy" Content="Open Packed" HorizontalAlignment="Left" Margin="91,38,0,0" VerticalAlignment="Top" Width="75" Click="btnOpenBigFile_Copy_Click"/>
-        <Button x:Name="btnUnpackBigfile" Content="Unpack" HorizontalAlignment="Left" Margin="617,85,0,0" VerticalAlignment="Top" Width="75" Click="btnUnpackBigfile_Click"/>
-        <TextBox x:Name="txtUnpackDir" HorizontalAlignment="Left" Height="23" Margin="617,57,0,0" TextWrapping="Wrap" Text="C:\GEX_Test\" VerticalAlignment="Top" Width="120"/>
-        <Button x:Name="btnPackBigFile" Content="Pack" HorizontalAlignment="Left" Margin="617,110,0,0" VerticalAlignment="Top" Width="75" Click="btnPackBigFile_Click"/>
-        <Slider x:Name="sldThreads" HorizontalAlignment="Left" Margin="432,58,0,0" VerticalAlignment="Top" Width="100" Minimum="1" Maximum="4" SmallChange="1" TickPlacement="Both" Value="4"/>
+        <Button x:Name="btnUnpackBigfile" Content="Unpack" HorizontalAlignment="Left" Margin="407,75,0,0" VerticalAlignment="Top" Width="120" Click="btnUnpackBigfile_Click"/>
+        <TextBox x:Name="txtUnpackDir" HorizontalAlignment="Left" Height="23" Margin="407,47,0,0" TextWrapping="Wrap" Text="C:\GEX_Test\" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="btnPackBigFile" Content="Pack" HorizontalAlignment="Left" Margin="407,100,0,0" VerticalAlignment="Top" Width="120" Click="btnPackBigFile_Click"/>
+        <Slider x:Name="sldThreads" HorizontalAlignment="Left" Margin="298,38,0,0" VerticalAlignment="Top" Width="100" Minimum="1" Maximum="4" SmallChange="1" TickPlacement="Both" Value="4"/>
+        <Button x:Name="btnGenFileExtensions" Content="Generate File Extensions List" HorizontalAlignment="Left" Margin="591,48,0,0" VerticalAlignment="Top" Width="175" Click="btnGenFileExtensions_Click"/>
 
     </Grid>
 </Window>

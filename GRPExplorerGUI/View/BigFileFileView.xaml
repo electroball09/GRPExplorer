@@ -30,6 +30,18 @@
                     <Label Content="ZIP: "/>
                     <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.ZIP}"/>
                 </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="UNKNOWN_01"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Unknown_01, StringFormat='0x{0:X8}'}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Flags"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Flags, StringFormat='0x{0:X8}'}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="UNKNOWN_03"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Unknown_03, StringFormat='0x{0:X8}'}"/>
+                </StackPanel>
                 <Label Content="{Binding Path=BigFileFile.FileReferences.Length}"/>
                 <ListBox x:Name="listFileReferences" ItemsSource="{Binding Path=BigFileFile.FileReferences}" ScrollViewer.HorizontalScrollBarVisibility="Visible">
                     <ListBox.ItemTemplate>

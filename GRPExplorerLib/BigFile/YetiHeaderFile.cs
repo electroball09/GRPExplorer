@@ -232,13 +232,13 @@ namespace GRPExplorerLib.BigFile
             {
                 fs.Seek(bigFile.SegmentHeader.InfoOffset + bigFile.FileHeader.StructSize, SeekOrigin.Begin);
 
-                int fileStructSize = bigFile.MappingData.FilesList[0].FileInfo.StructSize;
-                int remainder = (bigFile.MappingData.FilesList.Length * fileStructSize) % 8;
+                int fileStructSize = bigFile.FileMap.FilesList[0].FileInfo.StructSize;
+                int remainder = (bigFile.FileMap.FilesList.Length * fileStructSize) % 8;
                 log.Info("File struct remainder: " + remainder);
                 byte[] buffer = buffers[fileStructSize];
-                for (int i = 0; i < bigFile.MappingData.FilesList.Length; i++)
+                for (int i = 0; i < bigFile.FileMap.FilesList.Length; i++)
                 {
-                    bigFile.MappingData.FilesList[i].FileInfo.ToBytes(buffer);
+                    bigFile.FileMap.FilesList[i].FileInfo.ToBytes(buffer);
                     fs.Write(buffer, 0, fileStructSize);
                 }
 

@@ -27,8 +27,8 @@ namespace GRPExplorerLib.BigFile
 
         protected BigFileFolder rootFolder;
         public BigFileFolder RootFolder { get { return rootFolder; } }
-        protected FileMappingData mappingData;
-        public FileMappingData MappingData { get { return mappingData; } }
+        protected FileMappingData fileMap;
+        public FileMappingData FileMap { get { return fileMap; } }
 
         public bool IsLoaded { get { return rootFolder != null; } }
 

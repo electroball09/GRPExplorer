@@ -152,7 +152,7 @@ namespace GRPExplorerLib.BigFile
             {
                 packInfos[0].Options = options;
                 packInfos[0].startIndex = 0;
-                packInfos[0].count = bigFile.MappingData.FilesList.Length;
+                packInfos[0].count = bigFile.FileMap.FilesList.Length;
                 packInfos[0].bigFile = bigFile;
                 packInfos[0].OnCompleted = internal_OnPackFinished;
 
@@ -167,8 +167,8 @@ namespace GRPExplorerLib.BigFile
         private BigFilePackOperationStatus internal_ThreadedPack(BigFilePackOptions options)
         {
             //set up threads
-            int dividedCount = bigFile.MappingData.FilesList.Length / options.Threads;
-            int dividedRemainder = bigFile.MappingData.FilesList.Length % options.Threads;
+            int dividedCount = bigFile.FileMap.FilesList.Length / options.Threads;
+            int dividedRemainder = bigFile.FileMap.FilesList.Length % options.Threads;
             log.Info("Divided files into " + options.Threads + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
 
             List<BigFilePackInfo> infos = new List<BigFilePackInfo>();
@@ -212,7 +212,7 @@ namespace GRPExplorerLib.BigFile
                 metaFS.Write(BitConverter.GetBytes((long)0), 0, 8);
 
                 BigFileFile[] filesToWrite = new BigFileFile[info.count];
-                Array.Copy(bigFile.MappingData.FilesList, info.startIndex, filesToWrite, 0, info.count);
+                Array.Copy(bigFile.FileMap.FilesList, info.startIndex, filesToWrite, 0, info.count);
                 
                 BigFileFile currFile = null;
                 byte[] currentBuffer;
@@ -220,7 +220,7 @@ namespace GRPExplorerLib.BigFile
                 int index = info.startIndex;
                 foreach (int size in bigFile.FileReader.ReadAll(filesToWrite, info.IOBuffers, info.Options.Flags))
                 {
-                    currFile = info.bigFile.MappingData.FilesList[index];
+                    currFile = info.bigFile.FileMap.FilesList[index];
                     if (size == -1)
                     {
                         log.Error("Couldn't pack file " + currFile.Name + " because size was -1!");
@@ -403,7 +403,7 @@ namespace GRPExplorerLib.BigFile
                 for (int i = 0; i < metadataList.Count; i++)
                 {
                     newFileInfos[i] = info.bigFile.Version.CreateFileInfo();
-                    info.bigFile.MappingData[metadataList[i].Key].FileInfo.Copy(newFileInfos[i]);
+                    info.bigFile.FileMap[metadataList[i].Key].FileInfo.Copy(newFileInfos[i]);
                     newFileInfos[i].Offset = metadataList[i].Offset / 8;
                     newFileInfos[i].FileNumber = metadataList[i].Number;
                 }

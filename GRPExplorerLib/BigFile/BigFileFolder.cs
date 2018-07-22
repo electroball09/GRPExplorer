@@ -27,8 +27,8 @@ namespace GRPExplorerLib.BigFile
         private string name;
         public string Name { get { return name.Trim(); } }
 
-        private FileMappingData mappingData;
-        public FileMappingData MappingData { get { return mappingData; } set { mappingData = value; } }
+        private FileMappingData fileMap;
+        public FileMappingData FileMap { get { return fileMap; } set { fileMap = value; } }
 
         public BigFileFolder ParentFolder
         {

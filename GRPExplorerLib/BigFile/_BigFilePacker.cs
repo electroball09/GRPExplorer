@@ -248,7 +248,7 @@ namespace GRPExplorerLib.BigFile
                 BigFileFile currFile = null;
                 for (int i = info.start; i < info.start + info.count; i++)
                 {
-                    currFile = info.bigFile.MappingData.FilesList[i];
+                    currFile = info.bigFile.FileMap.FilesList[i];
                     FileInfo srcFile = new FileInfo(info.sourceDir.FullName + info.bigFile.RenamedMapping[currFile.FileInfo.Key].FileName);
 
                     log.Info("Packing file " + currFile.Name);
@@ -376,7 +376,7 @@ namespace GRPExplorerLib.BigFile
                     space += size;
                     fileCount++;
                     if (fileCount % 500 == 0)
-                        log.Info("Progress: " + fileCount + "/" + bigFile.MappingData.FilesList.Length);
+                        log.Info("Progress: " + fileCount + "/" + bigFile.FileMap.FilesList.Length);
                 }
 
                 foreach (DirectoryInfo dirInfo in subDir.GetDirectories())

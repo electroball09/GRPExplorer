@@ -20,6 +20,7 @@ using System.ComponentModel;
 using GRPExplorerGUI.Model;
 using GRPExplorerGUI.ViewModel;
 using GRPExplorerLib.Logging;
+using GRPExplorerLib.BigFile.Extra;
 
 namespace GRPExplorerGUI
 {
@@ -84,7 +85,7 @@ namespace GRPExplorerGUI
                 return;
             }
 
-            BigFileFile file = bigFile.MappingData[key];
+            BigFileFile file = bigFile.FileMap[key];
             if (file != null)
             {
                 groupFile.Header = file.Name;
@@ -114,6 +115,7 @@ namespace GRPExplorerGUI
                 Directory = new System.IO.DirectoryInfo(txtUnpackDir.Text),
                 Flags = BigFileFlags.Decompress | BigFileFlags.UseThreading,
                 Threads = 4,
+                LoadExtensionsFile = "FileExtensionsList.gex",
             };
 
             unpacker = new BigFileUnpacker((PackedBigFile)bigFile);
@@ -138,6 +140,29 @@ namespace GRPExplorerGUI
             packer = new BigFilePacker(bigFile);
 
             BigFilePackOperationStatus status = packer.PackBigFile(options);
+        }
+
+        BackgroundWorker bgworker;
+        BigFileFileExtensionsList gen;
+        private void btnGenFileExtensions_Click(object sender, RoutedEventArgs e)
+        {
+            gen = new BigFileFileExtensionsList(bigFile);
+            
+            if (bgworker == null)
+            {
+                bgworker = new BackgroundWorker();
+                bgworker.DoWork += Bgworker_DoWork;
+            }
+
+            bgworker.RunWorkerAsync();
+        }
+
+        private void Bgworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Dictionary<short, string> extensionsList = gen.LoadFileExtensionsListFromLoadReport(new System.IO.FileInfo("LoadReport.txt"));
+            //Dictionary<short, string> extensionsList = gen.LoadFileExtensionsList(new System.IO.FileInfo("FileExtensionsList.gex"));
+            gen.WriteFileExtensionsListToFile(extensionsList);
+            gen.VerifyFileTypes(extensionsList);
         }
     }
 }

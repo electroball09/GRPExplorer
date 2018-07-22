@@ -87,11 +87,11 @@ namespace GRPExplorerLib.BigFile
 
             status.UpdateProgress(0.6f);
 
-            mappingData = fileUtil.CreateFileMappingData(folderAndFiles.folderMap[0], folderAndFiles.filesList);
+            fileMap = fileUtil.CreateFileMappingData(folderAndFiles.folderMap[0], folderAndFiles.filesList);
 
             status.UpdateProgress(0.8f);
 
-            fileUtil.MapFilesToFolders(rootFolder, mappingData);
+            fileUtil.MapFilesToFolders(rootFolder, fileMap);
 
             status.UpdateProgress(1.0f);
 

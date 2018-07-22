@@ -51,6 +51,7 @@
     <Compile Include="BigFile\BigFilePacker.cs" />
     <Compile Include="BigFile\BigFileSegment.cs" />
     <Compile Include="BigFile\BigFileHeader.cs" />
+    <Compile Include="BigFile\Extra\BigFileFileExtensionGenerator.cs" />
     <Compile Include="BigFile\_BigFilePacker.cs" />
     <Compile Include="BigFile\PackedBigFile.cs" />
     <Compile Include="BigFile\BigFileConst.cs" />

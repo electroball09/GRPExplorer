@@ -84,9 +84,9 @@ namespace GRPExplorerLib.BigFile
 
             rootFolder = fileUtil.CreateRootFolderTree(rawFolderInfos);
             status.UpdateProgress(0.6f);
-            mappingData = fileUtil.CreateFileMappingData(rootFolder, rawFileInfos);
+            fileMap = fileUtil.CreateFileMappingData(rootFolder, rawFileInfos);
             status.UpdateProgress(0.8f);
-            fileUtil.MapFilesToFolders(rootFolder, mappingData);
+            fileUtil.MapFilesToFolders(rootFolder, fileMap);
             status.UpdateProgress(1f);
             status.stopwatch.Stop();
 
@@ -99,7 +99,7 @@ namespace GRPExplorerLib.BigFile
 
         public override void LoadExtraData(BigFileOperationStatus statusToUse)
         {
-            BigFileFile[] files = mappingData.KeyMapping.Values.ToArray();
+            BigFileFile[] files = fileMap.KeyMapping.Values.ToArray();
 
             int count = 0;
             foreach (int size in fileReader.ReadAll(files, fileUtil.IOBuffers))

@@ -172,7 +172,7 @@ namespace GRPExplorerLib.BigFile
 
             foreach (KeyValuePair<short, BigFileFolder> kvp in rootFolder.FolderMap)
             {
-                kvp.Value.MappingData = mappingData;
+                kvp.Value.FileMap = mappingData;
             }
 
             diagData.CreateKeyAndNumMappings = stopwatch.ElapsedMilliseconds;
