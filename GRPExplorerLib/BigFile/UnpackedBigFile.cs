@@ -6,6 +6,7 @@ using System.Text;
 using System.Diagnostics;
 using GRPExplorerLib.Logging;
 using GRPExplorerLib.BigFile.Versions;
+using GRPExplorerLib.BigFile.Files;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -23,11 +24,12 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
+        private UnpackedBigFileFileReader fileReader;
         public override BigFileFileReader FileReader
         {
             get
             {
-                throw new NotImplementedException("aaahhhhhhhhhhhhhhhhhhhhhhhhhh");
+                return fileReader;
             }
         }
 
@@ -52,6 +54,7 @@ namespace GRPExplorerLib.BigFile
         {
             directory = dir;
             log.Info("Creating unpacked bigfile, directory: " + dir.FullName);
+            fileReader = new UnpackedBigFileFileReader(this);
         }
 
         public override void LoadFromDisk()
@@ -68,18 +71,26 @@ namespace GRPExplorerLib.BigFile
 
             SegmentHeader = segment.ReadSegmentHeader();
             FileHeader = header.ReadHeader(ref SegmentHeader);
-
-            log.Info(string.Format("Version: {0:X4}", FileHeader.BigFileVersion));
-
+            
             log.Info(string.Format("Count info offset: {0:X8}", SegmentHeader.InfoOffset));
             version = BigFileVersions.GetVersion(FileHeader.BigFileVersion);
+            fileUtil.BigFileVersion = version;
+            filesAndFolders.Version = version;
+            log.Info(string.Format("Version: {0:X4}", FileHeader.BigFileVersion));
+
+            rawFolderInfos = filesAndFolders.ReadFolderInfos(ref SegmentHeader, ref FileHeader);
+            rawFileInfos = filesAndFolders.ReadFileInfos(ref SegmentHeader, ref FileHeader);
 
             fileUtil.BigFileVersion = version;
             filesAndFolders.Version = version;
 
             status.UpdateProgress(0.4f);
 
-            UnpackedFolderMapAndFilesList folderAndFiles = fileUtil.CreateFolderTreeAndFilesListFromDirectory(new DirectoryInfo(directory.FullName + "\\" + BigFileConst.UNPACK_DIR), renamedMapping);
+            rootFolder = fileUtil.CreateRootFolderTree(rawFolderInfos);
+            fileMap = fileUtil.CreateFileMappingData(rootFolder, rawFileInfos);
+            fileUtil.MapFilesToFolders(rootFolder, fileMap);
+
+            UnpackedFolderMapAndFilesList folderAndFiles = fileUtil.CreateFolderTreeAndFilesListFromDirectory(new DirectoryInfo(directory.FullName + "\\" + BigFileConst.UNPACK_DIR), renamedMapping, fileMap);
             rootFolder = folderAndFiles.folderMap[0];
 
             rawFileInfos = folderAndFiles.filesList;
@@ -102,7 +113,15 @@ namespace GRPExplorerLib.BigFile
 
         public override void LoadExtraData(BigFileOperationStatus statusToUse)
         {
-            throw new NotImplementedException();
+            BigFileFile[] files = fileMap.KeyMapping.Values.ToArray();
+
+            int count = 0;
+            foreach (int[] header in fileReader.ReadAllHeaders(files, fileUtil.IOBuffers, fileReader.DefaultFlags))
+            {
+                statusToUse.UpdateProgress((float)files.Length / (float)count);
+                fileUtil.AddFileReferencesToFile(files[count], fileUtil.IOBuffers, header);
+                count++;
+            }
         }
     }
 }

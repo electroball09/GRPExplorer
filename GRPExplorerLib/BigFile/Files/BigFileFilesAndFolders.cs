@@ -109,6 +109,7 @@ namespace GRPExplorerLib.BigFile
             }
 
             log.Info("File infos read!  Time taken: {0}ms", diag.StopwatchTime);
+            log.Info("File count: {0}", header.Files);
 
             return infos;
         }
@@ -135,7 +136,7 @@ namespace GRPExplorerLib.BigFile
             diag.StartStopwatch();
 
             int totalSize = infos[0].StructSize * infos.Length;
-            int remainder = totalSize % 8; //align to 8 bytes
+            int remainder = (((totalSize - 1) / 8 + 1) * 8) - totalSize; //align to 8 bytes
             log.Debug("Total length: {0:X8}", totalSize);
             log.Debug("Remainder: {0}", remainder);
 
@@ -177,7 +178,7 @@ namespace GRPExplorerLib.BigFile
             diag.StartStopwatch();
             
             int totalSize = infos[0].StructSize * infos.Length;
-            int remainder = totalSize % 8; //align to 8 bytes;
+            int remainder = (((totalSize - 1) / 8 + 1) * 8) - totalSize; //align to 8 bytes
             log.Debug("Total length: {0:X8}", totalSize);
             log.Debug("Remainder: {0}", remainder);
 

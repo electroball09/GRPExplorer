@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using GRPExplorerLib.Util;
 using GRPExplorerLib.BigFile.Versions;
+using GRPExplorerLib.BigFile.Files;
 
 namespace GRPExplorerLib.BigFile
 {

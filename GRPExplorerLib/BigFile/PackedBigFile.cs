@@ -6,6 +6,7 @@ using System.IO;
 using System.Diagnostics;
 using GRPExplorerLib.Logging;
 using GRPExplorerLib.BigFile.Versions;
+using GRPExplorerLib.BigFile.Files;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -66,14 +67,15 @@ namespace GRPExplorerLib.BigFile
 
             log.Info("Header and count info read");
 
-            log.Info(string.Format("Version: {0:X4}", FileHeader.BigFileVersion));
-
             version = BigFileVersions.GetVersion(FileHeader.BigFileVersion);
 
             status.UpdateProgress(0.2f);
-            
+
             fileUtil.BigFileVersion = version;
             filesAndFolders.Version = version;
+
+            log.Info(string.Format("Version: {0:X4}", FileHeader.BigFileVersion));
+            log.Info(string.Format("Data Offset: {0:X4}", fileUtil.CalculateDataOffset(ref SegmentHeader, ref FileHeader)));
 
             rawFolderInfos = filesAndFolders.ReadFolderInfos(ref SegmentHeader, ref FileHeader);
             rawFileInfos = filesAndFolders.ReadFileInfos(ref SegmentHeader, ref FileHeader);
@@ -102,10 +104,10 @@ namespace GRPExplorerLib.BigFile
             BigFileFile[] files = fileMap.KeyMapping.Values.ToArray();
 
             int count = 0;
-            foreach (int size in fileReader.ReadAll(files, fileUtil.IOBuffers))
+            foreach (int[] header in fileReader.ReadAllHeaders(files, fileUtil.IOBuffers, fileReader.DefaultFlags))
             {
                 statusToUse.UpdateProgress((float)files.Length / (float)count);
-                fileUtil.AddFileReferencesToFile(files[count], fileUtil.IOBuffers, size);
+                fileUtil.AddFileReferencesToFile(files[count], fileUtil.IOBuffers, header);
                 count++;
             }
         }

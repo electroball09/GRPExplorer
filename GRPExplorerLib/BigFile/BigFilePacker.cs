@@ -215,72 +215,85 @@ namespace GRPExplorerLib.BigFile
                 Array.Copy(bigFile.FileMap.FilesList, info.startIndex, filesToWrite, 0, info.count);
                 
                 BigFileFile currFile = null;
-                byte[] currentBuffer;
 
-                int index = info.startIndex;
-                foreach (int size in bigFile.FileReader.ReadAll(filesToWrite, info.IOBuffers, info.Options.Flags))
+                int index = -1;
+                foreach (int size in bigFile.FileReader.ReadAllRaw(filesToWrite, info.IOBuffers, info.Options.Flags))
                 {
-                    currFile = info.bigFile.FileMap.FilesList[index];
-                    if (size == -1)
+                    index++;
+
+                    currFile = filesToWrite[index];
+
+                    int size2 = size;
+
+                    //if (currFile.FileInfo.FileType == 0x3c)
+                    //{
+                    //    log.Error("Skipped file {0}", currFile.Name);
+                    //    index++;
+                    //    continue;
+                    //}
+
+                    log.Info("Packing file {0}, size: {1}, ZIP: {2}", currFile.Name, size, currFile.FileInfo.ZIP);
+
+                    if (size2 < 0)
                     {
-                        log.Error("Couldn't pack file " + currFile.Name + " because size was -1!");
-                        continue;
-                    }
-
-                    log.Info("Packing file " + currFile.Name);
-
-                    currentBuffer = info.IOBuffers[size];
-
-                    //write the file number, key, and offset to metadata file
-                    metaFS.Write(BitConverter.GetBytes(index), 0, 4);
-                    metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.Key), 0, 4);
-                    metaFS.Write(BitConverter.GetBytes((int)chunkFS.Position), 0, 4);
-
-                    if (currFile.FileInfo.ZIP == 1 && (info.Options.Flags & BigFileFlags.Compress) != 0)
-                    {
-                        int sizePos = (int)chunkFS.Position;
-                        chunkFS.Write(info.IOBuffers[8], 0, 8); //write 8 bytes of garbage to fill the space for decompressed and compressed size
-                        using (ZlibStream zs = new ZlibStream(chunkFS, Ionic.Zlib.CompressionMode.Compress, true))
-                        {
-                            zs.Write(info.IOBuffers[size], 0, size);
-                        }
-
-                        int newPos = (int)chunkFS.Position;
-                        int remainder = 8 - ((newPos - sizePos) % 8);
-
-                        if (remainder != 8)
-                            for (int i = 0; i < remainder; i++)
-                                chunkFS.WriteByte(0x00);
-
-                        int compressedSize = newPos - sizePos - 4;
-
-                        newPos = (int)chunkFS.Position;
-
-                        //go back to the file offset and write the compressed and decompressed sizes
-                        chunkFS.Seek(sizePos, SeekOrigin.Begin);
-                        chunkFS.Write(BitConverter.GetBytes(compressedSize), 0, 4);
-                        chunkFS.Write(BitConverter.GetBytes(size), 0, 4);
-                        chunkFS.Seek(newPos, SeekOrigin.Begin);
+                        metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.FileNumber), 0, 4);
+                        metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.Key), 0, 4);
+                        metaFS.Write(BitConverter.GetBytes(-1), 0, 4);
+                        log.Error("WAIT WHAT");
                     }
                     else
                     {
-                        int sizePos = (int)chunkFS.Position;
-                        chunkFS.Write(BitConverter.GetBytes(size), 0, 4);
-                        chunkFS.Write(info.IOBuffers[size], 0, size);
-                        int remainder = 8 - (((int)chunkFS.Position - sizePos) % 8);
-                        if (remainder != 8)
+                        //write the file number, key, and offset to metadata file
+                        metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.FileNumber), 0, 4);
+                        metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.Key), 0, 4);
+                        metaFS.Write(BitConverter.GetBytes((int)chunkFS.Position), 0, 4);
+
+                        if (currFile.FileInfo.ZIP == 1 && (info.Options.Flags & BigFileFlags.Compress) != 0)
+                        {
+                            int sizePos = (int)chunkFS.Position;
+                            chunkFS.Write(info.IOBuffers[8], 0, 8); //write 8 bytes of garbage to fill the space for decompressed and compressed size
+                            using (ZlibStream zs = new ZlibStream(chunkFS, Ionic.Zlib.CompressionMode.Compress, true))
+                            {
+                                zs.Write(info.IOBuffers[size], 0, size);
+                            }
+
+                            int newPos = (int)chunkFS.Position;
+                            int remainder = ((((newPos - sizePos) - 1) / 8 + 1) * 8) - (newPos - sizePos);
+
                             for (int i = 0; i < remainder; i++)
                                 chunkFS.WriteByte(0x00);
+
+                            newPos = (int)chunkFS.Position;
+
+                            int compressedSize = newPos - sizePos - 4;
+
+
+                            //go back to the file offset and write the compressed and decompressed sizes
+                            chunkFS.Seek(sizePos, SeekOrigin.Begin);
+                            chunkFS.Write(BitConverter.GetBytes(compressedSize), 0, 4);
+                            chunkFS.Write(BitConverter.GetBytes(size), 0, 4);
+                            chunkFS.Seek(newPos, SeekOrigin.Begin);
+                        }
+                        else
+                        {
+                            int sizePos = (int)chunkFS.Position;
+                            chunkFS.Write(BitConverter.GetBytes(size), 0, 4);
+                            chunkFS.Write(info.IOBuffers[size], 0, size);
+                            int remainder = (((((int)chunkFS.Position - sizePos) - 1) / 8 + 1) * 8) - ((int)chunkFS.Position - sizePos);
+                            for (int i = 0; i < remainder; i++)
+                                chunkFS.WriteByte(0x00);   
+                        }
                     }
 
                     info.filesChunked++;
-                    index++;
                 }
 
                 //write number of files chunked and final file size
                 metaFS.Seek(0, SeekOrigin.Begin);
                 metaFS.Write(BitConverter.GetBytes(info.filesChunked), 0, 4);
                 metaFS.Write(BitConverter.GetBytes(chunkFS.Length), 0, 4);
+
+                WinMessageBox.Show(chunkFS.Length.ToString(), "HA", WinMessageBoxFlags.btnOkay);
             }
 
             info.isPacking = false;
@@ -357,11 +370,14 @@ namespace GRPExplorerLib.BigFile
                         for (int j = 0; j < fileCount; j++)
                         {
                             metaFS.Read(tmpBuffer, 0, 12);
+                            int offset = BitConverter.ToInt32(tmpBuffer, 8);
+                            if (offset != -1)
+                                offset += chunkedFileOffsetInTargetFile;
                             ChunkedFileMetadata mdata = new ChunkedFileMetadata()
                             {
                                 Number = BitConverter.ToInt32(tmpBuffer, 0),
                                 Key = BitConverter.ToInt32(tmpBuffer, 4),
-                                Offset = BitConverter.ToInt32(tmpBuffer, 8) + chunkedFileOffsetInTargetFile
+                                Offset = offset
                             };
                             metadataList.Add(mdata);
                         }
@@ -403,9 +419,22 @@ namespace GRPExplorerLib.BigFile
                 for (int i = 0; i < metadataList.Count; i++)
                 {
                     newFileInfos[i] = info.bigFile.Version.CreateFileInfo();
+
                     info.bigFile.FileMap[metadataList[i].Key].FileInfo.Copy(newFileInfos[i]);
-                    newFileInfos[i].Offset = metadataList[i].Offset / 8;
+
+                    if (metadataList[i].Offset == -1)
+                    {
+                        newFileInfos[i].Offset = -1;
+                        log.Error("METATADA FILE OFFSET IS -1");
+                    }
+                    else
+                    {
+                        if (metadataList[i].Offset % 8 != 0)
+                            log.Error("WAIT WHAT: {0} {1:X4}", metadataList[i].Offset, metadataList[i].Key);
+                        newFileInfos[i].Offset = metadataList[i].Offset / 8;
+                    }
                     newFileInfos[i].FileNumber = metadataList[i].Number;
+                    newFileInfos[i].ZIP = (info.Options.Flags & BigFileFlags.Compress) != 0 ? newFileInfos[i].ZIP : 0;
                 }
                 log.Info("New file info list created!");
 

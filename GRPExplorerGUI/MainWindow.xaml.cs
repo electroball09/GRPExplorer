@@ -118,7 +118,7 @@ namespace GRPExplorerGUI
                 LoadExtensionsFile = "FileExtensionsList.gex",
             };
 
-            unpacker = new BigFileUnpacker((PackedBigFile)bigFile);
+            unpacker = new BigFileUnpacker(bigFile);
 
             BigFileUnpackOperationStatus status = unpacker.UnpackBigfile(options);
         }
@@ -129,7 +129,7 @@ namespace GRPExplorerGUI
             BigFilePackOptions options = new BigFilePackOptions
             {
                 Directory = new System.IO.DirectoryInfo(txtUnpackDir.Text),
-                Flags = BigFileFlags.Compress | BigFileFlags.UseThreading,
+                Flags = (bool)chkCompress.IsChecked ? BigFileFlags.UseThreading | BigFileFlags.Compress : BigFileFlags.UseThreading,
                 Threads = (int)sldThreads.Value,
                 BigFileName = "Yeti",
                 DeleteChunks = true

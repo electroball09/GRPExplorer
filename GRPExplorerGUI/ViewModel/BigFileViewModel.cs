@@ -95,8 +95,8 @@ namespace GRPExplorerGUI.ViewModel
         private void Bgworker_DoWork(object sender, DoWorkEventArgs e)
         {
             log.Info("BGWorker loading bigfile");
-            try
-            {
+            //try
+            //{
                 bigFile.LoadStatus.OnProgressUpdated +=
                     (BigFileOperationStatus status) =>
                         {
@@ -105,12 +105,12 @@ namespace GRPExplorerGUI.ViewModel
                 CurrentOperationStatus = bigFile.LoadStatus;
                 bigFile.LoadFromDisk();
                 BigFile = bigFile;
-            }
-            catch (Exception ex)
-            {
-                log.Error(ex.Message);
-                MessageBox.Show(ex.Message + "\n\n" + ex.StackTrace);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    log.Error(ex.Message);
+            //    MessageBox.Show(ex.Message + "\n\n" + ex.StackTrace);
+            //}
         }
 
         public void LoadFromDisk()

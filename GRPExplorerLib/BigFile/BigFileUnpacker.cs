@@ -100,7 +100,7 @@ namespace GRPExplorerLib.BigFile
 
         private ILogProxy log = LogManager.GetLogProxy("BigFileUnpacker");
 
-        private PackedBigFile bigFile;
+        private BigFile bigFile;
 
         private BigFileFileExtensionsList extGen;
 
@@ -125,7 +125,7 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
-        public BigFileUnpacker(PackedBigFile _bigFile)
+        public BigFileUnpacker(BigFile _bigFile)
         {
             bigFile = _bigFile;
             extGen = new BigFileFileExtensionsList(_bigFile);
@@ -268,49 +268,91 @@ namespace GRPExplorerLib.BigFile
             info.stopwatch.Reset();
             info.stopwatch.Start();
             
-            int dataOffset = info.bigFile.FileUtil.CalculateDataOffset(ref info.bigFile.SegmentHeader, ref info.bigFile.FileHeader);
-            byte[] buffer = info.buffers[4];
-            using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
+            //int segmentDataOffset = info.bigFile.FileUtil.CalculateDataOffset(ref info.bigFile.SegmentHeader, ref info.bigFile.FileHeader);
+            //byte[] buffer = info.buffers[4];
+            BigFileFile[] files = new BigFileFile[info.count];
+            Array.Copy(info.bigFile.FileMap.FilesList, info.startIndex, files, 0, info.count);
+
+            int index = -1;
+            foreach (int size in info.bigFile.FileReader.ReadAllRaw(files, info.buffers, info.options.Flags))
             {
-                BigFileFile currFile = null;
-                for (int i = info.startIndex; i < info.startIndex + info.count; i++)
+                index++;
+
+                info.progress = index;
+
+                log.Info("Unpacking file {0}", files[index].Name);
+
+                //********************************************//
+                //DON'T FORGET THE ******* UNPACK SUBDIRECTORY//
+                //********************************************//
+                string dataFileName = info.options.Directory.FullName + "\\" 
+                                    + BigFileConst.UNPACK_DIR + "\\" 
+                                    + info.fileMapping[files[index].FileInfo.Key].FileName;
+
+                string headerFileName = dataFileName + BigFileConst.UNPACKED_HEADER_FILE_EXTENSION;
+
+                using (FileStream dataFS = File.Create(dataFileName))
+                using (FileStream headerFS = File.Create(headerFileName))
                 {
-                    info.progress = i;
-                    currFile = bigFile.FileMap.FilesList[i];
-                    if (string.IsNullOrEmpty(currFile.Name))
+                    if (size != -1)
                     {
-                        log.Error(string.Format("File (key:{0:X8}) does not have a file name!", currFile.FileInfo.Key));
-                        continue;
-                    }
+                        int headerCount = BitConverter.ToInt32(info.buffers[size], 0);
+                        int dataOffset = headerCount * 4 + 4;
 
-                    log.Info("Unpacking file " + currFile.Name);
-                    //info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
-
-                    int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, info.options.Flags);
-
-                    //********************************************//
-                    //DON'T FORGET THE FUCKING UNPACK SUBDIRECTORY//
-                    //********************************************//
-                    string fileName = info.options.Directory.FullName + "\\" + BigFileConst.UNPACK_DIR + "\\" + info.fileMapping[currFile.FileInfo.Key].FileName;
-
-                    //write the read data to the unpacked file
-                    try
-                    {
-                        using (FileStream newFs = File.Create(fileName))
+                        if (dataOffset > size)
                         {
-                            if (fileSize != -1) //if the offset is bad, only create the file, don't write anything
-                            {
-                                buffer = info.buffers[fileSize]; //fuck me
-                                newFs.Write(buffer, 0, fileSize);
-                            }
+                            log.Error("Hmmm... something's wrong here");
+                            headerFS.Write(info.buffers[size], 0, size);
+                        }
+                        else
+                        {
+                            dataFS.Write(info.buffers[size], dataOffset, size - dataOffset);
+                            headerFS.Write(info.buffers[size], 0, dataOffset);
                         }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        log.Error("God Damnit.\n\n" + ex.Message);
+                        log.Error("Can't unpack file {0} because size is -1", files[index].Name);
                     }
                 }
             }
+            //using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
+            //{
+            //    BigFileFile currFile = null;
+            //    for (int i = info.startIndex; i < info.startIndex + info.count; i++)
+            //    {
+            //        info.progress = i;
+            //        currFile = bigFile.FileMap.FilesList[i];
+            //        if (string.IsNullOrEmpty(currFile.Name))
+            //        {
+            //            log.Error(string.Format("File (key:{0:X8}) does not have a file name!", currFile.FileInfo.Key));
+            //            continue;
+            //        }
+
+            //        log.Info("Unpacking file " + currFile.Name);
+            //        //info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
+
+            //        int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, info.options.Flags);
+
+
+            //        //write the read data to the unpacked file
+            //        try
+            //        {
+            //            using (FileStream newFs = File.Create(fileName))
+            //            {
+            //                if (fileSize != -1) //if the offset is bad, only create the file, don't write anything
+            //                {
+            //                    buffer = info.buffers[fileSize]; //fuck me
+            //                    newFs.Write(buffer, 0, fileSize);
+            //                }
+            //            }
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            log.Error("God Damnit.\n\n" + ex.Message);
+            //        }
+            //    }
+            //}
 
             log.Info("Unpack thread (ID:" + info.threadID + ") finished work!");
             info.isUnpacking = false;
@@ -337,7 +379,7 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
-        public void GenerateYetiMetadataFile(DirectoryInfo dir, PackedBigFile bigfile)
+        public void GenerateYetiMetadataFile(DirectoryInfo dir, BigFile bigfile)
         {
             stopwatch.Reset();
             stopwatch.Start();

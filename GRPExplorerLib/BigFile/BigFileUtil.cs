@@ -55,7 +55,7 @@ namespace GRPExplorerLib.BigFile
 
             IBigFileFileInfo tmpFileInfo = version.CreateFileInfo();
             int baseSize = (segmentHeader.InfoOffset + header.StructSize) + (header.Files * tmpFileInfo.StructSize);
-            baseSize += baseSize % 8; // align to 8 bytes
+            baseSize = (((baseSize - 1) / 8) + 1) * 8; // align to 8 bytes
             return baseSize;
         }
 
@@ -72,7 +72,7 @@ namespace GRPExplorerLib.BigFile
             IBigFileFolderInfo tmpFolderInfo = version.CreateFolderInfo();
             int folderOffset = CalculateFolderOffset(version, ref segmentHeader, ref header);
             int dataOffset = folderOffset + (header.Folders * tmpFolderInfo.StructSize);
-            dataOffset += dataOffset % 8; // align to 8 bytes;
+            dataOffset = (((dataOffset - 1) / 8) + 1) * 8; // align to 8 bytes;
             return dataOffset;
         }
 
@@ -182,6 +182,8 @@ namespace GRPExplorerLib.BigFile
             mappingData.FilesList = filesList;
             mappingData.KeyMapping = fileKeyMapping;
 
+            log.Info("mappingData count: {0}", mappingData.FilesList.Length);
+
             return mappingData;
         }
 
@@ -208,7 +210,7 @@ namespace GRPExplorerLib.BigFile
             stopwatch.Reset();
         }
 
-        public UnpackedFolderMapAndFilesList CreateFolderTreeAndFilesListFromDirectory(DirectoryInfo dir, UnpackedRenamedFileMapping mapping)
+        public UnpackedFolderMapAndFilesList CreateFolderTreeAndFilesListFromDirectory(DirectoryInfo dir, UnpackedRenamedFileMapping mapping, FileMappingData defaultMappingData)
         {
             log.Info("Creating folder tree and files list from directory " + dir.FullName);
             IBigFileFileInfo[] fileInfos = new IBigFileFileInfo[mapping.KeyMap.Count];
@@ -237,16 +239,18 @@ namespace GRPExplorerLib.BigFile
 
                 foreach (FileInfo file in directory.GetFiles())
                 {
-                    string fileName = dirName + "/" + file.Name;
+                    if (file.Name.EndsWith(".header")) // HACK LOL
+                        continue;
+
+                    string fileName = dirName + "//" + file.Name;
                     UnpackedRenamedFileMapping.RenamedFileMappingData mappingData = mapping[fileName];
                     temp.Remove(fileName);
                     IBigFileFileInfo fileInfo = version.CreateFileInfo();
-                    fileInfo.CRC32 = new byte[4];
+                    defaultMappingData[mappingData.Key].FileInfo.Copy(fileInfo);
                     fileInfo.Key = mappingData.Key;
-                    fileInfo.FileNumber = fileCount;
+                    //fileInfo.FileNumber = fileCount;
                     fileInfo.Name = mappingData.OriginalName.EncodeToBadString(length: 60);
                     fileInfo.Folder = folderCount;
-                    fileInfo.Flags = 0x000f0000;
 
                     log.Debug("Add file " + file.FullName);
 
@@ -284,22 +288,16 @@ namespace GRPExplorerLib.BigFile
             };
         }
 
-        public void AddFileReferencesToFile(BigFileFile file, IOBuffers buffers, int fileSize)
+        public void AddFileReferencesToFile(BigFileFile file, IOBuffers buffers, int[] header)
         {
-            byte[] fileBuffer = buffers[fileSize];
-
-            int referenceCount = BitConverter.ToInt32(fileBuffer, 0);
-
             log.Info("Loading file references for file: " + file.Name);
-            log.Debug("  Reference count: " + referenceCount.ToString());
+            log.Debug("  Reference count: " + header.Length.ToString());
 
-            BigFileFile[] references = new BigFileFile[referenceCount];
+            BigFileFile[] references = new BigFileFile[header.Length];
 
-            for (int i = 0; i < referenceCount; i++)
+            for (int i = 0; i < header.Length; i++)
             {
-                int key = BitConverter.ToInt32(fileBuffer, (i * 4) + 4);
-
-                references[i] = file.MappingData[key];
+                references[i] = file.MappingData[header[i]];
             }
 
             file.FileReferences = references;
