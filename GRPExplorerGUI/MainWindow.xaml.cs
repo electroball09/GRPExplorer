@@ -21,6 +21,7 @@ using GRPExplorerGUI.Model;
 using GRPExplorerGUI.ViewModel;
 using GRPExplorerLib.Logging;
 using GRPExplorerLib.BigFile.Extra;
+using GRPExplorerGUI.Extra;
 
 namespace GRPExplorerGUI
 {
@@ -28,6 +29,8 @@ namespace GRPExplorerGUI
     {
         private BigFile bigFile;
         private string lastText = "";
+
+        private FEUtoSWFWindow FEUtoSWFWindow;
 
         IGRPExplorerLibLogInterface logInterface;
 
@@ -163,6 +166,12 @@ namespace GRPExplorerGUI
             //Dictionary<short, string> extensionsList = gen.LoadFileExtensionsList(new System.IO.FileInfo("FileExtensionsList.gex"));
             gen.WriteFileExtensionsListToFile(extensionsList);
             gen.VerifyFileTypes(extensionsList);
+        }
+
+        private void btnFEUtoSWFShow_Click(object sender, RoutedEventArgs e)
+        {
+            FEUtoSWFWindow = new FEUtoSWFWindow();
+            FEUtoSWFWindow.ShowDialog();
         }
     }
 }

@@ -39,8 +39,9 @@
         <TextBox x:Name="txtUnpackDir" HorizontalAlignment="Left" Height="23" Margin="407,47,0,0" TextWrapping="Wrap" Text="C:\GEX_Test\" VerticalAlignment="Top" Width="120"/>
         <Button x:Name="btnPackBigFile" Content="Pack" HorizontalAlignment="Left" Margin="407,100,0,0" VerticalAlignment="Top" Width="120" Click="btnPackBigFile_Click"/>
         <Slider x:Name="sldThreads" HorizontalAlignment="Left" Margin="298,38,0,0" VerticalAlignment="Top" Width="100" Minimum="1" Maximum="4" SmallChange="1" TickPlacement="Both" Value="4"/>
-        <Button x:Name="btnGenFileExtensions" Content="Generate File Extensions List" HorizontalAlignment="Left" Margin="591,48,0,0" VerticalAlignment="Top" Width="175" Click="btnGenFileExtensions_Click"/>
+        <Button x:Name="btnGenFileExtensions" Content="Generate File Extensions List" HorizontalAlignment="Left" Margin="706,38,0,0" VerticalAlignment="Top" Width="175" Click="btnGenFileExtensions_Click"/>
         <CheckBox x:Name="chkCompress" Content="Compress" HorizontalAlignment="Left" Margin="532,103,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <Button x:Name="btnFEUtoSWFShow" Content="Show FEUtoSWF" HorizontalAlignment="Left" Margin="706,63,0,0" VerticalAlignment="Top" Width="175" Click="btnFEUtoSWFShow_Click"/>
 
     </Grid>
 </Window>
