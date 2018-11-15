@@ -434,6 +434,10 @@ namespace GRPExplorerLib.BigFile
                 {
                     fullName += "." + extensionsList[file.FileInfo.FileType];
                 }
+                else
+                {
+                    fullName += string.Format(".{0:X4}", file.FileInfo.FileType);
+                }
 
                 string fullNameLower = fullName.ToLowerInvariant();
 
