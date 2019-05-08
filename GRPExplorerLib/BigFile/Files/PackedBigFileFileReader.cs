@@ -133,13 +133,13 @@ namespace GRPExplorerLib.BigFile.Files
             if (referenceNum * 4 >= fileSize)
                 throw new Exception("referenceNum * 4 > fileSize");
 
-            int dataSize = fileSize - referenceNum * 4;
+            int dataSize = fileSize - (referenceNum + 1) * 4;
             byte[] dataBuffer = buffers[dataSize];
             byte[] fileBuffer = buffers[fileSize];
 
             for (int i = 0; i < dataSize; i++)
             {
-                dataBuffer[i] = fileBuffer[i + referenceNum + 1];
+                dataBuffer[i] = fileBuffer[i + (referenceNum + 1) * 4];
             }
 
             return dataSize;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using GRPExplorerLib.Util;
 using GRPExplorerLib.BigFile.Versions;
+using GRPExplorerLib.BigFile.Files.Archetypes;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -19,24 +20,19 @@ namespace GRPExplorerLib.BigFile
                     name;
             }
         }
+        public IBigFileFileInfo FileInfo { get; set; }
+        public BigFileFolder ParentFolder { get; }
+        public BigFileFile[] FileReferences { get; set; }
+        public FileMappingData MappingData { get; set; }
+        public BigFileFileArchetype Archetype { get; private set; }
 
-        private IBigFileFileInfo fileInfo;
-        public IBigFileFileInfo FileInfo { get { return fileInfo; } set { fileInfo = value; } }
-
-        private BigFileFolder parentFolder;
-        public BigFileFolder ParentFolder { get { return parentFolder; } }
-
-        private BigFileFile[] fileReferences;
-        public BigFileFile[] FileReferences { get { return fileReferences; } set { fileReferences = value; } }
-
-        private FileMappingData mappingData;
-        public FileMappingData MappingData { get { return mappingData; } set { mappingData = value; } }
+        public byte[] RawData { get; private set; }
 
         public string FullFolderPath
         {
             get
             {
-                BigFileFolder folder = parentFolder;
+                BigFileFolder folder = ParentFolder;
                 string fullName = "";
                 while (folder != null && folder.ParentFolder != null)
                 {
@@ -50,9 +46,24 @@ namespace GRPExplorerLib.BigFile
 
         public BigFileFile(IBigFileFileInfo _fileInfo, BigFileFolder _parentFolder)
         {
-            fileInfo = _fileInfo;
-            parentFolder = _parentFolder;
-            name = fileInfo.Name.EncodeToGoodString();
+            FileInfo = _fileInfo;
+            ParentFolder = _parentFolder;
+            name = FileInfo.Name.EncodeToGoodString();
+            Archetype = FileArchetypeFactory.GetArchetype(FileInfo);
+        }
+
+        public T ArchetypeAs<T>() where T : BigFileFileArchetype
+        {
+            if (Archetype is T)
+                return Archetype as T;
+            return null;
+        }
+
+        public void Load(byte[] buffer, int size)
+        {
+            RawData = new byte[size];
+            Array.Copy(buffer, RawData, size);
+            Archetype.Load(RawData);
         }
     }
 }

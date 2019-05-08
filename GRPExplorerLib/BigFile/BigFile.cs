@@ -31,6 +31,9 @@ namespace GRPExplorerLib.BigFile
         protected FileMappingData fileMap;
         public FileMappingData FileMap { get { return fileMap; } }
 
+        protected BigFileFileLoader fileLoader;
+        public BigFileFileLoader FileLoader { get { return fileLoader; } }
+
         public bool IsLoaded { get { return rootFolder != null; } }
 
         protected bool isExtraDataLoaded = false;
@@ -57,6 +60,7 @@ namespace GRPExplorerLib.BigFile
             header = new BigFileHeader(MetadataFileInfo);
             filesAndFolders = new BigFileFilesAndFolders(MetadataFileInfo);
             fileUtil = new BigFileUtil();
+            fileLoader = new BigFileFileLoader(this);
         }
 
         public abstract void LoadFromDisk();

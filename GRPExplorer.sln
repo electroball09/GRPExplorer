@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRPExplorerGUI", "GRPExplorerGUI\GRPExplorerGUI.csproj", "{85B91CCE-BD88-48B2-B997-FF9E7EAC349D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRPExplorerLib", "GRPExplorerLib\GRPExplorerLib.csproj", "{2B40EF25-718F-47DB-9ED5-EFCA5DCAAB96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRPExplorerTests", "GRPExplorerTests\GRPExplorerTests.csproj", "{0D078690-E1CC-4151-81E0-A8B4B8C55ABD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +23,15 @@ Global
 		{2B40EF25-718F-47DB-9ED5-EFCA5DCAAB96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B40EF25-718F-47DB-9ED5-EFCA5DCAAB96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B40EF25-718F-47DB-9ED5-EFCA5DCAAB96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D078690-E1CC-4151-81E0-A8B4B8C55ABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D078690-E1CC-4151-81E0-A8B4B8C55ABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D078690-E1CC-4151-81E0-A8B4B8C55ABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D078690-E1CC-4151-81E0-A8B4B8C55ABD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2EC12355-1805-432A-A9BF-1F5C5F21148C}
 	EndGlobalSection
 EndGlobal
