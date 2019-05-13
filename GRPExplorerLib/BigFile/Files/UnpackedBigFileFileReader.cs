@@ -35,7 +35,7 @@ namespace GRPExplorerLib.BigFile.Files
 
             byte[] dataBuffer = buffers[dataSize];
             byte[] buffer = buffers[dataSize + headerSize];
-            for (int i = 0; i < dataSize; i++)
+            for (int i = dataSize - 1; i >= 0; i--)
             {
                 buffer[i + headerSize] = dataBuffer[i];
             }

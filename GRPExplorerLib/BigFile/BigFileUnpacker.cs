@@ -273,83 +273,99 @@ namespace GRPExplorerLib.BigFile
             BigFileFile[] files = new BigFileFile[info.count];
             Array.Copy(info.bigFile.FileMap.FilesList, info.startIndex, files, 0, info.count);
 
-            int index = -1;
-            foreach (int size in info.bigFile.FileReader.ReadAllRaw(files, info.buffers, info.options.Flags))
+            IEnumerator<int[]> headers = info.bigFile.FileReader.ReadAllHeaders(files, info.buffers, info.options.Flags).GetEnumerator();
+            IEnumerator<int> data = info.bigFile.FileReader.ReadAllData(files, info.buffers, info.options.Flags).GetEnumerator();
+
+            for (int i = 0; i < files.Length; i++)
             {
-                index++;
+                info.progress = i;
 
-                info.progress = index;
+                headers.MoveNext();
+                data.MoveNext();
 
-                log.Info("Unpacking file {0}", files[index].Name);
+                log.Info("Unpacking file {0}", files[i].Name);
 
                 //********************************************//
                 //DON'T FORGET THE ******* UNPACK SUBDIRECTORY//
                 //********************************************//
-                string dataFileName = info.options.Directory.FullName + "\\" 
-                                    + BigFileConst.UNPACK_DIR + "\\" 
-                                    + info.fileMapping[files[index].FileInfo.Key].FileName;
+                string dataFileName = info.options.Directory.FullName + "\\"
+                                    + BigFileConst.UNPACK_DIR + "\\"
+                                    + info.fileMapping[files[i].FileInfo.Key].FileName;
 
                 string headerFileName = dataFileName + BigFileConst.UNPACKED_HEADER_FILE_EXTENSION;
 
                 using (FileStream dataFS = File.Create(dataFileName))
                 using (FileStream headerFS = File.Create(headerFileName))
                 {
+                    int size = data.Current;
+                    int[] header = headers.Current;
                     if (size != -1)
                     {
-                        int headerCount = BitConverter.ToInt32(info.buffers[size], 0);
-                        int dataOffset = headerCount * 4 + 4;
+                        int headerCount = header.Length;
 
-                        if (dataOffset > size)
-                        {
-                            log.Error("Hmmm... something's wrong here");
-                            headerFS.Write(info.buffers[size], 0, size);
-                        }
-                        else
-                        {
-                            dataFS.Write(info.buffers[size], dataOffset, size - dataOffset);
-                            headerFS.Write(info.buffers[size], 0, dataOffset);
-                        }
+                        //if (dataOffset > size)
+                        //{
+                        //    log.Error("Hmmm... something's wrong here");
+                        //    headerFS.Write(info.buffers[size], 0, size);
+                        //}
+                        //else
+                        //{
+                            dataFS.Write(info.buffers[size], 0, size);
+
+                            headerFS.Write(headerCount.ToByteArray(info.buffers[4]), 0, 4);
+                            for (int j = 0; j < headerCount; j++)
+                                headerFS.Write(header[j].ToByteArray(info.buffers[4]), 0, 4);
+                        //}
                     }
                     else
                     {
-                        log.Error("Can't unpack file {0} because size is -1", files[index].Name);
+                        log.Error("Can't unpack file {0} because size is -1", files[i].Name);
                     }
                 }
             }
-            //using (FileStream fs = File.OpenRead(info.bigFile.MetadataFileInfo.FullName))
+
+            //int index = -1;
+            //foreach (int size in info.bigFile.FileReader.ReadAllRaw(files, info.buffers, info.options.Flags))
             //{
-            //    BigFileFile currFile = null;
-            //    for (int i = info.startIndex; i < info.startIndex + info.count; i++)
+            //    index++;
+
+            //    info.progress = index;
+
+            //    log.Info("Unpacking file {0}", files[index].Name);
+
+            //    //********************************************//
+            //    //DON'T FORGET THE ******* UNPACK SUBDIRECTORY//
+            //    //********************************************//
+            //    string dataFileName = info.options.Directory.FullName + "\\" 
+            //                        + BigFileConst.UNPACK_DIR + "\\" 
+            //                        + info.fileMapping[files[index].FileInfo.Key].FileName;
+
+            //    string headerFileName = dataFileName + BigFileConst.UNPACKED_HEADER_FILE_EXTENSION;
+
+            //    IEnumerable<int> p = info.bigFile.FileReader.ReadAllData(files, info.buffers, info.options.Flags);
+
+            //    using (FileStream dataFS = File.Create(dataFileName))
+            //    using (FileStream headerFS = File.Create(headerFileName))
             //    {
-            //        info.progress = i;
-            //        currFile = bigFile.FileMap.FilesList[i];
-            //        if (string.IsNullOrEmpty(currFile.Name))
+            //        if (size != -1)
             //        {
-            //            log.Error(string.Format("File (key:{0:X8}) does not have a file name!", currFile.FileInfo.Key));
-            //            continue;
-            //        }
+            //            int headerCount = BitConverter.ToInt32(info.buffers[size], 0);
+            //            int dataOffset = headerCount * 4 + 4;
 
-            //        log.Info("Unpacking file " + currFile.Name);
-            //        //info.fileMapping[currFile.FileInfo.Key].DebugLog(log);
-
-            //        int fileSize = info.bigFile.FileReader.ReadFile(fs, currFile, info.buffers, info.options.Flags);
-
-
-            //        //write the read data to the unpacked file
-            //        try
-            //        {
-            //            using (FileStream newFs = File.Create(fileName))
+            //            if (dataOffset > size)
             //            {
-            //                if (fileSize != -1) //if the offset is bad, only create the file, don't write anything
-            //                {
-            //                    buffer = info.buffers[fileSize]; //fuck me
-            //                    newFs.Write(buffer, 0, fileSize);
-            //                }
+            //                log.Error("Hmmm... something's wrong here");
+            //                headerFS.Write(info.buffers[size], 0, size);
+            //            }
+            //            else
+            //            {
+            //                dataFS.Write(info.buffers[size], dataOffset, size - dataOffset);
+            //                headerFS.Write(info.buffers[size], 0, dataOffset);
             //            }
             //        }
-            //        catch (Exception ex)
+            //        else
             //        {
-            //            log.Error("God Damnit.\n\n" + ex.Message);
+            //            log.Error("Can't unpack file {0} because size is -1", files[index].Name);
             //        }
             //    }
             //}

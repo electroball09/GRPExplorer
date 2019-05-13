@@ -110,8 +110,11 @@ namespace GRPExplorerLib.BigFile.Files
                 return new int[0];
 
             int referenceNum = BitConverter.ToInt32(buffers[fileSize], 0);
-            if (referenceNum * 4>= fileSize)
-                throw new Exception("referenceNum * 4 > fileSize");
+            if (referenceNum * 4 >= fileSize)
+            {
+                log.Error("referenceNum * 4 > fileSize\n{0}>{1}", referenceNum, fileSize);
+                return new int[0];
+            }
 
             int[] header = new int[referenceNum];
 
@@ -131,7 +134,10 @@ namespace GRPExplorerLib.BigFile.Files
 
             int referenceNum = BitConverter.ToInt32(buffers[fileSize], 0);
             if (referenceNum * 4 >= fileSize)
-                throw new Exception("referenceNum * 4 > fileSize");
+            {
+                log.Error("referenceNum * 4 > fileSize\n{0}>{1}", referenceNum, fileSize);
+                return -1;
+            }
 
             int dataSize = fileSize - (referenceNum + 1) * 4;
             byte[] dataBuffer = buffers[dataSize];
