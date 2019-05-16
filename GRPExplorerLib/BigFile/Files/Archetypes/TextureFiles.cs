@@ -5,13 +5,26 @@ using System.Text;
 
 namespace GRPExplorerLib.BigFile.Files.Archetypes
 {
+    public enum TextureFormat : byte
+    {
+        AO = 0x0F,
+        DXT5_1 = 0x0A,
+        DXT5_2 = 0x0C,
+        DXT1_1 = 0x08,
+        DXT1_2 = 0x09,
+        RGBA32_1 = 0x04,
+        RGBA32_2 = 0x05,
+        XBOX_A = 0x27,
+        XBOX_B = 0x28
+    }
+
     public class TextureMetadataFileArchetype : BigFileFileArchetype
     {
         public override short Identifier => 0x0020;
 
         public ushort Width { get; private set; }
         public ushort Height { get; private set; }
-        public byte Format { get; private set; }
+        public TextureFormat Format { get; private set; }
 
         public override void Load(byte[] rawData)
         {
@@ -20,7 +33,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
             Width = BitConverter.ToUInt16(rawData, 4);
             Height = BitConverter.ToUInt16(rawData, 6);
-            Format = rawData[9];
+            Format = (TextureFormat)rawData[9];
         }
     }
 
