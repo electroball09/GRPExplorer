@@ -77,7 +77,7 @@ namespace GRPExplorerLib.BigFile.Files
                 return new int[0];
 
             int[] header = new int[referenceNum];
-            for (int i = 1; i < referenceNum; i++)
+            for (int i = 1; i <= referenceNum; i++)
             {
                 header[i - 1] = BitConverter.ToInt32(buffer, i * 4);
             }

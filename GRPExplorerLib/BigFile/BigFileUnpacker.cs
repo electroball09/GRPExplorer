@@ -302,20 +302,15 @@ namespace GRPExplorerLib.BigFile
                     if (size != -1)
                     {
                         int headerCount = header.Length;
+                        dataFS.Write(info.buffers[size], 0, size);
 
-                        //if (dataOffset > size)
-                        //{
-                        //    log.Error("Hmmm... something's wrong here");
-                        //    headerFS.Write(info.buffers[size], 0, size);
-                        //}
-                        //else
-                        //{
-                            dataFS.Write(info.buffers[size], 0, size);
-
-                            headerFS.Write(headerCount.ToByteArray(info.buffers[4]), 0, 4);
-                            for (int j = 0; j < headerCount; j++)
-                                headerFS.Write(header[j].ToByteArray(info.buffers[4]), 0, 4);
-                        //}
+                        headerFS.Write(headerCount.ToByteArray(info.buffers[4]), 0, 4);
+                        for (int j = 0; j < headerCount; j++)
+                        {
+                            headerFS.Write(header[j].ToByteArray(info.buffers[4]), 0, 4);
+                            if (header[j] == 0)
+                                log.Error("WTF");
+                        }
                     }
                     else
                     {

@@ -9,15 +9,19 @@ using GRPExplorerLib.BigFile;
 using GRPExplorerLib.Logging;
 using GRPExplorerLib.BigFile.Files;
 using GRPExplorerLib.BigFile.Files.Archetypes;
+using GRPExplorerLib.Util;
 
 namespace GRPExplorerTests
 {
     class Program
     {
+        static ILogProxy log = LogManager.GetLogProxy(">");
+
         static Action[] funcs =
         {
             TestTextures,
             ProcessBigmap,
+            CompareFiles,
         };
 
         static void Main(string[] args)
@@ -30,6 +34,88 @@ namespace GRPExplorerTests
             int num = int.Parse(Console.ReadLine());
             Console.Clear();
             funcs[num]();
+        }
+
+        static void CompareFiles()
+        {
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            Console.Write("Bigfile 1: ");
+            string path1 = Console.ReadLine();
+            Console.Write("Bigfile 2: ");
+            string path2 = Console.ReadLine();
+
+            IOBuffers buffer1 = new IOBuffers();
+            IOBuffers buffer2 = new IOBuffers();
+
+            Console.Write("File key: ");
+            int key = 0;
+            key = Convert.ToInt32(Console.ReadLine(), 16);
+            if (key == 0)
+                Environment.Exit(420);
+
+            BigFile file1 = BigFile.OpenBigFile(path1);
+            BigFile file2 = BigFile.OpenBigFile(path2);
+
+            if (file1 == null)
+            {
+                Console.WriteLine("file 1 null");
+                Console.ReadLine();
+                Environment.Exit(911);
+            }
+            if (file2 == null)
+            {
+                Console.WriteLine("file 2 null");
+                Console.ReadLine();
+                Environment.Exit(911);
+            }
+
+            file1.LoadFromDisk();
+            Console.Write("Press enter...");
+            Console.ReadLine();
+            file2.LoadFromDisk();
+            Console.Write("Press enter...");
+            Console.ReadLine();
+
+            BigFileFile bigFileFile1 = file1.FileMap[key];
+            BigFileFile bigFileFile2 = file2.FileMap[key];
+
+            int[] header1 = file1.FileReader.ReadFileHeader(bigFileFile1, buffer1, file1.FileReader.DefaultFlags);
+            int[] header2 = file2.FileReader.ReadFileHeader(bigFileFile2, buffer2, file2.FileReader.DefaultFlags);
+            
+            int size1 = file1.FileReader.ReadFileRaw(bigFileFile1, buffer1, file1.FileReader.DefaultFlags);
+            int size2 = file2.FileReader.ReadFileRaw(bigFileFile2, buffer2, file2.FileReader.DefaultFlags);
+
+            int chksum1 = 0;
+            int chksum2 = 0;
+            for (int i = 0; i < size1; i++)
+                chksum1 += buffer1[size1][i];
+            for (int i = 0; i < size2; i++)
+                chksum2 += buffer2[size2][i];
+
+            Console.Clear();
+
+            Console.WriteLine("Size 1: " + size1);
+            Console.WriteLine("Checksum 1: " + chksum1);
+            Console.WriteLine("Size 2: " + size2);
+            Console.WriteLine("Checksum 2: " + chksum2);
+
+            Console.Write("Header 1, length: {0} : ", header1.Length);
+            for (int i = 0; i < header1.Length; i++)
+                Console.Write("{0:X8} ", header1[i]);
+            Console.Write("\nHeader 2, length: {0} : ", header2.Length);
+            for (int i = 0; i < header2.Length; i++)
+                Console.Write("{0:X8} ", header2[i]);
+
+            Console.WriteLine("");
+
+            LogManager.GlobalLogFlags = LogFlags.All;
+
+            bigFileFile1.FileInfo.DebugLog(log);
+            bigFileFile2.FileInfo.DebugLog(log);
+
+
+            Console.ReadLine();
         }
 
         static void ProcessBigmap()

@@ -11,6 +11,14 @@ namespace GRPExplorerLib.BigFile
 {
     public abstract class BigFile
     {
+        public static BigFile OpenBigFile(string filePath)
+        {
+            if (filePath.EndsWith(".big"))
+                return new PackedBigFile(new FileInfo(filePath));
+            else
+                return new UnpackedBigFile(new DirectoryInfo(filePath));
+        }
+
         protected string fileOrDirectory;
 
         public abstract FileInfo MetadataFileInfo { get; }
