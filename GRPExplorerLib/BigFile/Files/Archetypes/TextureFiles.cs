@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GRPExplorerLib.Logging;
 
 namespace GRPExplorerLib.BigFile.Files.Archetypes
 {
@@ -35,6 +36,11 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
             Height = BitConverter.ToUInt16(rawData, 6);
             Format = (TextureFormat)rawData[9];
         }
+
+        public override void Log(ILogProxy log)
+        {
+            log.Info("w:{0} h:{1} format:{2}", Width, Height, Format);
+        }
     }
 
     public class TexturePayloadFileArchetype : BigFileFileArchetype
@@ -44,6 +50,11 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
         public override void Load(byte[] rawData)
         {
             
+        }
+
+        public override void Log(ILogProxy log)
+        {
+            log.Info("TEXTUREPAYLOADFILEARCHETYPE");
         }
     }
 }

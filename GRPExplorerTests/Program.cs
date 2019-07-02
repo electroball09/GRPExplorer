@@ -22,6 +22,7 @@ namespace GRPExplorerTests
             TestTextures,
             ProcessBigmap,
             CompareFiles,
+            LogFiles,
         };
 
         static void Main(string[] args)
@@ -174,6 +175,30 @@ namespace GRPExplorerTests
                 TextureMetadataFileArchetype archetype = file.ArchetypeAs<TextureMetadataFileArchetype>();
                 if (archetype.Format == format)
                     Console.WriteLine(file.FullFolderPath + file.Name + " " + string.Format("{0:X2} {1} {2}", archetype.Format, archetype.Width, archetype.Height));
+            }
+
+            Console.ReadLine();
+        }
+
+        static void LogFiles()
+        {
+            Console.Write("File path: ");
+            string path = Console.ReadLine();
+            if (!File.Exists(path))
+                Environment.Exit(69);
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
+            bigFile.LoadFromDisk();
+
+            List<BigFileFile> files = bigFile.RootFolder.GetAllFilesOfArchetype<CurveFileArchetype>();
+            bigFile.FileLoader.LoadFiles(files);
+            foreach (BigFileFile file in files)
+            {
+                CurveFileArchetype archetype = file.ArchetypeAs<CurveFileArchetype>();
+                log.Info(file.Name);
+                archetype.Log(log);
             }
 
             Console.ReadLine();

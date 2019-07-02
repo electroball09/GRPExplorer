@@ -16,6 +16,11 @@ namespace GRPExplorerLib.BigFile.Files
             bigFile = _bigFile;
         }
 
+        /// <summary>
+        /// LOAD REFERENCES IS NOT FINISHED
+        /// </summary>
+        /// <param name="filesToLoad"></param>
+        /// <param name="loadReferences"></param>
         public void LoadFiles(List<BigFileFile> filesToLoad, bool loadReferences = true)
         {
             foreach (BigFileFile file in filesToLoad)
