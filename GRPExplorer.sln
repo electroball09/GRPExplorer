@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRPExplorerLib", "GRPExplor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRPExplorerTests", "GRPExplorerTests\GRPExplorerTests.csproj", "{0D078690-E1CC-4151-81E0-A8B4B8C55ABD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityIntegration", "UnityIntegration\UnityIntegration.csproj", "{D29D1330-CB82-41A1-87C4-7ABF61F42669}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityIntegrationEditor", "UnityIntegrationEditor\UnityIntegrationEditor.csproj", "{5DE4BECB-3DDC-4273-8D5B-262282A17D1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{0D078690-E1CC-4151-81E0-A8B4B8C55ABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D078690-E1CC-4151-81E0-A8B4B8C55ABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D078690-E1CC-4151-81E0-A8B4B8C55ABD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D29D1330-CB82-41A1-87C4-7ABF61F42669}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D29D1330-CB82-41A1-87C4-7ABF61F42669}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D29D1330-CB82-41A1-87C4-7ABF61F42669}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D29D1330-CB82-41A1-87C4-7ABF61F42669}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DE4BECB-3DDC-4273-8D5B-262282A17D1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DE4BECB-3DDC-4273-8D5B-262282A17D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DE4BECB-3DDC-4273-8D5B-262282A17D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DE4BECB-3DDC-4273-8D5B-262282A17D1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

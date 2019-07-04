@@ -77,7 +77,7 @@ namespace GRPExplorerLib.BigFile
                 filesList = new List<BigFileFile>();
             foreach (BigFileFile file in Files)
             {
-                if (file.ArchetypeAs<T>() != null)
+                if (file.Is<T>())
                     filesList.Add(file);
             }
             foreach (BigFileFolder folder in SubFolders)

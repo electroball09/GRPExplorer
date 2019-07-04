@@ -119,7 +119,7 @@ namespace GRPExplorerLib.BigFile
             foreach (int[] header in fileReader.ReadAllHeaders(files, fileUtil.IOBuffers, fileReader.DefaultFlags))
             {
                 statusToUse.UpdateProgress((float)files.Length / (float)count);
-                fileUtil.AddFileReferencesToFile(files[count], fileUtil.IOBuffers, header);
+                fileUtil.AddFileReferencesToFile(files[count], header);
                 count++;
             }
         }

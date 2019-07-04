@@ -22,9 +22,9 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
         public CurveKeyframe[] Keyframes { get; private set; }
 
-        public override void Load(byte[] rawData)
+        public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
         {
-            KeyframeCount = BitConverter.ToInt16(rawData, 4);
+            KeyframeCount = BitConverter.ToInt16(buffer, 4);
             Keyframes = new CurveKeyframe[KeyframeCount];
 
             //if (rawData.Length < 25 + (KeyframeCount + (KeyframeCount * 16) + 12))
@@ -44,10 +44,10 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
                     //kf.Number3 = 25 + (i + (i * 16) + 8);
                     //kf.Number4 = 25 + (i + (i * 16) + 12);
 
-                    kf.x = BitConverter.ToSingle(rawData, 25 + (i + (i * 16) + 0));
-                    kf.y = BitConverter.ToSingle(rawData, 25 + (i + (i * 16) + 4));
-                    kf.@in = BitConverter.ToSingle(rawData, 25 + (i + (i * 16) + 8));
-                    kf.@out = BitConverter.ToSingle(rawData, 25 + (i + (i * 16) + 12));
+                    kf.x = BitConverter.ToSingle(buffer, 25 + (i + (i * 16) + 0));
+                    kf.y = BitConverter.ToSingle(buffer, 25 + (i + (i * 16) + 4));
+                    kf.@in = BitConverter.ToSingle(buffer, 25 + (i + (i * 16) + 8));
+                    kf.@out = BitConverter.ToSingle(buffer, 25 + (i + (i * 16) + 12));
 
                     Keyframes[i] = kf;
                 }

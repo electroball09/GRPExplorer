@@ -164,7 +164,7 @@ namespace GRPExplorerLib.BigFile
 
                 if (filesList[i].FileInfo.FileNumber == -1)
                 {
-                    log.Error(string.Format("File number is -1! (key:{0:X8}) (offset:{1:X8})", fileInfos[i].Key, fileInfos[i].Offset));
+                    log.Debug(string.Format("File number is -1! (key:{0:X8}) (offset:{1:X8})", fileInfos[i].Key, fileInfos[i].Offset));
                 }
             }
 
@@ -288,10 +288,16 @@ namespace GRPExplorerLib.BigFile
             };
         }
 
-        public void AddFileReferencesToFile(BigFileFile file, IOBuffers buffers, int[] header)
+        public void AddFileReferencesToFile(BigFileFile file, int[] header)
         {
-            log.Info("Loading file references for file: " + file.Name);
+            log.Debug("Loading file references for file: " + file.Name);
             log.Debug("  Reference count: " + header.Length.ToString());
+
+            if (file.FileReferences != null)
+            {
+                log.Error("File {0} (key{1:X8}) already has references loaded!", file.Name, file.FileInfo.Key);
+                return;
+            }
 
             BigFileFile[] references = new BigFileFile[header.Length];
 

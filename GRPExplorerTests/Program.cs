@@ -159,7 +159,7 @@ namespace GRPExplorerTests
 
             Console.Write("\nType: ");
             string type = Console.ReadLine();
-            TextureFormat format;
+            YetiTextureFormat format;
             if (!Enum.TryParse(type, out format))
                 Environment.Exit(420);
             

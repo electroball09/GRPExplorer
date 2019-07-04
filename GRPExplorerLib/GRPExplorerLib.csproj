@@ -85,6 +85,7 @@
     <Compile Include="Util\ByteUtil.cs" />
     <Compile Include="Util\DiagTools.cs" />
     <Compile Include="Util\IOBuffers.cs" />
+    <Compile Include="Util\ListUtil.cs" />
     <Compile Include="Util\MarshalUtil.cs" />
     <Compile Include="Util\StringUtil.cs" />
     <Compile Include="Util\StructConverter.cs" />
@@ -96,8 +97,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>COPY "$(TargetPath)" "$(SolutionDir)GRPExplorerUnityIntegration\Assets\DLL\"
-COPY "$(TargetDir)DotNetZip.dll" "$(SolutionDir)GRPExplorerUnityIntegration\Assets\DLL\"</PostBuildEvent>
+    <PostBuildEvent>COPY "$(TargetPath)" "$(SolutionDir)UnityProject\Assets\DLL\"
+COPY "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)UnityProject\Assets\DLL\"
+COPY "$(TargetDir)DotNetZip.dll" "$(SolutionDir)UnityProject\Assets\DLL\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

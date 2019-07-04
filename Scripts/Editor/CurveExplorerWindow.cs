@@ -48,6 +48,13 @@ public class CurveExplorerWindow : EditorWindow
     static void RefreshKeyframes()
     {
         CurveFileArchetype arch = archetypes[selected];
+        if (arch.Keyframes.Length == 0)
+        {
+            Debug.Log("Curve keyframe count was zero");
+            curve.keys = new Keyframe[0];
+            return;
+        }
+
         Keyframe[] keyframes = new Keyframe[arch.Keyframes.Length - 1];
 
         for (int i = 0; i < arch.Keyframes.Length - 1; i++)

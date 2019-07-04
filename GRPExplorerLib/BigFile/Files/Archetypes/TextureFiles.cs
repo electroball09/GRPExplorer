@@ -6,7 +6,7 @@ using GRPExplorerLib.Logging;
 
 namespace GRPExplorerLib.BigFile.Files.Archetypes
 {
-    public enum TextureFormat : byte
+    public enum YetiTextureFormat : byte
     {
         AO = 0x0F,
         DXT5_1 = 0x0A,
@@ -25,16 +25,25 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
         public ushort Width { get; private set; }
         public ushort Height { get; private set; }
-        public TextureFormat Format { get; private set; }
+        public YetiTextureFormat Format { get; private set; }
+        public TexturePayloadFileArchetype Payload { get; private set; }
 
-        public override void Load(byte[] rawData)
+        public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
         {
-            if (rawData.Length < 10)
+            if (size < 10)
                 return;
 
-            Width = BitConverter.ToUInt16(rawData, 4);
-            Height = BitConverter.ToUInt16(rawData, 6);
-            Format = (TextureFormat)rawData[9];
+            Width = BitConverter.ToUInt16(buffer, 4);
+            Height = BitConverter.ToUInt16(buffer, 6);
+            Format = (YetiTextureFormat)buffer[9];
+
+            if (fileReferences.Length == 0)
+            {
+                LogManager.Error("WTF " + File.Name);
+                return;
+            }
+
+            Payload = fileReferences[0]?.ArchetypeAs<TexturePayloadFileArchetype>();
         }
 
         public override void Log(ILogProxy log)
@@ -47,9 +56,17 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
     {
         public override short Identifier => 0x007E;
 
-        public override void Load(byte[] rawData)
+        public byte[] Data { get; private set; }
+
+        public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
         {
-            
+            Data = new byte[size];
+            Array.Copy(buffer, Data, size);
+        }
+
+        public override void Unload()
+        {
+            Data = null;
         }
 
         public override void Log(ILogProxy log)

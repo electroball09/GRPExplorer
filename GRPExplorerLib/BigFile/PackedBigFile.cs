@@ -103,13 +103,7 @@ namespace GRPExplorerLib.BigFile
         {
             BigFileFile[] files = fileMap.KeyMapping.Values.ToArray();
 
-            int count = 0;
-            foreach (int[] header in fileReader.ReadAllHeaders(files, fileUtil.IOBuffers, fileReader.DefaultFlags))
-            {
-                statusToUse.UpdateProgress((float)files.Length / (float)count);
-                fileUtil.AddFileReferencesToFile(files[count], fileUtil.IOBuffers, header);
-                count++;
-            }
+            fileLoader.LoadReferences(files);
         }
     }
 }

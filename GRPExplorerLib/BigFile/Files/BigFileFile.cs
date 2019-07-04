@@ -22,11 +22,17 @@ namespace GRPExplorerLib.BigFile
         }
         public IBigFileFileInfo FileInfo { get; set; }
         public BigFileFolder ParentFolder { get; }
-        public BigFileFile[] FileReferences { get; set; }
+        private BigFileFile[] fileReferences;
+        public BigFileFile[] FileReferences
+        {
+            get { return fileReferences; }
+            set
+            {
+                fileReferences = value;
+            }
+        }
         public FileMappingData MappingData { get; set; }
         public BigFileFileArchetype Archetype { get; private set; }
-
-        public byte[] RawData { get; private set; }
 
         public string FullFolderPath
         {
@@ -49,21 +55,30 @@ namespace GRPExplorerLib.BigFile
             FileInfo = _fileInfo;
             ParentFolder = _parentFolder;
             name = FileInfo.Name.EncodeToGoodString();
-            Archetype = FileArchetypeFactory.GetArchetype(FileInfo);
+            Archetype = this.CreateArchetype();
+            Archetype.File = this;
+        }
+
+        public bool Is<T>() where T : BigFileFileArchetype
+        {
+            return Archetype is T;
         }
 
         public T ArchetypeAs<T>() where T : BigFileFileArchetype
         {
-            if (Archetype is T)
+            if (Is<T>())
                 return Archetype as T;
             return null;
         }
 
         public void Load(byte[] buffer, int size)
         {
-            RawData = new byte[size];
-            Array.Copy(buffer, RawData, size);
-            Archetype.Load(RawData);
+            Archetype.Load(buffer, size, fileReferences);
+        }
+
+        public void Unload()
+        {
+            Archetype.Unload();
         }
     }
 }

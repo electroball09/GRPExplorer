@@ -11,8 +11,11 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
     public abstract class BigFileFileArchetype
     {
         public abstract short Identifier { get; }
+        public BigFileFile File { get; set; }
 
-        public abstract void Load(byte[] rawData);
+        public abstract void Load(byte[] buffer, int size, BigFileFile[] fileReferences);
+
+        public virtual void Unload() { }
 
         public abstract void Log(ILogProxy log);
     }
@@ -21,7 +24,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
     {
         public override short Identifier => 0x0000;
 
-        public override void Load(byte[] rawData)
+        public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
         {
             return;
         }
@@ -46,10 +49,10 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
             }
         }
 
-        public static BigFileFileArchetype GetArchetype(IBigFileFileInfo fileInfo)
+        public static BigFileFileArchetype CreateArchetype(this BigFileFile file)
         {
-            if (archetypes.ContainsKey(fileInfo.FileType))
-                return (BigFileFileArchetype)Activator.CreateInstance(archetypes[fileInfo.FileType].GetType(), null);
+            if (archetypes.ContainsKey(file.FileInfo.FileType))
+                return (BigFileFileArchetype)Activator.CreateInstance(archetypes[file.FileInfo.FileType].GetType());
 
             return new DefaultFileArchetype();
         }
