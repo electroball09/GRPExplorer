@@ -14,7 +14,7 @@ namespace UnityIntegration
 
         public void Error(string msg)
         {
-            UnityEngine.Debug.Log(msg);
+            UnityEngine.Debug.LogError(msg);
         }
 
         public void Info(string msg)

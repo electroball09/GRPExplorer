@@ -295,7 +295,7 @@ namespace GRPExplorerLib.BigFile
 
             if (file.FileReferences != null)
             {
-                log.Error("File {0} (key{1:X8}) already has references loaded!", file.Name, file.FileInfo.Key);
+                log.Debug("File {0} (key{1:X8}) already has references loaded!", file.Name, file.FileInfo.Key);
                 return;
             }
 

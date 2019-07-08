@@ -13,8 +13,8 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
         DXT5_2 = 0x0C,
         DXT1_1 = 0x08,
         DXT1_2 = 0x09,
-        RGBA32_1 = 0x04,
-        RGBA32_2 = 0x05,
+        BGRA32 = 0x04,
+        RGBA32 = 0x05,
         XBOX_A = 0x27,
         XBOX_B = 0x28
     }
@@ -60,8 +60,12 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
         public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
         {
-            Data = new byte[size];
-            Array.Copy(buffer, Data, size);
+            Data = new byte[size - 8];
+            Array.Copy(buffer, 8, Data, 0, Data.Length);
+
+            int hmm = BitConverter.ToInt32(buffer, 0);
+            if (hmm != 1)
+                LogManager.Error("wtf! value is " + hmm);
         }
 
         public override void Unload()
