@@ -41,16 +41,24 @@ namespace UnityIntegrationEditor
             }
             test.currentFilePath = EditorGUILayout.TextField(test.currentFilePath);
             EditorGUILayout.EndHorizontal();
-            test.textureType = (GRPExplorerLib.BigFile.Files.Archetypes.YetiTextureFormat)EditorGUILayout.EnumPopup(test.textureType);
-            EditorGUILayout.BeginHorizontal();
-            test.ImportStart = EditorGUILayout.IntField("Import Start:", test.ImportStart);
-            test.ImportCount = EditorGUILayout.IntField("Import Count:", test.ImportCount);
-            EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
         }
 
         void GUI_Texture(TextureLoaderTest test)
         {
+            test.textureType = (GRPExplorerLib.BigFile.Files.Archetypes.YetiTextureFormat)EditorGUILayout.EnumPopup(test.textureType);
+            EditorGUILayout.BeginHorizontal();
+            test.ImportStart = EditorGUILayout.IntField("Import Start:", test.ImportStart);
+            test.ImportCount = EditorGUILayout.IntField("Import Count:", test.ImportCount);
+            EditorGUILayout.EndHorizontal();
+            if (GUILayout.Button("Update"))
+            {
+                test.ChangeDisplayedTextures();
+                return;
+            }
+
+            EditorGUILayout.Space();
+
             test.ImportAs = (TextureFormat)EditorGUILayout.EnumPopup("Import As:", test.ImportAs);
             test.Transparent = EditorGUILayout.Toggle("Transparent?", test.Transparent);
             EditorGUILayout.BeginHorizontal();

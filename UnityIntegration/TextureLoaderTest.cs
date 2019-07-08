@@ -32,7 +32,8 @@ namespace UnityIntegration
         public YetiTextureFormat textureType = YetiTextureFormat.RGBA32;
         public TextureFormat ImportAs = TextureFormat.RGBA32;
         public List<string> fileNames = new List<string>();
-        public List<BigFileFile> metadataFiles = new List<BigFileFile>();
+        public List<BigFileFile> textureMetadataFiles = new List<BigFileFile>();
+        public List<BigFileFile> displayedFiles = new List<BigFileFile>();
         public BigFileFile loadedPayload;
         public bool Transparent = false;
         public int ImportCount = 50;
@@ -58,35 +59,40 @@ namespace UnityIntegration
                 (currentFilePath,
                 (bigFile) =>
                 {
-                    List<BigFileFile> textureFiles = bigFile.RootFolder.GetAllFilesOfArchetype<TextureMetadataFileArchetype>();
-                    bigFile.FileLoader.LoadFiles(textureFiles);
-                    List<BigFileFile> imports = new List<BigFileFile>();
-                    Debug.Log(textureType);
-                    foreach (BigFileFile file in textureFiles)
-                    {
-                        YetiTextureFormat f = file.ArchetypeAs<TextureMetadataFileArchetype>().Format;
-                        if (f == textureType)
-                        {
-                            imports.Add(file);
-                        }
-                    }
-                    int ind = ImportStart;
-                    foreach (BigFileFile file in imports)
-                    {
-                        if (ind - ImportStart > ImportCount)
-                            break;
-
-                        if (file.ArchetypeAs<TextureMetadataFileArchetype>().Format == textureType)
-                        {
-                            fileNames.Add(file.Name);
-                            metadataFiles.Add(file);
-                        }
-
-                        ind++;
-                    }
-                    bigFile.FileLoader.LoadFiles(metadataFiles);
+                    textureMetadataFiles = bigFile.RootFolder.GetAllFilesOfArchetype<TextureMetadataFileArchetype>();
+                    bigFile.FileLoader.LoadFiles(textureMetadataFiles);
                     m_bigFile = bigFile;
                 });
+        }
+
+        public void ChangeDisplayedTextures()
+        {
+            List<BigFileFile> imports = new List<BigFileFile>();
+            foreach (BigFileFile textureFile in textureMetadataFiles)
+            {
+                if (textureFile.ArchetypeAs<TextureMetadataFileArchetype>().Format == textureType)
+                    imports.Add(textureFile);
+            }
+            sel = 0;
+            fileNames.Clear();
+            displayedFiles.Clear();
+            int ind = 0;
+            foreach (BigFileFile file in imports)
+            {
+                if (ind - ImportStart > ImportCount)
+                    break;
+
+                if (ind < ImportStart)
+                    continue;
+
+                if (file.ArchetypeAs<TextureMetadataFileArchetype>().Format == textureType)
+                {
+                    fileNames.Add(file.Name);
+                    displayedFiles.Add(file);
+                }
+
+                ind++;
+            }
         }
 
         public void LoadTextureFile()
@@ -102,7 +108,7 @@ namespace UnityIntegration
 
             loadedPayload?.Unload();
 
-            BigFileFile curr = metadataFiles[sel];
+            BigFileFile curr = displayedFiles[sel];
             TextureMetadataFileArchetype arch = curr.ArchetypeAs<TextureMetadataFileArchetype>();
 
             loadedPayload = arch.Payload.File;
