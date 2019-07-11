@@ -75,6 +75,12 @@ namespace GRPExplorerLib.BigFile.Extra
         {
             log.Info("Loading a file extensions list from file {0}", fileInfo.FullName);
 
+            if (!fileInfo.Exists)
+            {
+                log.Error("Tried to load file extension list from file {0} but the file doesn't exist!", fileInfo.FullName);
+                return new Dictionary<short, string>();
+            }
+
             Dictionary<short, string> extensionsList = new Dictionary<short, string>();
             using (StreamReader sr = new StreamReader(fileInfo.FullName))
             {

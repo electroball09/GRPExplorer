@@ -47,6 +47,10 @@ namespace UnityIntegration
         void Start()
         {
             testPlane = (GameObject)Instantiate(Resources.Load("TextureTester"));
+
+            Matrix4x4 m = Matrix4x4.identity;
+            m.SetTRS(new Vector3(35f, 0.4325f, -5f), Quaternion.identity, Vector3.one);
+            Debug.Log(m);
         }
 
         public void LoadBigFile()
@@ -73,25 +77,27 @@ namespace UnityIntegration
                 if (textureFile.ArchetypeAs<TextureMetadataFileArchetype>().Format == textureType)
                     imports.Add(textureFile);
             }
+
+            if (ImportStart > imports.Count - 1)
+            {
+                Debug.LogErrorFormat("ImportStart larger than imports count ({0} > {1})", ImportStart, imports.Count);
+                return;
+            }
+
+            if (ImportStart + ImportCount > imports.Count)
+            {
+                Debug.LogErrorFormat("ImportCount larger than imports count ({0} > {1})", ImportStart + ImportCount, imports.Count);
+                return;
+            }
+
             sel = 0;
             fileNames.Clear();
             displayedFiles.Clear();
-            int ind = 0;
-            foreach (BigFileFile file in imports)
+            for (int i = ImportStart; i < ImportStart + ImportCount; i++)
             {
-                if (ind - ImportStart > ImportCount)
-                    break;
-
-                if (ind < ImportStart)
-                    continue;
-
-                if (file.ArchetypeAs<TextureMetadataFileArchetype>().Format == textureType)
-                {
-                    fileNames.Add(file.Name);
-                    displayedFiles.Add(file);
-                }
-
-                ind++;
+                BigFileFile file = imports[i];
+                fileNames.Add(file.Name);
+                displayedFiles.Add(file);
             }
         }
 
