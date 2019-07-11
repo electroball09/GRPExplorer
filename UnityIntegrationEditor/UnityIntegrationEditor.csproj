@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GRPExplorerLib\GRPExplorerLib.csproj" />
+    <ProjectReference Include="..\UnityIntegration\UnityIntegration.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="UnityEditor">
+      <HintPath>..\..\..\Program Files\Unity\Hub\Editor\2018.3.14f1\Editor\Data\Managed\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\Program Files\Unity\Hub\Editor\2018.3.14f1\Editor\Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(SolutionDir)UnityProject\Assets\DLL\Editor\&quot;&#xD;&#xA;COPY &quot;$(TargetDir)$(TargetName).pdb&quot; &quot;$(SolutionDir)UnityProject\Assets\DLL\Editor\&quot;" />
+  </Target>
+
+</Project>
