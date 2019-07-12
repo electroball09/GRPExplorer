@@ -51,6 +51,7 @@
     <Compile Include="BigFile\Files\Archetypes\BigFileFileArchetype.cs" />
     <Compile Include="BigFile\Files\Archetypes\CurveFile.cs" />
     <Compile Include="BigFile\Files\Archetypes\TextureFiles.cs" />
+    <Compile Include="BigFile\Files\Archetypes\WorldFiles.cs" />
     <Compile Include="BigFile\Files\BigFileFileLoader.cs" />
     <Compile Include="BigFile\Files\BigFileFileReader.cs" />
     <Compile Include="BigFile\Files\BigFileFilesAndFolders.cs" />
