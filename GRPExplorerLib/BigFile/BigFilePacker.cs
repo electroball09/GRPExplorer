@@ -75,6 +75,7 @@ namespace GRPExplorerLib.BigFile
             public bool isPacking = false;
             public DiagTools diag = new DiagTools();
             public BigFile bigFile;
+            public BigFileFile[] filesList;
             public Action<BigFilePackInfo> OnCompleted;
             public int filesChunked = 0;
 
@@ -150,15 +151,17 @@ namespace GRPExplorerLib.BigFile
             }
             else
             {
-                packInfos[0].Options = options;
-                packInfos[0].startIndex = 0;
-                packInfos[0].count = bigFile.FileMap.FilesList.Length;
-                packInfos[0].bigFile = bigFile;
-                packInfos[0].OnCompleted = internal_OnPackFinished;
+                log.Error("Single threaded pack not supported!");
 
-                internal_GenBigFileChunk(packInfos[0]);
+                //packInfos[0].Options = options;
+                //packInfos[0].startIndex = 0;
+                //packInfos[0].count = bigFile.FileMap.FilesList.Length;
+                //packInfos[0].bigFile = bigFile;
+                //packInfos[0].OnCompleted = internal_OnPackFinished;
 
-                log.Info("Finished pack!");
+                //internal_GenBigFileChunk(packInfos[0]);
+
+                //log.Info("Finished pack!");
 
                 return null;
             }
@@ -171,6 +174,14 @@ namespace GRPExplorerLib.BigFile
             int dividedRemainder = bigFile.FileMap.FilesList.Length % options.Threads;
             log.Info("Divided files into " + options.Threads + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
 
+            BigFileFile[] files = new BigFileFile[bigFile.FileMap.FilesList.Length];
+            Array.Copy(bigFile.FileMap.FilesList, files, files.Length);
+            Array.Sort(files,
+                (fileA, fileB) =>
+                {
+                    return fileA.FileInfo.Offset.CompareTo(fileB.FileInfo.Offset);
+                });
+
             List<BigFilePackInfo> infos = new List<BigFilePackInfo>();
             for (int i = 0; i < options.Threads; i++)
             {
@@ -178,6 +189,7 @@ namespace GRPExplorerLib.BigFile
                 packInfos[i].startIndex = i * dividedCount;
                 packInfos[i].count = dividedCount;
                 packInfos[i].bigFile = bigFile;
+                packInfos[i].filesList = files;
             }
             packInfos[options.Threads - 1].count += dividedRemainder;
             packInfos[options.Threads - 1].OnCompleted = internal_OnPackFinished; //the last thread gets the job of stitching together the chunks
@@ -212,7 +224,10 @@ namespace GRPExplorerLib.BigFile
                 metaFS.Write(BitConverter.GetBytes((long)0), 0, 8);
 
                 BigFileFile[] filesToWrite = new BigFileFile[info.count];
-                Array.Copy(bigFile.FileMap.FilesList, info.startIndex, filesToWrite, 0, info.count);
+                Array.Copy(info.filesList, info.startIndex, filesToWrite, 0, info.count);
+
+                log.Error("Thread ID {0} - First file is {1}", info.ThreadID, filesToWrite[0].Name);
+                log.Error("Thread ID {0} - Last file is {1}", info.ThreadID, filesToWrite[filesToWrite.Length - 1].Name);
                 
                 BigFileFile currFile = null;
 
@@ -232,7 +247,7 @@ namespace GRPExplorerLib.BigFile
                     //    continue;
                     //}
 
-                    log.Info("Packing file {0}, size: {1}, ZIP: {2}", currFile.Name, size, currFile.FileInfo.ZIP);
+                    log.Debug("Packing file {0}, size: {1}, ZIP: {2}", currFile.Name, size, currFile.FileInfo.ZIP);
 
                     if (size2 < 0)
                     {

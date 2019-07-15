@@ -22,7 +22,9 @@ namespace GRPExplorerTests
             TestTextures,
             ProcessBigmap,
             CompareFiles,
+            CompareAllFiles,
             LogFiles,
+            CheckFiles,
         };
 
         static void Main(string[] args)
@@ -35,6 +37,132 @@ namespace GRPExplorerTests
             int num = int.Parse(Console.ReadLine());
             Console.Clear();
             funcs[num]();
+        }
+
+        static void CheckFiles()
+        {
+            Console.Write("File path: ");
+            string path = Console.ReadLine();
+            if (!File.Exists(path) && !Directory.Exists(path))
+                Environment.Exit(69);
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            BigFile bigFile = BigFile.OpenBigFile(path);
+            bigFile.LoadFromDisk();
+
+            for (int i = 0; i < bigFile.FileMap.FilesList.Length; i++)
+            {
+                BigFileFile file = bigFile.FileMap.FilesList[i];
+
+                if (file.FileInfo.Offset == -1)
+                {
+                    LogManager.GlobalLogFlags = LogFlags.All;
+                    file.FileInfo.DebugLog(log);
+                    LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+                }
+            }
+
+            Console.ReadLine();
+        }
+
+        static void CompareAllFiles()
+        {
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            Console.Write("Bigfile 1: ");
+            string path1 = Console.ReadLine();
+            Console.Write("Bigfile 2: ");
+            string path2 = Console.ReadLine();
+
+            IOBuffers buffer1 = new IOBuffers();
+            IOBuffers buffer2 = new IOBuffers();
+
+            BigFile file1 = BigFile.OpenBigFile(path1);
+            BigFile file2 = BigFile.OpenBigFile(path2);
+
+            if (file1 == null)
+            {
+                Console.WriteLine("file 1 null");
+                Console.ReadLine();
+                Environment.Exit(911);
+            }
+            if (file2 == null)
+            {
+                Console.WriteLine("file 2 null");
+                Console.ReadLine();
+                Environment.Exit(911);
+            }
+
+            file1.LoadFromDisk();
+            Console.Write("Press enter...");
+            Console.ReadLine();
+            file2.LoadFromDisk();
+            Console.Write("Press enter...");
+            Console.ReadLine();
+            Console.Clear();
+
+            int missingFiles = 0;
+            if (file1.FileMap.FilesList.Length != file2.FileMap.FilesList.Length)
+            {
+                Console.WriteLine("Files count don't match!");
+                foreach (BigFileFile file1file in file1.FileMap.FilesList)
+                {
+                    if (file2.FileMap[file1file.FileInfo.Key] == null)
+                    {
+                        missingFiles++;
+                        Console.WriteLine("Found file {0} (key: {1:X8}) that appears in the first bigfile but not the second!", file1file.Name, file1file.FileInfo.Key);
+                    }
+                }
+                Console.ReadLine();
+                foreach (BigFileFile file2file in file2.FileMap.FilesList)
+                {
+                    if (file1.FileMap[file2file.FileInfo.Key] == null)
+                    {
+                        missingFiles++;
+                        Console.WriteLine("Found file {0} (key: {1:X8}) that appears in the second bigfile but not the first!", file2file.Name, file2file.FileInfo.Key);
+                    }
+                }
+                Console.ReadLine();
+            }
+
+            Console.WriteLine("");
+            Console.WriteLine("Found {0} file discrepancies between the two bigfiles", missingFiles);
+            Console.Write("Would you like to continue? ");
+            Console.ReadLine();
+
+            Console.Clear();
+
+            IEnumerator<int[]> headers1 = file1.FileReader.ReadAllHeaders(file1.FileMap.FilesList, buffer1, file1.FileReader.DefaultFlags).GetEnumerator();
+            IEnumerator<int[]> headers2 = file2.FileReader.ReadAllHeaders(file2.FileMap.FilesList, buffer1, file2.FileReader.DefaultFlags).GetEnumerator();
+
+            void CompareHeaders(BigFileFile file1file, BigFileFile file2file, int[] a, int[] b)
+            {
+                bool foundError = a.Length != b.Length;
+                if (!foundError)
+                {
+                    for (int i = 0; i < a.Length; i++)
+                    {
+                        if (a[i] != b[i])
+                        {
+                            foundError = true;
+                            break;
+                        }
+                    }
+                }
+                if (foundError)
+                {
+                    Console.WriteLine("File {0} has a header discrepancy!");
+                    Console.WriteLine("File 1 header length: {0}", a.Length);
+                    Console.WriteLine("File 2 header length: {1}", b.Length);
+                    for (int i = 0; i < a.Length; i++)
+                        Console.Write("{0:X8} ", a[i]);
+                    for (int i = 0; i < b.Length; i++)
+                        Console.Write("{0:X8} ", b[i]);
+                }
+            }
+
+
         }
 
         static void CompareFiles()
