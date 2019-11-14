@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,10 +11,10 @@
 
   <ItemGroup>
     <Reference Include="UnityEditor">
-      <HintPath>..\..\..\Program Files\Unity\Hub\Editor\2018.3.14f1\Editor\Data\Managed\UnityEditor.dll</HintPath>
+      <HintPath>..\bin\UnityEditor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\Program Files\Unity\Hub\Editor\2018.3.14f1\Editor\Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\bin\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
 

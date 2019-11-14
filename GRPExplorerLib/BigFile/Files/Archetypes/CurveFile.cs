@@ -12,6 +12,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
         public float y;
         public float @in;
         public float @out;
+        public byte flags; // maybe?
     }
 
     public class CurveFileArchetype : BigFileFileArchetype
@@ -48,6 +49,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
                     kf.y = BitConverter.ToSingle(buffer, 25 + (i + (i * 16) + 4));
                     kf.@in = BitConverter.ToSingle(buffer, 25 + (i + (i * 16) + 8));
                     kf.@out = BitConverter.ToSingle(buffer, 25 + (i + (i * 16) + 12));
+                    kf.flags = buffer[25 + (i + (i * 16) + 16)];
 
                     Keyframes[i] = kf;
                 }
