@@ -10,7 +10,7 @@ namespace GRPExplorerLib.BigFile.Versions
               int Offset { get; set; }
                  int Key { get; set; }
           int Unknown_01 { get; set; }
-          short FileType { get; set; }
+   YetiFileType FileType { get; set; }
             short Folder { get; set; }
            int TimeStamp { get; set; }
                int Flags { get; set; }

@@ -10,7 +10,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 {
     public abstract class BigFileFileArchetype
     {
-        public abstract short Identifier { get; }
+        public abstract YetiFileType Identifier { get; }
         public BigFileFile File { get; set; }
 
         public abstract void Load(byte[] buffer, int size, BigFileFile[] fileReferences);
@@ -22,7 +22,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public class DefaultFileArchetype : BigFileFileArchetype
     {
-        public override short Identifier => 0x0000;
+        public override YetiFileType Identifier => YetiFileType.NONE;
 
         public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
         {
@@ -37,7 +37,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public static class FileArchetypeFactory
     {
-        static readonly Dictionary<short, BigFileFileArchetype> archetypes = new Dictionary<short, BigFileFileArchetype>();
+        static readonly Dictionary<YetiFileType, BigFileFileArchetype> archetypes = new Dictionary<YetiFileType, BigFileFileArchetype>();
 
         static FileArchetypeFactory()
         {

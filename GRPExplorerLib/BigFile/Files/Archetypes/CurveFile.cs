@@ -17,7 +17,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public class CurveFileArchetype : BigFileFileArchetype
     {
-        public override short Identifier => 0x0010;
+        public override YetiFileType Identifier => YetiFileType.cur;
 
         public int KeyframeCount { get; private set; }
 

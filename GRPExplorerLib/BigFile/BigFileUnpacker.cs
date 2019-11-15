@@ -17,7 +17,6 @@ namespace GRPExplorerLib.BigFile
         public DirectoryInfo Directory;
         public BigFileFlags Flags;
         public int Threads;
-        public string LoadExtensionsFile;
 
         internal void Log(ILogProxy log)
         {
@@ -25,7 +24,6 @@ namespace GRPExplorerLib.BigFile
             log.Info("    Directory: " + Directory?.FullName);
             log.Info("    Flags: " + Flags);
             log.Info("    Threads: " + Threads.ToString());
-            log.Info("    LoadExtensionsFile: " + LoadExtensionsFile.ToString());
         }
     }
 
@@ -91,7 +89,6 @@ namespace GRPExplorerLib.BigFile
             public IOBuffers buffers = new IOBuffers();
             public bool isUnpacking = false;
             public Stopwatch stopwatch = new Stopwatch();
-            public Dictionary<short, string> fileExtensionsList;
 
             public int progress;
         }
@@ -101,8 +98,6 @@ namespace GRPExplorerLib.BigFile
         private ILogProxy log = LogManager.GetLogProxy("BigFileUnpacker");
 
         private BigFile bigFile;
-
-        private BigFileFileExtensionsList extGen;
 
         private Stopwatch stopwatch = new Stopwatch();
 
@@ -128,7 +123,6 @@ namespace GRPExplorerLib.BigFile
         public BigFileUnpacker(BigFile _bigFile)
         {
             bigFile = _bigFile;
-            extGen = new BigFileFileExtensionsList(_bigFile);
         }
         
         public BigFileUnpackOperationStatus UnpackBigfile(BigFileUnpackOptions options)
@@ -159,15 +153,8 @@ namespace GRPExplorerLib.BigFile
             log.Info("Creating unpacked directories...");
             CreateDirectoriesFromTree(unpackDir, bigFile.RootFolder);
 
-            Dictionary<short, string> fileExtensionsList = null;
-            if (!string.IsNullOrEmpty(options.LoadExtensionsFile))
-            {
-                log.Info("Loading extensions list from file {0}", options.LoadExtensionsFile);
-                fileExtensionsList = extGen.LoadFileExtensionsList(new FileInfo(options.LoadExtensionsFile));
-            }
-
             log.Info("Creating renamed mapping file...");
-            UnpackedRenamedFileMapping renamedMapping = CreateRenamedFileMapping(bigFile.RootFolder, fileExtensionsList);
+            UnpackedRenamedFileMapping renamedMapping = CreateRenamedFileMapping(bigFile.RootFolder);
             UnpackedFileKeyMappingFile mappingFile = new UnpackedFileKeyMappingFile(options.Directory);
             mappingFile.SaveMappingData(renamedMapping);
             log.Info("Mapping file saved!");
@@ -195,7 +182,6 @@ namespace GRPExplorerLib.BigFile
                     unpackThreads[i].count = dividedCount;
                     unpackThreads[i].threadID = i;
                     unpackThreads[i].OnWorkDoneCallback = internal_OnThreadFinished;
-                    unpackThreads[i].fileExtensionsList = fileExtensionsList;
                 }
                 unpackThreads[options.Threads - 1].count += dividedRemainder; //add the remainder onto the last info
 
@@ -216,7 +202,6 @@ namespace GRPExplorerLib.BigFile
                 unpackThreads[0].count = bigFile.FileMap.FilesList.Length;
                 unpackThreads[0].threadID = 0;
                 unpackThreads[0].OnWorkDoneCallback = internal_OnThreadFinished;
-                unpackThreads[0].fileExtensionsList = fileExtensionsList;
 
                 internal_UnpackFiles(unpackThreads[0]); //teehee
 
@@ -257,7 +242,6 @@ namespace GRPExplorerLib.BigFile
                 unpackThreads[i].threadID = i;
                 unpackThreads[i].progress = 0;
                 unpackThreads[i].OnWorkDoneCallback = internal_OnThreadFinished;
-                unpackThreads[i].fileExtensionsList = null;
             }
         }
 
@@ -426,7 +410,7 @@ namespace GRPExplorerLib.BigFile
             diagData.CreateDirectories = stopwatch.ElapsedMilliseconds;
         }
 
-        public UnpackedRenamedFileMapping CreateRenamedFileMapping(BigFileFolder folder, Dictionary<short, string> extensionsList, UnpackedRenamedFileMapping mapping = null, Dictionary<string, int> fileRenameCounts = null)
+        public UnpackedRenamedFileMapping CreateRenamedFileMapping(BigFileFolder folder, UnpackedRenamedFileMapping mapping = null, Dictionary<string, int> fileRenameCounts = null)
         {
             bool isFirst = mapping == null;
             if (isFirst)
@@ -441,14 +425,14 @@ namespace GRPExplorerLib.BigFile
             {
                 string fullName = file.FullFolderPath + file.Name;
 
-                if (extensionsList != null && extensionsList.ContainsKey(file.FileInfo.FileType))
-                {
-                    fullName += "." + extensionsList[file.FileInfo.FileType];
-                }
-                else
-                {
-                    fullName += string.Format(".{0:X4}", file.FileInfo.FileType);
-                }
+                //if (extensionsList != null && extensionsList.ContainsKey(file.FileInfo.FileType))
+                //{
+                //    fullName += "." + extensionsList[file.FileInfo.FileType];
+                //}
+                //else
+                //{
+                    fullName += string.Format(".{0}", file.FileInfo.FileType);
+                //}
 
                 string fullNameLower = fullName.ToLowerInvariant();
 
@@ -476,7 +460,7 @@ namespace GRPExplorerLib.BigFile
 
             foreach (BigFileFolder childFolder in folder.SubFolders)
             {
-                CreateRenamedFileMapping(childFolder, extensionsList, mapping, fileRenameCounts);
+                CreateRenamedFileMapping(childFolder, mapping, fileRenameCounts);
             }
 
             if (isFirst)

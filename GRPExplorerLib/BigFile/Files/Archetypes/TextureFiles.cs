@@ -21,7 +21,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public class TextureMetadataFileArchetype : BigFileFileArchetype
     {
-        public override short Identifier => 0x0020;
+        public override YetiFileType Identifier => YetiFileType.tga;
 
         public ushort Width { get; private set; }
         public ushort Height { get; private set; }
@@ -54,7 +54,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public class TexturePayloadFileArchetype : BigFileFileArchetype
     {
-        public override short Identifier => 0x007E;
+        public override YetiFileType Identifier => YetiFileType.txd;
 
         public byte[] Data { get; private set; }
 

@@ -118,7 +118,6 @@ namespace GRPExplorerGUI
                 Directory = new System.IO.DirectoryInfo(txtUnpackDir.Text),
                 Flags = BigFileFlags.Decompress | BigFileFlags.UseThreading,
                 Threads = 4,
-                LoadExtensionsFile = "FileExtensionsList.gex",
             };
 
             unpacker = new BigFileUnpacker(bigFile);
@@ -143,29 +142,6 @@ namespace GRPExplorerGUI
             packer = new BigFilePacker(bigFile);
 
             BigFilePackOperationStatus status = packer.PackBigFile(options);
-        }
-
-        BackgroundWorker bgworker;
-        BigFileFileExtensionsList gen;
-        private void btnGenFileExtensions_Click(object sender, RoutedEventArgs e)
-        {
-            gen = new BigFileFileExtensionsList(bigFile);
-            
-            if (bgworker == null)
-            {
-                bgworker = new BackgroundWorker();
-                bgworker.DoWork += Bgworker_DoWork;
-            }
-
-            bgworker.RunWorkerAsync();
-        }
-
-        private void Bgworker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            Dictionary<short, string> extensionsList = gen.LoadFileExtensionsListFromLoadReport(new System.IO.FileInfo("LoadReport.txt"));
-            //Dictionary<short, string> extensionsList = gen.LoadFileExtensionsList(new System.IO.FileInfo("FileExtensionsList.gex"));
-            gen.WriteFileExtensionsListToFile(extensionsList);
-            gen.VerifyFileTypes(extensionsList);
         }
 
         private void btnFEUtoSWFShow_Click(object sender, RoutedEventArgs e)
