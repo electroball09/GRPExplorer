@@ -86,8 +86,7 @@ namespace UnityIntegration
 
             if (ImportStart + ImportCount > imports.Count)
             {
-                Debug.LogErrorFormat("ImportCount larger than imports count ({0} > {1})", ImportStart + ImportCount, imports.Count);
-                return;
+                ImportCount = imports.Count - ImportStart;
             }
 
             sel = 0;
@@ -130,6 +129,8 @@ namespace UnityIntegration
             texture.Apply();
 
             testPlane.GetComponent<Renderer>().material.mainTexture = texture;
+            testPlane.transform.localScale = new Vector3(arch.Width / arch.Height, 1, 1);
+            Camera.main.orthographicSize = Mathf.Clamp(5 + (.37f * (testPlane.transform.localScale.x - 1)), 5, 100);
         }
     }
 }
