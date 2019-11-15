@@ -14,6 +14,7 @@ namespace UnityIntegrationEditor
     public class CurveExplorerWindow : EditorWindow
     {
         static List<CurveFileArchetype> archetypes;
+        static CurveFileArchetype arch;
         static string[] options;
         static int selected = 0;
         static string BigFilePath = "";
@@ -53,7 +54,7 @@ namespace UnityIntegrationEditor
 
         static void RefreshKeyframes()
         {
-            CurveFileArchetype arch = archetypes[selected];
+            arch = archetypes[selected];
             if (arch.Keyframes.Length == 0)
             {
                 Debug.Log("Curve keyframe count was zero");
@@ -61,7 +62,7 @@ namespace UnityIntegrationEditor
                 return;
             }
 
-            Keyframe[] keyframes = new Keyframe[arch.Keyframes.Length - 1];
+            Keyframe[] keyframes = new Keyframe[arch.Keyframes.Length];
 
             for (int i = 0; i < arch.Keyframes.Length - 1; i++)
             {
@@ -102,6 +103,14 @@ namespace UnityIntegrationEditor
                 RefreshKeyframes();
 
             EditorGUILayout.CurveField(curve);
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.TextField("Curve keyframe count: " + arch.KeyframeCount);
+            for (int i = 0; i < arch.KeyframeCount; i++)
+            {
+                EditorGUILayout.TextField(i + " - " + System.Convert.ToString(arch.Keyframes[i].flags, 2).PadLeft(8, '0'));
+            }
 
             EditorGUILayout.EndVertical();
         }

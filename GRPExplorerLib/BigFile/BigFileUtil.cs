@@ -221,8 +221,7 @@ namespace GRPExplorerLib.BigFile
 
             Dictionary<string, UnpackedRenamedFileMapping.RenamedFileMappingData> temp = new Dictionary<string, UnpackedRenamedFileMapping.RenamedFileMappingData>(mapping.RenamedMap);
 
-            Func<DirectoryInfo, string, BigFileFolder, BigFileFolder> recursion = null;
-            recursion = (directory, dirName, parentFolder) =>
+            BigFileFolder recursion(DirectoryInfo directory, string dirName, BigFileFolder parentFolder)
             {
                 IBigFileFolderInfo folderInfo = version.CreateFolderInfo();
                 folderInfo.Unknown_01 = 0;
@@ -239,7 +238,7 @@ namespace GRPExplorerLib.BigFile
 
                 foreach (FileInfo file in directory.GetFiles())
                 {
-                    if (file.Name.EndsWith(".header")) // HACK LOL
+                    if (file.Name.EndsWith(".header"))
                         continue;
 
                     string fileName = dirName + "//" + file.Name;
@@ -263,15 +262,15 @@ namespace GRPExplorerLib.BigFile
                 foreach (DirectoryInfo dirInfo in directory.GetDirectories())
                 {
                     if (parentFolder == null) //ONLY THE FIRST RECURSION, PREVENTS ADDING WRONG FOLDERS WHEN PACKING
-                        thisFolder.SubFolders.Add(recursion.Invoke(dirInfo, dirInfo.Name, thisFolder));
+                        thisFolder.SubFolders.Add(recursion(dirInfo, dirInfo.Name, thisFolder));
                     else
-                        thisFolder.SubFolders.Add(recursion.Invoke(dirInfo, dirName + "/" + dirInfo.Name, thisFolder));
+                        thisFolder.SubFolders.Add(recursion(dirInfo, dirName + "/" + dirInfo.Name, thisFolder));
                 }
 
                 return thisFolder;
-            };
+            }
 
-            recursion.Invoke(dir, "", null);
+            recursion(dir, "", null);
 
             if (fileCount != mapping.KeyMap.Count)
             {
