@@ -64,5 +64,10 @@ namespace GRPExplorerGUI.View
                     });
             }
         }
+
+        private void BtnLoadReferences_Click(object sender, RoutedEventArgs e)
+        {
+            BigFileViewModel.LoadExtraData();
+        }
     }
 }

@@ -13,8 +13,78 @@ using GRPExplorerLib.Util;
 
 namespace GRPExplorerTests
 {
+    static class Out
+    {
+        const string log_file = "log.txt";
+        static StreamWriter log_sw = File.CreateText(log_file);
+
+        public static void Write(string format, params object[] args)
+        {
+            Console.Write(format, args);
+            log_sw.Write(format, args);
+            log_sw.Flush();
+        }
+
+        public static void Write(string msg)
+        {
+            Console.Write(msg);
+            log_sw.Write(msg);
+            log_sw.Flush();
+        }
+
+        public static void WriteLine(string format, params object[] args)
+        {
+            Console.WriteLine(format, args);
+            log_sw.WriteLine(format, args);
+            log_sw.Flush();
+        }
+
+        public static void WriteLine(string msg)
+        {
+            Console.WriteLine(msg);
+            log_sw.WriteLine(msg);
+            log_sw.Flush();
+        }
+
+        public static string ReadLine()
+        {
+            return Console.ReadLine();
+        }
+
+        public static void Clear()
+        {
+            Console.Clear();
+            log_sw.WriteLine("");
+            log_sw.WriteLine("CLEAR");
+            log_sw.WriteLine("");
+            log_sw.Flush();
+        }
+    }
+
     class Program
     {
+        class LogInterface : IGRPExplorerLibLogInterface
+        {
+            public void Debug(string msg)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Out.WriteLine(msg);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            public void Error(string msg)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Out.WriteLine(msg);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            public void Info(string msg)
+            {
+                Out.WriteLine(msg);
+            }
+        }
+
         static ILogProxy log = LogManager.GetLogProxy(">");
 
         static Action[] funcs =
@@ -25,24 +95,27 @@ namespace GRPExplorerTests
             CompareAllFiles,
             LogFiles,
             CheckFiles,
+            LogFolderUnknowns,
         };
 
         static void Main(string[] args)
         {
+            LogManager.LogInterface = new LogInterface();
+
             for (int i = 0; i < funcs.Length; i++)
             {
-                Console.WriteLine("{0}: {1}", i, funcs[i].Method.Name);
+                Out.WriteLine("{0}: {1}", i, funcs[i].Method.Name);
             }
-            Console.Write("Choice: ");
-            int num = int.Parse(Console.ReadLine());
-            Console.Clear();
+            Out.Write("Choice: ");
+            int num = int.Parse(Out.ReadLine());
+            Out.Clear();
             funcs[num]();
         }
 
         static void CheckFiles()
         {
-            Console.Write("File path: ");
-            string path = Console.ReadLine();
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
             if (!File.Exists(path) && !Directory.Exists(path))
                 Environment.Exit(69);
 
@@ -55,7 +128,7 @@ namespace GRPExplorerTests
             {
                 BigFileFile file = bigFile.FileMap.FilesList[i];
 
-                if (file.FileInfo.Offset == -1)
+                if ((file.FileInfo.Flags & 0x00FF0000) != 0)
                 {
                     LogManager.GlobalLogFlags = LogFlags.All;
                     file.FileInfo.DebugLog(log);
@@ -63,17 +136,17 @@ namespace GRPExplorerTests
                 }
             }
 
-            Console.ReadLine();
+            Out.ReadLine();
         }
 
         static void CompareAllFiles()
         {
             LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
 
-            Console.Write("Bigfile 1: ");
-            string path1 = Console.ReadLine();
-            Console.Write("Bigfile 2: ");
-            string path2 = Console.ReadLine();
+            Out.Write("Bigfile 1: ");
+            string path1 = Out.ReadLine();
+            Out.Write("Bigfile 2: ");
+            string path2 = Out.ReadLine();
 
             IOBuffers buffer1 = new IOBuffers();
             IOBuffers buffer2 = new IOBuffers();
@@ -83,55 +156,55 @@ namespace GRPExplorerTests
 
             if (file1 == null)
             {
-                Console.WriteLine("file 1 null");
-                Console.ReadLine();
+                Out.WriteLine("file 1 null");
+                Out.ReadLine();
                 Environment.Exit(911);
             }
             if (file2 == null)
             {
-                Console.WriteLine("file 2 null");
-                Console.ReadLine();
+                Out.WriteLine("file 2 null");
+                Out.ReadLine();
                 Environment.Exit(911);
             }
 
             file1.LoadFromDisk();
-            Console.Write("Press enter...");
-            Console.ReadLine();
+            Out.Write("Press enter...");
+            Out.ReadLine();
             file2.LoadFromDisk();
-            Console.Write("Press enter...");
-            Console.ReadLine();
-            Console.Clear();
+            Out.Write("Press enter...");
+            Out.ReadLine();
+            Out.Clear();
 
             int missingFiles = 0;
             if (file1.FileMap.FilesList.Length != file2.FileMap.FilesList.Length)
             {
-                Console.WriteLine("Files count don't match!");
+                Out.WriteLine("Files count don't match!");
                 foreach (BigFileFile file1file in file1.FileMap.FilesList)
                 {
                     if (file2.FileMap[file1file.FileInfo.Key] == null)
                     {
                         missingFiles++;
-                        Console.WriteLine("Found file {0} (key: {1:X8}) that appears in the first bigfile but not the second!", file1file.Name, file1file.FileInfo.Key);
+                        Out.WriteLine("Found file {0} (key: {1:X8}) that appears in the first bigfile but not the second!", file1file.Name, file1file.FileInfo.Key);
                     }
                 }
-                Console.ReadLine();
+                Out.ReadLine();
                 foreach (BigFileFile file2file in file2.FileMap.FilesList)
                 {
                     if (file1.FileMap[file2file.FileInfo.Key] == null)
                     {
                         missingFiles++;
-                        Console.WriteLine("Found file {0} (key: {1:X8}) that appears in the second bigfile but not the first!", file2file.Name, file2file.FileInfo.Key);
+                        Out.WriteLine("Found file {0} (key: {1:X8}) that appears in the second bigfile but not the first!", file2file.Name, file2file.FileInfo.Key);
                     }
                 }
-                Console.ReadLine();
+                Out.ReadLine();
             }
 
-            Console.WriteLine("");
-            Console.WriteLine("Found {0} file discrepancies between the two bigfiles", missingFiles);
-            Console.Write("Would you like to continue? ");
-            Console.ReadLine();
+            Out.WriteLine("");
+            Out.WriteLine("Found {0} file discrepancies between the two bigfiles", missingFiles);
+            Out.Write("Would you like to continue? ");
+            Out.ReadLine();
 
-            Console.Clear();
+            Out.Clear();
 
             IEnumerator<int[]> headers1 = file1.FileReader.ReadAllHeaders(file1.FileMap.FilesList, buffer1, file1.FileReader.DefaultFlags).GetEnumerator();
             IEnumerator<int[]> headers2 = file2.FileReader.ReadAllHeaders(file2.FileMap.FilesList, buffer1, file2.FileReader.DefaultFlags).GetEnumerator();
@@ -152,13 +225,13 @@ namespace GRPExplorerTests
                 }
                 if (foundError)
                 {
-                    Console.WriteLine("File {0} has a header discrepancy!");
-                    Console.WriteLine("File 1 header length: {0}", a.Length);
-                    Console.WriteLine("File 2 header length: {1}", b.Length);
+                    Out.WriteLine("File {0} has a header discrepancy!");
+                    Out.WriteLine("File 1 header length: {0}", a.Length);
+                    Out.WriteLine("File 2 header length: {1}", b.Length);
                     for (int i = 0; i < a.Length; i++)
-                        Console.Write("{0:X8} ", a[i]);
+                        Out.Write("{0:X8} ", a[i]);
                     for (int i = 0; i < b.Length; i++)
-                        Console.Write("{0:X8} ", b[i]);
+                        Out.Write("{0:X8} ", b[i]);
                 }
             }
 
@@ -169,17 +242,17 @@ namespace GRPExplorerTests
         {
             LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
 
-            Console.Write("Bigfile 1: ");
-            string path1 = Console.ReadLine();
-            Console.Write("Bigfile 2: ");
-            string path2 = Console.ReadLine();
+            Out.Write("Bigfile 1: ");
+            string path1 = Out.ReadLine();
+            Out.Write("Bigfile 2: ");
+            string path2 = Out.ReadLine();
 
             IOBuffers buffer1 = new IOBuffers();
             IOBuffers buffer2 = new IOBuffers();
 
-            Console.Write("File key: ");
+            Out.Write("File key: ");
             int key = 0;
-            key = Convert.ToInt32(Console.ReadLine(), 16);
+            key = Convert.ToInt32(Out.ReadLine(), 16);
             if (key == 0)
                 Environment.Exit(420);
 
@@ -188,23 +261,23 @@ namespace GRPExplorerTests
 
             if (file1 == null)
             {
-                Console.WriteLine("file 1 null");
-                Console.ReadLine();
+                Out.WriteLine("file 1 null");
+                Out.ReadLine();
                 Environment.Exit(911);
             }
             if (file2 == null)
             {
-                Console.WriteLine("file 2 null");
-                Console.ReadLine();
+                Out.WriteLine("file 2 null");
+                Out.ReadLine();
                 Environment.Exit(911);
             }
 
             file1.LoadFromDisk();
-            Console.Write("Press enter...");
-            Console.ReadLine();
+            Out.Write("Press enter...");
+            Out.ReadLine();
             file2.LoadFromDisk();
-            Console.Write("Press enter...");
-            Console.ReadLine();
+            Out.Write("Press enter...");
+            Out.ReadLine();
 
             BigFileFile bigFileFile1 = file1.FileMap[key];
             BigFileFile bigFileFile2 = file2.FileMap[key];
@@ -222,21 +295,21 @@ namespace GRPExplorerTests
             for (int i = 0; i < size2; i++)
                 chksum2 += buffer2[size2][i];
 
-            Console.Clear();
+            Out.Clear();
 
-            Console.WriteLine("Size 1: " + size1);
-            Console.WriteLine("Checksum 1: " + chksum1);
-            Console.WriteLine("Size 2: " + size2);
-            Console.WriteLine("Checksum 2: " + chksum2);
+            Out.WriteLine("Size 1: " + size1);
+            Out.WriteLine("Checksum 1: " + chksum1);
+            Out.WriteLine("Size 2: " + size2);
+            Out.WriteLine("Checksum 2: " + chksum2);
 
-            Console.Write("Header 1, length: {0} : ", header1.Length);
+            Out.Write("Header 1, length: {0} : ", header1.Length);
             for (int i = 0; i < header1.Length; i++)
-                Console.Write("{0:X8} ", header1[i]);
-            Console.Write("\nHeader 2, length: {0} : ", header2.Length);
+                Out.Write("{0:X8} ", header1[i]);
+            Out.Write("\nHeader 2, length: {0} : ", header2.Length);
             for (int i = 0; i < header2.Length; i++)
-                Console.Write("{0:X8} ", header2[i]);
+                Out.Write("{0:X8} ", header2[i]);
 
-            Console.WriteLine("");
+            Out.WriteLine("");
 
             LogManager.GlobalLogFlags = LogFlags.All;
 
@@ -244,13 +317,13 @@ namespace GRPExplorerTests
             bigFileFile2.FileInfo.DebugLog(log);
 
 
-            Console.ReadLine();
+            Out.ReadLine();
         }
 
         static void ProcessBigmap()
         {
-            Console.Write("File path: ");
-            string path = Console.ReadLine();
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
             if (!File.Exists(path))
                 Environment.Exit(69);
 
@@ -264,29 +337,29 @@ namespace GRPExplorerTests
                     Array.Reverse(tmpBytes, 4, 4);
                     int keyA = BitConverter.ToInt32(tmpBytes, 0);
                     int keyB = BitConverter.ToInt32(tmpBytes, 4);
-                    Console.WriteLine("{0:X4} {1:X4}", keyA, keyB);
+                    Out.WriteLine("{0:X4} {1:X4}", keyA, keyB);
 
                     if (keyB != 0)
                     {
-                        Console.Write("Press enter...");
-                        Console.ReadLine();
+                        Out.Write("Press enter...");
+                        Out.ReadLine();
                     }
                 }
             }
 
-            Console.Write("End!");
-            Console.ReadLine();
+            Out.Write("End!");
+            Out.ReadLine();
         }
 
         static void TestTextures()
         {
-            Console.Write("File path: ");
-            string path = Console.ReadLine();
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
             if (!File.Exists(path))
                 Environment.Exit(69);
 
-            Console.Write("\nType: ");
-            string type = Console.ReadLine();
+            Out.Write("\nType: ");
+            string type = Out.ReadLine();
             YetiTextureFormat format;
             if (!Enum.TryParse(type, out format))
                 Environment.Exit(420);
@@ -302,16 +375,16 @@ namespace GRPExplorerTests
             {
                 TextureMetadataFileArchetype archetype = file.ArchetypeAs<TextureMetadataFileArchetype>();
                 if (archetype.Format == format)
-                    Console.WriteLine(file.FullFolderPath + file.Name + " " + string.Format("{0:X2} {1} {2}", archetype.Format, archetype.Width, archetype.Height));
+                    Out.WriteLine(file.FullFolderPath + file.Name + " " + string.Format("{0:X2} {1} {2}", archetype.Format, archetype.Width, archetype.Height));
             }
 
-            Console.ReadLine();
+            Out.ReadLine();
         }
 
         static void LogFiles()
         {
-            Console.Write("File path: ");
-            string path = Console.ReadLine();
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
             if (!File.Exists(path))
                 Environment.Exit(69);
 
@@ -329,7 +402,67 @@ namespace GRPExplorerTests
                 archetype.Log(log);
             }
 
-            Console.ReadLine();
+            Out.ReadLine();
+        }
+
+        static void LogFolderUnknowns()
+        {
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
+            if (!File.Exists(path))
+                Environment.Exit(69);
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
+            bigFile.LoadFromDisk();
+
+            void FolderRecursion(BigFileFolder folder)
+            {
+                if (false)//(folder.InfoStruct.Unknown_03 != -1)
+                    if (folder.FolderMap.ContainsKey(folder.InfoStruct.Unknown_03))
+                        goto next;
+
+                Out.WriteLine(folder.Name);
+                if (folder.InfoStruct.NextFolder != -1)
+                    if (!folder.FolderMap.ContainsKey(folder.InfoStruct.NextFolder))
+                        Out.WriteLine(string.Format("next  {0:X4}", folder.InfoStruct.NextFolder));
+                    else
+                        Out.WriteLine(string.Format("next  {0}", folder.FolderMap[folder.InfoStruct.NextFolder].Name));
+
+                if (folder.InfoStruct.PreviousFolder != -1)
+                    if (!folder.FolderMap.ContainsKey(folder.InfoStruct.PreviousFolder))
+                        Out.WriteLine(string.Format("prev  {0:X4}", folder.InfoStruct.PreviousFolder));
+                    else
+                        Out.WriteLine(string.Format("prev  {0}", folder.FolderMap[folder.InfoStruct.PreviousFolder].Name));
+
+                if (true)//(folder.InfoStruct.Unknown_01 != -1)
+                    if (!folder.FolderMap.ContainsKey(folder.InfoStruct.Unknown_01))
+                        Out.WriteLine(string.Format("un01  {0:X4}", folder.InfoStruct.Unknown_01));
+                    else
+                        Out.WriteLine(string.Format("un01  {0}", folder.FolderMap[folder.InfoStruct.Unknown_01].Name));
+
+                if (true)//(folder.InfoStruct.Unknown_02 != -1)
+                    if (!folder.FolderMap.ContainsKey(folder.InfoStruct.Unknown_02))
+                        Out.WriteLine(string.Format("un02  {0:X4}", folder.InfoStruct.Unknown_02));
+                    else
+                        Out.WriteLine(string.Format("un02  {0}", folder.FolderMap[folder.InfoStruct.Unknown_02].Name));
+
+                if (true)//(folder.InfoStruct.Unknown_03 != -1)
+                    if (!folder.FolderMap.ContainsKey(folder.InfoStruct.Unknown_03))
+                        Out.WriteLine(string.Format("un03  {0:X4}", folder.InfoStruct.Unknown_03));
+                    else
+                        Out.WriteLine(string.Format("un03  {0}", folder.FolderMap[folder.InfoStruct.Unknown_03].Name));
+                Out.WriteLine("");
+
+                next:
+                foreach (BigFileFolder f in folder.SubFolders)
+                    FolderRecursion(f);
+            }
+
+            FolderRecursion(bigFile.RootFolder);
+
+            Out.ReadLine();
         }
     }
 }

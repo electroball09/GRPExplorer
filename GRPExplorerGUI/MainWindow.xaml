@@ -15,7 +15,7 @@
         <Button x:Name="btnFindKey" Content="Find" HorizontalAlignment="Left" Margin="884,111,0,0" VerticalAlignment="Top" Width="74"/>
 
         <View:BigFileView x:Name="bigFileview" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="701" ScrollViewer.CanContentScroll="True" Height="521" MaxHeight="521" />
-        <View:LogView x:Name="logView" HorizontalAlignment="Left" Height="395" Margin="725,0,0,10" VerticalAlignment="Bottom" Width="800"/>
+        <View:LogView x:Name="logView" HorizontalAlignment="Left" Height="333" Margin="725,0,0,10" VerticalAlignment="Bottom" Width="800"/>
         <Button x:Name="btnUnpackBigfile" Content="Unpack" HorizontalAlignment="Left" Margin="716,38,0,0" VerticalAlignment="Top" Width="120" Click="btnUnpackBigfile_Click"/>
         <TextBox x:Name="txtUnpackDir" HorizontalAlignment="Left" Height="23" Margin="716,10,0,0" TextWrapping="Wrap" Text="C:\GEX_Test\" VerticalAlignment="Top" Width="368"/>
         <Button x:Name="btnPackBigFile" Content="Pack" HorizontalAlignment="Left" Margin="842,38,0,0" VerticalAlignment="Top" Width="120" Click="btnPackBigFile_Click"/>

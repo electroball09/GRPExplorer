@@ -9,7 +9,7 @@ namespace GRPExplorerLib.BigFile.Versions
     {
               int Offset { get; set; }
                  int Key { get; set; }
-          int Unknown_01 { get; set; }
+          int Unknown_01 { get; set; } // THIS IS ALWAYS 0
    YetiFileType FileType { get; set; }
             short Folder { get; set; }
            int TimeStamp { get; set; }
@@ -17,7 +17,7 @@ namespace GRPExplorerLib.BigFile.Versions
           int FileNumber { get; set; }
             byte[] CRC32 { get; set; }
              byte[] Name { get; set; }
-          int Unknown_03 { get; set; }
+          int Unknown_03 { get; set; } // THIS IS ALWAYS 1
                  int ZIP { get; set; }
 
         IBigFileFileInfo FromBytes(byte[] byteBuffer);

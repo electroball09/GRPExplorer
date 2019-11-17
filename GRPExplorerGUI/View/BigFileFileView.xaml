@@ -21,7 +21,7 @@
                     <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Unknown_03, StringFormat='UNKNOWN_03: 0x{0:X8}'}"/>
                 </StackPanel>
                 <Label Content="{Binding Path=BigFileFile.FileReferences.Length}"/>
-                <ListBox x:Name="listFileReferences" ItemsSource="{Binding Path=BigFileFile.FileReferences}" HorizontalAlignment="Right" MinWidth="150"  ScrollViewer.HorizontalScrollBarVisibility="Visible">
+                <ListBox x:Name="listFileReferences" ItemsSource="{Binding Path=BigFileFile.FileReferences}" HorizontalAlignment="Right" MinWidth="150" Height="150" ScrollViewer.HorizontalScrollBarVisibility="Visible">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Path=FileInfo.Key, StringFormat=0x{0:X8}}"/>

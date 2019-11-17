@@ -105,17 +105,19 @@ namespace GRPExplorerLib.BigFile.Versions
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct BigFileFolderInfo_GRFSDLC : IBigFileFolderInfo
     {
-        int unknown_01;
+        short unknown_01;
+        short unknown_02;
         short previousFolder;
         short nextFolder;
-        short unknown_02;
+        short unknown_03;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 54)]
         byte[] name;
 
-        public int Unknown_01 { get { return unknown_01; } set { unknown_01 = value; } }
+        public short Unknown_01 { get { return unknown_01; } set { unknown_01 = value; } }
         public short PreviousFolder { get { return previousFolder; } set { previousFolder = value; } }
         public short NextFolder { get { return nextFolder; } set { nextFolder = value; } }
         public short Unknown_02 { get { return unknown_02; } set { unknown_02 = value; } }
+        public short Unknown_03 { get { return unknown_03; } set { unknown_03 = value; } }
         public byte[] Name { get { return name; } set { name = value; } }
 
         public int StructSize { get { return Marshal.SizeOf(this); } }

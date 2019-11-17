@@ -10,8 +10,9 @@
     <Grid Background="White">
         <StackPanel>
             <StackPanel Orientation="Vertical">
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="btnOpenFile" Content="Open..." IsEnabled="{Binding Path=BigFileLoaded}" Click="BtnOpenFile_Click"/>
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+                    <Button x:Name="btnOpenFile" Content="Open..." Margin="0,0,10,0" IsEnabled="{Binding Path=BigFileLoaded}" Click="BtnOpenFile_Click"/>
+                    <Button x:Name="btnLoadReferences" Margin="20,0,0,0" Content="Load References" Click="BtnLoadReferences_Click" />
                 </StackPanel>
                 <local:BigFileFolderTree x:Name="BigFileFolderTreeComponent" MaxHeight="500" />
             </StackPanel>
