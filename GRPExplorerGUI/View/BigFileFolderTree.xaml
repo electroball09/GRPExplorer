@@ -6,41 +6,44 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:GRPExplorerGUI.View"
              DataContext="{Binding RelativeSource={RelativeSource Self}}"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="1500">
-    <Grid Background="White">
-        <TreeView x:Name="treeFolderView" ItemsSource="{Binding Path=RootFolder.SubFolders}"
+             mc:Ignorable="d" >
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <local:BigFileFileView x:Name="bigFileView" />
+            <TreeView x:Name="treeFolderView" ItemsSource="{Binding Path=RootFolder.SubFolders}"
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
                   ScrollViewer.CanContentScroll="True"
-                  Width="300" MinHeight="300" MaxHeight="300" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Path=SubFolders}">
+                  Height="350">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Path=SubFolders}">
                         <StackPanel Orientation="Vertical">
-                            <Label x:Name="lblHeader" Content="{Binding Path=Name}" Padding="0" Margin="0"/>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox x:Name="chkExpanded" IsChecked="{Binding Path=IsExpanded, Mode=TwoWay}"/>
+                                <Label x:Name="lblHeader" Content="{Binding Path=Name}" Padding="0" Margin="0"/>
+                            </StackPanel>
                             <ListBox x:Name="listFiles" ItemsSource="{Binding Path=Files}" 
                                      SelectedItem="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=SelectedFile, Mode=TwoWay}"
                                      LostFocus="listFiles_LostFocus"
-                                     Margin="5,0,0,0" Padding="0" ScrollViewer.CanContentScroll="False">
+                                     Margin="5,0,0,0" Padding="0" ScrollViewer.CanContentScroll="False" BorderThickness="2,0,0,0" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" BorderBrush="Black">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Label Content="{Binding Path=Name}" ToolTip="{Binding Path=Name}" MaxWidth="150" Margin="0" Padding="0"/>
+                                        <Label Content="{Binding Path=Name}" ToolTip="{Binding Path=Name}" Margin="0" Padding="0"/>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>
                         </StackPanel>
                         <HierarchicalDataTemplate.Triggers>
-                        <DataTrigger Binding="{Binding Path=Files.Count}" Value="0">
-                            <Setter TargetName="listFiles" Property="Visibility" Value="Hidden"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding Path=IsExpanded}" Value="False">
-                            <Setter TargetName="listFiles" Property="Visibility" Value="Hidden"/>
-                        </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=Files.Count}" Value="0">
+                                <Setter TargetName="listFiles" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="chkExpanded" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=IsExpanded}" Value="False">
+                                <Setter TargetName="listFiles" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
                         </HierarchicalDataTemplate.Triggers>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>
-        <StackPanel Orientation="Vertical" Margin="300,0,0,0" HorizontalAlignment="Left">
-            <local:BigFileFileView x:Name="bigFileView" Height="500" Width="200" Margin="0"/>
         </StackPanel>
     </Grid>
 </UserControl>

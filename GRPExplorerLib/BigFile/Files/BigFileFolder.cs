@@ -24,6 +24,8 @@ namespace GRPExplorerLib.BigFile
         private FileMappingData fileMap;
         public FileMappingData FileMap { get { return fileMap; } set { fileMap = value; } }
 
+        public bool IsExpanded { get; set; } = false;
+
         public BigFileFolder ParentFolder
         {
             get

@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using GRPExplorerLib;
 using GRPExplorerLib.BigFile;
 using GRPExplorerGUI.ViewModel;
+using Microsoft.Win32;
 
 namespace GRPExplorerGUI.View
 {
@@ -26,6 +27,8 @@ namespace GRPExplorerGUI.View
     {
         public static DependencyProperty BigFileViewModelProperty =
             DependencyProperty.Register("BigFileViewModel", typeof(BigFileViewModel), typeof(BigFileView));
+        public static DependencyProperty BigFileProperty =
+            DependencyProperty.Register("BigFile", typeof(BigFile), typeof(BigFileView));
 
         public BigFileViewModel BigFileViewModel
         {
@@ -38,19 +41,28 @@ namespace GRPExplorerGUI.View
             InitializeComponent();
         }
 
-        private void LoadFromDiskBtnClick(object sender, RoutedEventArgs e)
+        private void BtnOpenFile_Click(object sender, RoutedEventArgs e)
         {
-            BigFileViewModel.LoadFromDisk();
-        }
+            OpenFileDialog dialog = new OpenFileDialog();
 
-        private void button_Click(object sender, RoutedEventArgs e)
-        {
-            BigFileFolderTreeComponent.RootFolder = BigFileViewModel.BigFile.RootFolder;
-        }
+            dialog.DefaultExt = ".big";
+            dialog.Filter = "BIG files (*.big)|*.big";
 
-        private void btnLoadXtra_Click(object sender, RoutedEventArgs e)
-        {
-            BigFileViewModel.LoadExtraData();
+            bool? result = dialog.ShowDialog();
+
+            if (result == true)
+            {
+                BigFile bf = new PackedBigFile(new System.IO.FileInfo(dialog.FileName));
+                BigFileViewModel = new BigFileViewModel();
+                BigFileViewModel.BigFile = bf;
+
+                BigFileViewModel.LoadFromDisk
+                    (() =>
+                    {
+                        bf.FileUtil.SortFolderTree(bf.RootFolder);
+                        BigFileFolderTreeComponent.RootFolder = BigFileViewModel.BigFile.RootFolder;
+                    });
+            }
         }
     }
 }

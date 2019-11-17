@@ -8,42 +8,20 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <Rectangle Fill="#FFF4F4F5" Margin="0" Stroke="Black"/>
-        <GroupBox x:Name="groupBox" Header="{Binding Path=BigFileFile.Name}" Margin="0">
-            <StackPanel Orientation="Vertical">
-                <StackPanel.Triggers>
-                    
-                </StackPanel.Triggers>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Key: "/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Key, StringFormat='0x{0:X8}'}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Offset: "/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Offset, StringFormat='0x{0:X8}'}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="FileType: "/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.FileType, StringFormat='0x{0:X2}'}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="ZIP: "/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.ZIP}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="UNKNOWN_01"/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Unknown_01, StringFormat='0x{0:X8}'}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Flags"/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Flags, StringFormat='0x{0:X8}'}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="UNKNOWN_03"/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Unknown_03, StringFormat='0x{0:X8}'}"/>
+        <Rectangle Fill="#FFF4F4F5" Margin="0" Stroke="White"/>
+        <GroupBox x:Name="grpFileData" Header="{Binding Path=BigFileFile.Name}" Margin="0,4,0,0">
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Vertical" MinWidth="250">
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Key, StringFormat='Key: 0x{0:X8}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Offset, StringFormat='Offset: 0x{0:X8}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.FileType, StringFormat='FileType: {0}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.ZIP, StringFormat='ZIP: {0}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Unknown_01, StringFormat='UNKNOWN_01: 0x{0:X8}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Flags, StringFormat='Flags: 0x{0:X8}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Path=BigFileFile.FileInfo.Unknown_03, StringFormat='UNKNOWN_03: 0x{0:X8}'}"/>
                 </StackPanel>
                 <Label Content="{Binding Path=BigFileFile.FileReferences.Length}"/>
-                <ListBox x:Name="listFileReferences" ItemsSource="{Binding Path=BigFileFile.FileReferences}" ScrollViewer.HorizontalScrollBarVisibility="Visible">
+                <ListBox x:Name="listFileReferences" ItemsSource="{Binding Path=BigFileFile.FileReferences}" HorizontalAlignment="Right" MinWidth="150"  ScrollViewer.HorizontalScrollBarVisibility="Visible">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Path=FileInfo.Key, StringFormat=0x{0:X8}}"/>

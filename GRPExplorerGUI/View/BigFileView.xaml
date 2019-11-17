@@ -6,51 +6,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:GRPExplorerGUI.View"
              DataContext="{Binding Path=BigFileViewModel, RelativeSource={RelativeSource Self}}"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" Width="363.706">
+             mc:Ignorable="d" Width="717.706" Height="207">
     <Grid Background="White">
-        <StackPanel Margin="0,0,0,0">
-            <GroupBox x:Name="groupBox" Header="{Binding Path=BigFile.MetadataFileInfo.FullName}">
+        <StackPanel>
+            <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
-                            <Button x:Name="btnLoadFromDisk" Content="Load from disk" Click="LoadFromDiskBtnClick"/>
-                            <ProgressBar x:Name="progLoadFromDisk" Value="{Binding Path=LoadProgress, Mode=OneWay}" Width="98" Height="15" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0">
-                                <ProgressBar.Style>
-                                    <Style TargetType="ProgressBar">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=BigFileLoaded}" Value="True">
-                                                <Setter Property="Visibility" Value="Hidden"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Path=BigFileLoaded}" Value="False">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ProgressBar.Style>
-                            </ProgressBar>
-                            <Button x:Name="button" Content="Do Thing" Width="75" Click="button_Click"/>
-                            <Button x:Name="btnLoadXtra" Content="Load Xtra" Width="75" Click="btnLoadXtra_Click"/>
-                        </StackPanel>
-                        <local:BigFileFolderTree x:Name="BigFileFolderTreeComponent"/>
-                    </StackPanel>
-                    <GroupBox Header="Status" Height="200" HorizontalAlignment="Right">
-                        <DockPanel LastChildFill="True" Margin="0">
-                            <StackPanel HorizontalAlignment="Left">
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Type: "/>
-                                    <Label Content="{Binding Path=BigFileType}"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Loaded:"/>
-                                    <Label Content="{Binding Path=BigFileLoaded}"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </DockPanel>
-
-                    </GroupBox>
+                    <Button x:Name="btnOpenFile" Content="Open..." IsEnabled="{Binding Path=BigFileLoaded}" Click="BtnOpenFile_Click"/>
                 </StackPanel>
-            </GroupBox>
+                <local:BigFileFolderTree x:Name="BigFileFolderTreeComponent" MaxHeight="500" />
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

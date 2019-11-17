@@ -308,6 +308,24 @@ namespace GRPExplorerLib.BigFile
             file.FileReferences = references;
         }
 
+        public void SortFolderTree(BigFileFolder folder, bool recursive = true, bool sortFiles = true)
+        {
+            List<BigFileFolder> newFolder = folder.SubFolders.OrderBy(f => f.Name).ToList();
+            for (int i = 0; i < folder.SubFolders.Count; i++)
+                folder.SubFolders[i] = newFolder[i];
+
+            if (sortFiles)
+            {
+                List<BigFileFile> newFiles = folder.Files.OrderBy(f => f.Name).ToList();
+                for (int i = 0; i < folder.Files.Count; i++)
+                    folder.Files[i] = newFiles[i];
+            }
+
+            if (recursive)
+                foreach (BigFileFolder folder2 in folder.SubFolders)
+                    SortFolderTree(folder2);
+        }
+
         public void DebugLogRootFolderTree(BigFileFolder rootFolder)
         {
             Action<BigFileFolder, int> recursion = null;

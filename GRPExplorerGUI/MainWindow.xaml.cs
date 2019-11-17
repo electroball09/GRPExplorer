@@ -27,7 +27,6 @@ namespace GRPExplorerGUI
 {
     public partial class MainWindow : Window
     {
-        private BigFile bigFile;
         private string lastText = "";
 
         private FEUtoSWFWindow FEUtoSWFWindow;
@@ -38,7 +37,6 @@ namespace GRPExplorerGUI
         {
             InitializeComponent();
 
-            btnOpenBigFile.Click += BtnOpenBigFile_Click;
             btnFindKey.Click += BtnFindKey_Click;
             
             LogModel logModel = new LogModel();
@@ -64,44 +62,29 @@ namespace GRPExplorerGUI
             }
         }
 
-        private void BtnOpenBigFile_Click(object sender, RoutedEventArgs e)
-        {
-            bigFile = new UnpackedBigFile(new System.IO.DirectoryInfo(txtFileInput.Text));
-            BigFileViewModel vm = new BigFileViewModel();
-            bigFileview.BigFileViewModel = vm;
-            vm.BigFile = bigFile;
-        }
-
-        private void btnOpenBigFile_Copy_Click(object sender, RoutedEventArgs e)
-        {
-            bigFile = new PackedBigFile(new System.IO.FileInfo(txtFileInput.Text));
-            BigFileViewModel vm = new BigFileViewModel();
-            bigFileview.BigFileViewModel = vm;
-            vm.BigFile = bigFile;
-        }
-
         private void SetFile(int key)
         {
-            if (bigFile == null)
+            if (bigFileview.BigFileViewModel == null)
             {
                 Log("no.");
                 return;
             }
 
-            BigFileFile file = bigFile.FileMap[key];
+            BigFileFile file = bigFileview.BigFileViewModel.BigFile.FileMap[key];
             if (file != null)
             {
-                groupFile.Header = file.Name;
-                lblKey.Content = string.Format("{0:X8}", key);
-                lblPath.Content = file.FullFolderPath;
-                if (bigFile is UnpackedBigFile)
-                {
-                    lblRenamed.Content = (bigFile as UnpackedBigFile).RenamedMapping[key].FileName;
-                }
+                //groupFile.Header = file.Name;
+                //lblKey.Content = string.Format("{0:X8}", key);
+                //lblPath.Content = file.FullFolderPath;
+                //if (bigFileview.BigFileViewModel.BigFile is UnpackedBigFile)
+                //{
+                //    lblRenamed.Content = (bigFileview.BigFileViewModel.BigFile as UnpackedBigFile).RenamedMapping[key].FileName;
+                //}
+                bigFileview.BigFileFolderTreeComponent.SelectedFile = file;
             }
             else
             {
-                Log("oh now ya done it");
+                Log("File key not found!");
             }
         }
 
@@ -120,7 +103,7 @@ namespace GRPExplorerGUI
                 Threads = 4,
             };
 
-            unpacker = new BigFileUnpacker(bigFile);
+            unpacker = new BigFileUnpacker(bigFileview.BigFileViewModel.BigFile);
 
             BigFileUnpackOperationStatus status = unpacker.UnpackBigfile(options);
         }
@@ -132,14 +115,14 @@ namespace GRPExplorerGUI
             {
                 Directory = new System.IO.DirectoryInfo(txtUnpackDir.Text),
                 Flags = (bool)chkCompress.IsChecked ? BigFileFlags.UseThreading | BigFileFlags.Compress : BigFileFlags.UseThreading,
-                Threads = (int)sldThreads.Value,
+                Threads = 4,
                 BigFileName = "Yeti",
                 DeleteChunks = true
             };
 
             logInterface.Info("[GUI] Threads: " + options.Threads);
 
-            packer = new BigFilePacker(bigFile);
+            packer = new BigFilePacker(bigFileview.BigFileViewModel.BigFile);
 
             BigFilePackOperationStatus status = packer.PackBigFile(options);
         }

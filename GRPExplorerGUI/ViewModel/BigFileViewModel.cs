@@ -95,28 +95,26 @@ namespace GRPExplorerGUI.ViewModel
         private void Bgworker_DoWork(object sender, DoWorkEventArgs e)
         {
             log.Info("BGWorker loading bigfile");
-            //try
-            //{
-                bigFile.LoadStatus.OnProgressUpdated +=
-                    (BigFileOperationStatus status) =>
-                        {
-                            NotifyPropertyChanged("LoadProgress");
-                        };
-                CurrentOperationStatus = bigFile.LoadStatus;
-                bigFile.LoadFromDisk();
-                BigFile = bigFile;
-            //}
-            //catch (Exception ex)
-            //{
-            //    log.Error(ex.Message);
-            //    MessageBox.Show(ex.Message + "\n\n" + ex.StackTrace);
-            //}
+            bigFile.LoadStatus.OnProgressUpdated +=
+                (BigFileOperationStatus status) =>
+                    {
+                        NotifyPropertyChanged("LoadProgress");
+                    };
+            CurrentOperationStatus = bigFile.LoadStatus;
+            bigFile.LoadFromDisk();
+            BigFile = bigFile;
         }
 
-        public void LoadFromDisk()
+        public void LoadFromDisk(Action onFinished = null)
         {
-            if (bgworker.IsBusy)
+            if (bgworker.IsBusy || BigFileLoaded == true)
                 return;
+
+            bgworker.RunWorkerCompleted += 
+                (sender, e) =>
+                {
+                    Application.Current.Dispatcher.Invoke(onFinished);
+                };
 
             bgworker.RunWorkerAsync();
         }
