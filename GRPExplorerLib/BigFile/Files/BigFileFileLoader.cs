@@ -48,6 +48,19 @@ namespace GRPExplorerLib.BigFile.Files
         public void LoadReferences(BigFileFile[] files)
         {
             int count = 0;
+
+            //sort the files by location in the bigfile to avoid unnecessary seeks
+            Array.Sort(files,
+                (a, b) =>
+                {
+                    if (a.FileInfo.Offset == -1)
+                        return 1;
+                    if (b.FileInfo.Offset == -1)
+                        return -1;
+
+                    return a.FileInfo.Offset - b.FileInfo.Offset;
+                });
+
             foreach (int[] header in bigFile.FileReader.ReadAllHeaders(files, bigFile.FileUtil.IOBuffers, bigFile.FileReader.DefaultFlags))
             {
                 bigFile.FileUtil.AddFileReferencesToFile(files[count], header);

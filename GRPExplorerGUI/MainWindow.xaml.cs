@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Media.Animation;
 using GRPExplorerLib;
 using GRPExplorerLib.BigFile;
 using GRPExplorerLib.Util;
@@ -45,6 +46,8 @@ namespace GRPExplorerGUI
             logView.Log = logModel;
             LogManager.LogInterface = logInterface;
             LogManager.GlobalLogFlags = LogFlags.Info | LogFlags.Error;
+
+            TypewriteTextblock("....", lblLoadingEllipses, new TimeSpan(0, 0, 2));
         }
 
         private void BtnFindKey_Click(object sender, RoutedEventArgs e)
@@ -144,15 +147,21 @@ namespace GRPExplorerGUI
                 bigFileview.BigFileViewModel = new BigFileViewModel();
                 bigFileview.BigFileViewModel.BigFile = bf;
 
+                stkLoadingReferences.Visibility = Visibility.Visible;
+                lblLoadingReferences.Content = "Loading bigfile";
+
                 bigFileview.BigFileViewModel.LoadFromDisk
                     (() =>
                     {
                         bf.FileUtil.SortFolderTree(bf.RootFolder);
                         bigFileview.FolderTree.RootFolder = bigFileview.BigFileViewModel.BigFile.RootFolder;
 
+                        lblLoadingReferences.Content = "Loading references";
+
                         bigFileview.BigFileViewModel.LoadExtraData
                             (() =>
                             {
+                                stkLoadingReferences.Visibility = Visibility.Collapsed;
                                 LogManager.Info("REFERENCES LOADED");
                             });
                     });
@@ -173,6 +182,32 @@ namespace GRPExplorerGUI
                 PackBigfile(window.txtUnpackDir.Text, window.chkCompress.IsChecked ==  true);
             if (window.Clicked == clicked.unpack)
                 UnpackBigfile(window.txtUnpackDir.Text, window.chkCompress.IsChecked == true);
+        }
+
+        private void TypewriteTextblock(string textToAnimate, Label txt, TimeSpan timeSpan)
+        {
+            Storyboard story = new Storyboard();
+            story.FillBehavior = FillBehavior.HoldEnd;
+            story.RepeatBehavior = RepeatBehavior.Forever;
+
+            DiscreteStringKeyFrame discreteStringKeyFrame;
+            StringAnimationUsingKeyFrames stringAnimationUsingKeyFrames = new StringAnimationUsingKeyFrames();
+            stringAnimationUsingKeyFrames.Duration = new Duration(timeSpan);
+
+            string tmp = string.Empty;
+            foreach (char c in textToAnimate)
+            {
+                discreteStringKeyFrame = new DiscreteStringKeyFrame();
+                discreteStringKeyFrame.KeyTime = KeyTime.Paced;
+                tmp += c;
+                discreteStringKeyFrame.Value = tmp;
+                stringAnimationUsingKeyFrames.KeyFrames.Add(discreteStringKeyFrame);
+            }
+            Storyboard.SetTargetName(stringAnimationUsingKeyFrames, txt.Name);
+            Storyboard.SetTargetProperty(stringAnimationUsingKeyFrames, new PropertyPath(Label.ContentProperty));
+            story.Children.Add(stringAnimationUsingKeyFrames);
+
+            story.Begin(txt);
         }
     }
 }

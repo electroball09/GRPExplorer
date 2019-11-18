@@ -42,7 +42,7 @@ namespace GRPExplorerLib.BigFile.Files
 
             stream.Seek((uint)dataOffset + (uint)(file.FileInfo.Offset * 8), SeekOrigin.Begin);
 
-            int size = -1;
+            int size;
 
             if (file.FileInfo.ZIP == 0)
             {
@@ -73,7 +73,6 @@ namespace GRPExplorerLib.BigFile.Files
 
             if (bytesSize == -1)
             {
-                log.Error("There was an error reading the file!");
                 return -1;
             }
 

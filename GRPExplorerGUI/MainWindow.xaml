@@ -8,8 +8,14 @@
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         x:Class="GRPExplorerGUI.MainWindow"
         mc:Ignorable="d"
-        Title="GRPExplorer" Height="843.554" Width="1230" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+        Title="GRPExplorer" Height="867.554" Width="1230" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
     <Grid>
+        <StatusBar VerticalAlignment="Bottom" Height="30">
+            <StackPanel x:Name="stkLoadingReferences" Visibility="Collapsed" Orientation="Horizontal">
+                <Label x:Name="lblLoadingReferences" Padding="4,4,0,4" Content="LOADING REFERENCES"/>
+                <Label x:Name="lblLoadingEllipses" Padding="0,4,4,4" Content="..."/>
+            </StackPanel>
+        </StatusBar>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="1200" Margin="0,25,0,10">
             <View:BigFileView x:Name="bigFileview" HorizontalAlignment="Stretch" Width="1200" Margin="10,0,0,0" VerticalAlignment="Top" ScrollViewer.CanContentScroll="True" Height="654"/>
             <View:LogView x:Name="logView" HorizontalAlignment="Stretch" Height="110" MaxHeight="110" Margin="10,0,0,654" />
