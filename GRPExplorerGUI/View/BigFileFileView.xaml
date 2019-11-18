@@ -9,16 +9,17 @@
              d:DesignHeight="300" d:DesignWidth="866">
     <Grid>
         <Rectangle Fill="#FFF4F4F5" Margin="0" Stroke="White"/>
-        <GroupBox x:Name="grpFileData" HorizontalAlignment="Stretch" Header="{Binding Path=SelectedFile.Name}" Margin="0,4,0,0">
+        <GroupBox x:Name="grpFileData" HorizontalAlignment="Stretch" Header="{Binding Path=SelectedFile.NameWithExtension}" Margin="0,4,0,0">
             <StackPanel Orientation="Horizontal">
                 <StackPanel Orientation="Vertical" MinWidth="250">
-                    <TextBox IsReadOnly="True" Text="{Binding Path=SelectedFile.FileInfo.Key, StringFormat='Key: 0x{0:X8}'}"/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=SelectedFile.FileInfo.Offset, StringFormat='Offset: 0x{0:X8}'}"/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=SelectedFile.FileInfo.FileType, StringFormat='FileType: {0}'}"/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=SelectedFile.FileInfo.ZIP, StringFormat='ZIP: {0}'}"/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=SelectedFile.FileInfo.Unknown_01, StringFormat='UNKNOWN_01: 0x{0:X8}'}"/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=SelectedFile.FileInfo.Flags, StringFormat='Flags: 0x{0:X8}'}"/>
-                    <TextBox IsReadOnly="True" Text="{Binding Path=SelectedFile.FileInfo.Unknown_03, StringFormat='UNKNOWN_03: 0x{0:X8}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Mode=OneWay, Path=SelectedFile.FileInfo.Key, StringFormat='Key: 0x{0:X8}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Mode=OneWay, Path=SelectedFile.FileInfo.Offset, StringFormat='Offset: 0x{0:X8}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Mode=OneWay, Path=SelectedFile.FileInfo.FileType, StringFormat='FileType: {0}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Mode=OneWay, Path=SelectedFile.FileInfo.ZIP, StringFormat='ZIP: {0}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Mode=OneWay, Path=SelectedFile.FileInfo.Unknown_01, StringFormat='UNKNOWN_01: 0x{0:X8}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Mode=OneWay, Path=SelectedFile.FileInfo.Flags, StringFormat='Flags: 0x{0:X8}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Mode=OneWay, Path=SelectedFile.FileInfo.Unknown_03, StringFormat='UNKNOWN_03: 0x{0:X8}'}"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Mode=OneWay, Path=SelectedFile.FullFolderPath, StringFormat='UNKNOWN_03: 0x{0:X8}'}"/>
                 </StackPanel>
                 <Label Content="{Binding Path=SelectedFile.FileReferences.Length}"/>
             </StackPanel>
@@ -30,8 +31,8 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBox IsReadOnly="true" Width="80"  Margin="0,0,4,0" Text="{Binding FileInfo.Key, StringFormat=0x\{0:X8\}}"/>
-                                    <TextBox IsReadOnly="true" Text="{Binding Name, Mode=OneWay}"/>
+                                    <TextBox IsReadOnly="true" Width="80"  Margin="0,0,4,0" Text="{Binding FileInfo.Key, StringFormat=0x\{0:X8\}}" BorderThickness="1,0,0,0"/>
+                                    <TextBox IsReadOnly="true" Text="{Binding NameWithExtension, Mode=OneWay}" BorderThickness="0,0,0,0"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -40,12 +41,12 @@
             </TabItem>
             <TabItem Header="Referenced by">
                 <Grid Background="#FFE5E5E5">
-                    <ListBox x:Name="listFileReferencedBy" ItemsSource="{Binding SelectedFile.FileReferences}" HorizontalAlignment="Stretch" MinWidth="250" ScrollViewer.HorizontalScrollBarVisibility="Visible">
+                    <ListBox x:Name="listFileReferencedBy" ItemsSource="{Binding SelectedFile.ReferencedBy}" HorizontalAlignment="Stretch" MinWidth="250" ScrollViewer.HorizontalScrollBarVisibility="Visible">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBox IsReadOnly="true" Margin="0,0,4,0" Text="{Binding FileInfo.Key, StringFormat=0x\{0:X8\}}"/>
-                                    <TextBox IsReadOnly="true" Text="{Binding Name, Mode=OneWay}"/>
+                                    <TextBox IsReadOnly="true" Width="80" Margin="0,0,2,0" BorderThickness="1,0,0,0" Text="{Binding FileInfo.Key, StringFormat=0x\{0:X8\}}"/>
+                                    <TextBox IsReadOnly="true" BorderThickness="0,0,0,0" Text="{Binding NameWithExtension, Mode=OneWay}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

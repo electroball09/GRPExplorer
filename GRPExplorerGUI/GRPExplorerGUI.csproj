@@ -53,6 +53,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Extra\BigfilePackingWindow.xaml.cs">
+      <DependentUpon>BigfilePackingWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Extra\FEUtoSWFWindow.xaml.cs">
       <DependentUpon>FEUtoSWFWindow.xaml</DependentUpon>
     </Compile>
@@ -70,6 +73,10 @@
     <Compile Include="View\LogView.xaml.cs">
       <DependentUpon>LogView.xaml</DependentUpon>
     </Compile>
+    <Page Include="Extra\BigfilePackingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Extra\FEUtoSWFWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

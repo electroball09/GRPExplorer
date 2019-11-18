@@ -40,18 +40,22 @@ namespace GRPExplorerGUI.View
 
         private void LogUpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke
-                (() =>
-                {
-                    if (Log.LogProxy.Messages.Count == lastCount)
-                        return;
+            try
+            {
+                Application.Current.Dispatcher.Invoke
+                    (() =>
+                    {
+                        if (Log.LogProxy.Messages.Count == lastCount)
+                            return;
 
-                    lastCount = Log.LogProxy.Messages.Count;
+                        lastCount = Log.LogProxy.Messages.Count;
 
-                    listBox.SelectedIndex = listBox.Items.Count - 1;
-                    listBox.ScrollIntoView(listBox.SelectedItem);
-                    listBox.SelectedIndex = -1;
-                });
+                        listBox.SelectedIndex = listBox.Items.Count - 1;
+                        listBox.ScrollIntoView(listBox.SelectedItem);
+                        listBox.SelectedIndex = -1;
+                    });
+            }
+            catch { } //sometimes it crashes on exit ¯\_(ツ)_/¯
         }
     }
 }

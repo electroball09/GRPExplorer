@@ -95,11 +95,11 @@ namespace GRPExplorerGUI
         }
         
         BigFileUnpacker unpacker;
-        private void btnUnpackBigfile_Click(object sender, RoutedEventArgs e)
+        private void UnpackBigfile(string path, bool compress)
         {
             BigFileUnpackOptions options = new BigFileUnpackOptions
             {
-                Directory = new System.IO.DirectoryInfo(txtUnpackDir.Text),
+                Directory = new System.IO.DirectoryInfo(path),
                 Flags = BigFileFlags.Decompress | BigFileFlags.UseThreading,
                 Threads = 4,
             };
@@ -110,12 +110,12 @@ namespace GRPExplorerGUI
         }
 
         BigFilePacker packer;
-        private void btnPackBigFile_Click(object sender, RoutedEventArgs e)
+        private void PackBigfile(string path, bool compress)
         {
             BigFilePackOptions options = new BigFilePackOptions
             {
-                Directory = new System.IO.DirectoryInfo(txtUnpackDir.Text),
-                Flags = (bool)chkCompress.IsChecked ? BigFileFlags.UseThreading | BigFileFlags.Compress : BigFileFlags.UseThreading,
+                Directory = new System.IO.DirectoryInfo(path),
+                Flags = compress ? BigFileFlags.UseThreading | BigFileFlags.Compress : BigFileFlags.UseThreading,
                 Threads = 4,
                 BigFileName = "Yeti",
                 DeleteChunks = true
@@ -128,18 +128,13 @@ namespace GRPExplorerGUI
             BigFilePackOperationStatus status = packer.PackBigFile(options);
         }
 
-        private void btnFEUtoSWFShow_Click(object sender, RoutedEventArgs e)
-        {
-            FEUtoSWFWindow = new FEUtoSWFWindow();
-            FEUtoSWFWindow.ShowDialog();
-        }
-
         private void MenuOpenBigfile_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-
-            dialog.DefaultExt = ".big";
-            dialog.Filter = "BIG files (*.big)|*.big";
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                DefaultExt = ".big",
+                Filter = "BIG files (*.big)|*.big"
+            };
 
             bool? result = dialog.ShowDialog();
 
@@ -158,10 +153,26 @@ namespace GRPExplorerGUI
                         bigFileview.BigFileViewModel.LoadExtraData
                             (() =>
                             {
-                                GRPExplorerLib.Logging.LogManager.Info("REFERENCES LOADED");
+                                LogManager.Info("REFERENCES LOADED");
                             });
                     });
             }
+        }
+
+        private void MenuFEUtoSWF_Click(object sender, RoutedEventArgs e)
+        {
+            FEUtoSWFWindow = new FEUtoSWFWindow();
+            FEUtoSWFWindow.ShowDialog();
+        }
+
+        private void MenuBigfilePacking_Click(object sender, RoutedEventArgs e)
+        {
+            BigfilePackingWindow window = new BigfilePackingWindow();
+            window.ShowDialog();
+            if (window.Clicked == clicked.pack)
+                PackBigfile(window.txtUnpackDir.Text, window.chkCompress.IsChecked ==  true);
+            if (window.Clicked == clicked.unpack)
+                UnpackBigfile(window.txtUnpackDir.Text, window.chkCompress.IsChecked == true);
         }
     }
 }

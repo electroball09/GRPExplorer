@@ -20,17 +20,20 @@ namespace GRPExplorerLib.BigFile
                     name;
             }
         }
-        public IBigFileFileInfo FileInfo { get; set; }
-        public BigFileFolder ParentFolder { get; }
-        private BigFileFile[] fileReferences;
-        public BigFileFile[] FileReferences
+
+        public string NameWithExtension
         {
-            get { return fileReferences; }
-            set
+            get
             {
-                fileReferences = value;
+                return string.Format("{0}.{1}", Name, FileInfo.FileType);
             }
         }
+        public IBigFileFileInfo FileInfo { get; set; }
+        public BigFileFolder ParentFolder { get; }
+        public BigFileFile[] FileReferences { get; set; }
+
+        public List<BigFileFile> ReferencedBy { get; } = new List<BigFileFile>();
+
         public FileMappingData MappingData { get; set; }
         public BigFileFileArchetype Archetype { get; private set; }
 
@@ -73,7 +76,7 @@ namespace GRPExplorerLib.BigFile
 
         public void Load(byte[] buffer, int size)
         {
-            Archetype.Load(buffer, size, fileReferences);
+            Archetype.Load(buffer, size, FileReferences);
         }
 
         public void Unload()

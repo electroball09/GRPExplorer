@@ -302,7 +302,12 @@ namespace GRPExplorerLib.BigFile
 
             for (int i = 0; i < header.Length; i++)
             {
-                references[i] = file.MappingData[header[i]];
+                BigFileFile reference = file.MappingData[header[i]];
+                if (reference != null)
+                {
+                    reference.ReferencedBy.Add(file);
+                }
+                references[i] = reference;
             }
 
             file.FileReferences = references;

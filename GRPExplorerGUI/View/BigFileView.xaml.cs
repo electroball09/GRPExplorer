@@ -69,35 +69,5 @@ namespace GRPExplorerGUI.View
         {
             InitializeComponent();
         }
-
-        private void BtnOpenFile_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog dialog = new OpenFileDialog();
-
-            dialog.DefaultExt = ".big";
-            dialog.Filter = "BIG files (*.big)|*.big";
-
-            bool? result = dialog.ShowDialog();
-
-            if (result == true)
-            {
-                BigFile bf = new PackedBigFile(new System.IO.FileInfo(dialog.FileName));
-                BigFileViewModel = new BigFileViewModel();
-                BigFileViewModel.BigFile = bf;
-
-                BigFileViewModel.LoadFromDisk
-                    (() =>
-                    {
-                        bf.FileUtil.SortFolderTree(bf.RootFolder);
-                        FolderTree.RootFolder = BigFileViewModel.BigFile.RootFolder;
-
-                        BigFileViewModel.LoadExtraData
-                            (() =>
-                            {
-                                GRPExplorerLib.Logging.LogManager.Info("REFERENCES LOADED");
-                            });
-                    });
-            }
-        }
     }
 }
