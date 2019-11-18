@@ -8,19 +8,23 @@
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         x:Class="GRPExplorerGUI.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="571.554" Width="1606.069">
+        Title="MainWindow" Height="843.554" Width="1630.069">
     <Grid>
-        <TextBox x:Name="txtFindKey" HorizontalAlignment="Left" Height="22" Margin="758,109,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-        <Label x:Name="lblFindKey" Content="Key:" HorizontalAlignment="Left" Margin="722,105,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="btnFindKey" Content="Find" HorizontalAlignment="Left" Margin="884,111,0,0" VerticalAlignment="Top" Width="74"/>
-
-        <View:BigFileView x:Name="bigFileview" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="701" ScrollViewer.CanContentScroll="True" Height="521" MaxHeight="521" />
-        <View:LogView x:Name="logView" HorizontalAlignment="Left" Height="333" Margin="725,0,0,10" VerticalAlignment="Bottom" Width="800"/>
-        <Button x:Name="btnUnpackBigfile" Content="Unpack" HorizontalAlignment="Left" Margin="716,38,0,0" VerticalAlignment="Top" Width="120" Click="btnUnpackBigfile_Click"/>
-        <TextBox x:Name="txtUnpackDir" HorizontalAlignment="Left" Height="23" Margin="716,10,0,0" TextWrapping="Wrap" Text="C:\GEX_Test\" VerticalAlignment="Top" Width="368"/>
-        <Button x:Name="btnPackBigFile" Content="Pack" HorizontalAlignment="Left" Margin="842,38,0,0" VerticalAlignment="Top" Width="120" Click="btnPackBigFile_Click"/>
-        <CheckBox x:Name="chkCompress" Content="Compress" HorizontalAlignment="Left" Margin="967,43,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <Button x:Name="btnFEUtoSWFShow" Content="Show FEUtoSWF" HorizontalAlignment="Left" Margin="716,86,0,0" VerticalAlignment="Top" Width="175" Click="btnFEUtoSWFShow_Click"/>
+        <TextBox x:Name="txtFindKey" HorizontalAlignment="Left" Height="22" Margin="1194,445,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <Label x:Name="lblFindKey" Content="Key:" HorizontalAlignment="Left" Margin="1158,441,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnFindKey" Content="Find" HorizontalAlignment="Left" Margin="1320,447,0,0" VerticalAlignment="Top" Width="74"/>
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="1080" Margin="0,25,0,10">
+            <View:BigFileView x:Name="bigFileview" HorizontalAlignment="Stretch" Width="1080" Margin="10,0,0,0" VerticalAlignment="Top" ScrollViewer.CanContentScroll="True" Height="654"/>
+            <View:LogView x:Name="logView" HorizontalAlignment="Stretch" Height="100" MaxHeight="100" Margin="10,0,0,654" />
+        </StackPanel>
+        <Button x:Name="btnUnpackBigfile" Content="Unpack" HorizontalAlignment="Left" Margin="1152,374,0,0" VerticalAlignment="Top" Width="120" Click="btnUnpackBigfile_Click"/>
+        <TextBox x:Name="txtUnpackDir" HorizontalAlignment="Left" Height="23" Margin="1152,346,0,0" TextWrapping="Wrap" Text="C:\GEX_Test\" VerticalAlignment="Top" Width="368"/>
+        <Button x:Name="btnPackBigFile" Content="Pack" HorizontalAlignment="Left" Margin="1278,374,0,0" VerticalAlignment="Top" Width="120" Click="btnPackBigFile_Click"/>
+        <CheckBox x:Name="chkCompress" Content="Compress" HorizontalAlignment="Left" Margin="1403,379,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <Button x:Name="btnFEUtoSWFShow" Content="Show FEUtoSWF" HorizontalAlignment="Left" Margin="1152,422,0,0" VerticalAlignment="Top" Width="175" Click="btnFEUtoSWFShow_Click"/>
+        <Menu x:Name="menu" Height="20" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalAlignment="Stretch">
+            <MenuItem x:Name="menuOpenBigfile" Header="Open Bigfile..." Click="MenuOpenBigfile_Click"/>
+        </Menu>
 
     </Grid>
 </Window>

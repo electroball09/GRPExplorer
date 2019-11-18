@@ -119,7 +119,7 @@ namespace GRPExplorerGUI.ViewModel
             bgworker.RunWorkerAsync();
         }
 
-        public void LoadExtraData()
+        public void LoadExtraData(Action onFinished = null)
         {
             if (extraDataWorker.IsBusy)
                 return;
@@ -128,6 +128,12 @@ namespace GRPExplorerGUI.ViewModel
             CurrentOperationStatus = status;
 
             extraDataWorker.RunWorkerAsync(status);
+
+            extraDataWorker.RunWorkerCompleted +=
+                (sender, e) =>
+                {
+                    Application.Current.Dispatcher.Invoke(onFinished);
+                };
         }
     }
 }

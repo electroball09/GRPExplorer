@@ -7,10 +7,13 @@
              xmlns:local="clr-namespace:GRPExplorerGUI.View"
              xmlns:Model="clr-namespace:GRPExplorerGUI.Model"
              DataContext="{Binding RelativeSource={RelativeSource Self}}"
-             mc:Ignorable="d" Height="268.572" Width="503.81">
-    <StackPanel >
-        <DockPanel >
-            <ListBox x:Name="listBox" MinHeight="150" MaxHeight="250" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding LogList.LogProxy.Messages}">
+             mc:Ignorable="d">
+    <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <ListBox x:Name="listBox" 
+                 Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}, Path=Width}"
+                 Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}, Path=Height}" 
+                 MaxHeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}, Path=Height}" 
+                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding LogList.LogProxy.Messages}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -31,7 +34,6 @@
                         <Setter Property="Height" Value="20"/>
                     </Style>
                 </ListBox.ItemContainerStyle>
-            </ListBox>
-        </DockPanel>
+        </ListBox>
     </StackPanel>
 </UserControl>

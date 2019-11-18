@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Timers;
 using GRPExplorerGUI.Model;
 
 namespace GRPExplorerGUI.View
@@ -25,10 +26,32 @@ namespace GRPExplorerGUI.View
             get { return (LogModel)GetValue(LogListProperty); }
             set { SetValue(LogListProperty, value); }
         }
+
+        int lastCount = 0;
+        Timer logUpdateTimer = new Timer(100);
         
         public LogView()
         {
             InitializeComponent();
+
+            logUpdateTimer.Elapsed += LogUpdateTimer_Elapsed;
+            logUpdateTimer.Start();
+        }
+
+        private void LogUpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke
+                (() =>
+                {
+                    if (Log.LogProxy.Messages.Count == lastCount)
+                        return;
+
+                    lastCount = Log.LogProxy.Messages.Count;
+
+                    listBox.SelectedIndex = listBox.Items.Count - 1;
+                    listBox.ScrollIntoView(listBox.SelectedItem);
+                    listBox.SelectedIndex = -1;
+                });
         }
     }
 }

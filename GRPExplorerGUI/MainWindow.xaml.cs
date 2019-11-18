@@ -22,6 +22,7 @@ using GRPExplorerGUI.ViewModel;
 using GRPExplorerLib.Logging;
 using GRPExplorerLib.BigFile.Extra;
 using GRPExplorerGUI.Extra;
+using Microsoft.Win32;
 
 namespace GRPExplorerGUI
 {
@@ -80,7 +81,7 @@ namespace GRPExplorerGUI
                 //{
                 //    lblRenamed.Content = (bigFileview.BigFileViewModel.BigFile as UnpackedBigFile).RenamedMapping[key].FileName;
                 //}
-                bigFileview.BigFileFolderTreeComponent.SelectedFile = file;
+                bigFileview.FolderTree.SelectedFile = file;
             }
             else
             {
@@ -131,6 +132,36 @@ namespace GRPExplorerGUI
         {
             FEUtoSWFWindow = new FEUtoSWFWindow();
             FEUtoSWFWindow.ShowDialog();
+        }
+
+        private void MenuOpenBigfile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+
+            dialog.DefaultExt = ".big";
+            dialog.Filter = "BIG files (*.big)|*.big";
+
+            bool? result = dialog.ShowDialog();
+
+            if (result == true)
+            {
+                BigFile bf = new PackedBigFile(new System.IO.FileInfo(dialog.FileName));
+                bigFileview.BigFileViewModel = new BigFileViewModel();
+                bigFileview.BigFileViewModel.BigFile = bf;
+
+                bigFileview.BigFileViewModel.LoadFromDisk
+                    (() =>
+                    {
+                        bf.FileUtil.SortFolderTree(bf.RootFolder);
+                        bigFileview.FolderTree.RootFolder = bigFileview.BigFileViewModel.BigFile.RootFolder;
+
+                        bigFileview.BigFileViewModel.LoadExtraData
+                            (() =>
+                            {
+                                GRPExplorerLib.Logging.LogManager.Info("REFERENCES LOADED");
+                            });
+                    });
+            }
         }
     }
 }

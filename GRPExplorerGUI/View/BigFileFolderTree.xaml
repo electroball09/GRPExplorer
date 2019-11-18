@@ -7,43 +7,51 @@
              xmlns:local="clr-namespace:GRPExplorerGUI.View"
              DataContext="{Binding RelativeSource={RelativeSource Self}}"
              mc:Ignorable="d" >
-    <Grid>
-        <StackPanel Orientation="Vertical">
-            <local:BigFileFileView x:Name="bigFileView" />
-            <TreeView x:Name="treeFolderView" ItemsSource="{Binding Path=RootFolder.SubFolders}"
+    <StackPanel Orientation="Vertical">
+        <TreeView x:Name="treeFolderView" ItemsSource="{Binding Path=RootFolder.SubFolders}"
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
                   ScrollViewer.CanContentScroll="True"
-                  Height="350">
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Path=SubFolders}">
-                        <StackPanel Orientation="Vertical">
-                            <StackPanel Orientation="Horizontal">
-                                <CheckBox x:Name="chkExpanded" IsChecked="{Binding Path=IsExpanded, Mode=TwoWay}"/>
-                                <Label x:Name="lblHeader" Content="{Binding Path=Name}" Padding="0" Margin="0"/>
-                            </StackPanel>
-                            <ListBox x:Name="listFiles" ItemsSource="{Binding Path=Files}" 
+                  VerticalAlignment="Stretch"
+                  Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:BigFileFolderTree}, Path=Height}"
+                  MaxHeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:BigFileFolderTree}, Path=Height}">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Path=SubFolders}">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <Expander Width="20" Height="20" Padding="0" x:Name="expHeader" IsExpanded="{Binding Path=IsExpanded, Mode=TwoWay}" ExpandDirection="Right" RenderTransformOrigin="0.5,0.5">
+                                <Expander.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="0.5" ScaleY="0.5"/>
+                                        <SkewTransform/>
+                                        <RotateTransform/>
+                                        <TranslateTransform Y="-2"/>
+                                    </TransformGroup>
+                                </Expander.RenderTransform>
+                            </Expander>
+                            <Label Padding ="0" x:Name="lblHeader" Content="{Binding Path=Name}"/>
+                        </StackPanel>
+                        <ListBox x:Name="listFiles" ItemsSource="{Binding Path=Files}" 
                                      SelectedItem="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=SelectedFile, Mode=TwoWay}"
                                      LostFocus="listFiles_LostFocus"
                                      Margin="5,0,0,0" Padding="0" ScrollViewer.CanContentScroll="False" BorderThickness="2,0,0,0" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" BorderBrush="Black">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Label Content="{Binding Path=Name}" ToolTip="{Binding Path=Name}" Margin="0" Padding="0"/>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </StackPanel>
-                        <HierarchicalDataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Path=Files.Count}" Value="0">
-                                <Setter TargetName="listFiles" Property="Visibility" Value="Collapsed"/>
-                                <Setter TargetName="chkExpanded" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Path=IsExpanded}" Value="False">
-                                <Setter TargetName="listFiles" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </HierarchicalDataTemplate.Triggers>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
-        </StackPanel>
-    </Grid>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding Path=Name}" ToolTip="{Binding Path=Name}" Margin="0" Padding="0"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                    <HierarchicalDataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding Path=Files.Count}" Value="0">
+                            <Setter TargetName="listFiles" Property="Visibility" Value="Collapsed"/>
+                            <Setter TargetName="expHeader" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=IsExpanded}" Value="False">
+                            <Setter TargetName="listFiles" Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </HierarchicalDataTemplate.Triggers>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+    </StackPanel>
 </UserControl>

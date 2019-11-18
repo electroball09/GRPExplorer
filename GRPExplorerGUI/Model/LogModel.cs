@@ -66,7 +66,11 @@ namespace GRPExplorerGUI.Model
 
         private void AddMsg(LogMessage msg)
         {
-            Application.Current.Dispatcher.BeginInvoke((Action<LogMessage>)messages.Add, msg);
+            try
+            {
+                Application.Current.Dispatcher.BeginInvoke((Action<LogMessage>)messages.Add, msg);
+            }
+            catch { } //sometimes there's an exception when closing the program so i'm cancelling it
         }
 
         public void Debug(string msg)

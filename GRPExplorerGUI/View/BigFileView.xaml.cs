@@ -29,11 +29,40 @@ namespace GRPExplorerGUI.View
             DependencyProperty.Register("BigFileViewModel", typeof(BigFileViewModel), typeof(BigFileView));
         public static DependencyProperty BigFileProperty =
             DependencyProperty.Register("BigFile", typeof(BigFile), typeof(BigFileView));
+        static DependencyProperty RootFolderProperty =
+            DependencyProperty.Register("RootFolder", typeof(BigFileFolder), typeof(BigFileView));
+        static DependencyProperty SelectedFolderProperty =
+            DependencyProperty.Register("SelectedFolder", typeof(BigFileFolder), typeof(BigFileView));
+        static DependencyProperty SelectedFileProperty =
+            DependencyProperty.Register("SelectedFile_", typeof(BigFileFile), typeof(BigFileView));
 
         public BigFileViewModel BigFileViewModel
         {
             get { return (BigFileViewModel)GetValue(BigFileViewModelProperty); }
             set { SetValue(BigFileViewModelProperty, value); }
+        }
+
+        public BigFileFolder RootFolder
+        {
+            get { return (BigFileFolder)GetValue(RootFolderProperty); }
+            set { SetValue(RootFolderProperty, value); }
+        }
+
+        public BigFileFolder SelectedFolder
+        {
+            get { return (BigFileFolder)GetValue(SelectedFolderProperty); }
+            set { SetValue(SelectedFolderProperty, value); }
+        }
+
+        public BigFileFile SelectedFile
+        {
+            get { return (BigFileFile)GetValue(SelectedFileProperty); }
+            set { SetValue(SelectedFileProperty, value); FileView.SelectedFile = value; }
+        }
+
+        public double TreeHeight
+        {
+            get { return Height - 280; }
         }
 
         public BigFileView()
@@ -60,14 +89,15 @@ namespace GRPExplorerGUI.View
                     (() =>
                     {
                         bf.FileUtil.SortFolderTree(bf.RootFolder);
-                        BigFileFolderTreeComponent.RootFolder = BigFileViewModel.BigFile.RootFolder;
+                        FolderTree.RootFolder = BigFileViewModel.BigFile.RootFolder;
+
+                        BigFileViewModel.LoadExtraData
+                            (() =>
+                            {
+                                GRPExplorerLib.Logging.LogManager.Info("REFERENCES LOADED");
+                            });
                     });
             }
-        }
-
-        private void BtnLoadReferences_Click(object sender, RoutedEventArgs e)
-        {
-            BigFileViewModel.LoadExtraData();
         }
     }
 }

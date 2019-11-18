@@ -21,10 +21,10 @@ namespace GRPExplorerGUI.View
     /// </summary>
     public partial class BigFileFileView : UserControl
     {
-        static DependencyProperty fileProperty =
-            DependencyProperty.Register("BigFileFile", typeof(BigFileFile), typeof(BigFileFileView));
+        public static readonly DependencyProperty fileProperty =
+            DependencyProperty.Register("SelectedFile", typeof(BigFileFile), typeof(BigFileFileView), new FrameworkPropertyMetadata());
 
-        public BigFileFile File
+        public BigFileFile SelectedFile
         {
             get { return (BigFileFile)GetValue(fileProperty); }
             set

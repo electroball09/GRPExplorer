@@ -6,16 +6,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:GRPExplorerGUI.View"
              DataContext="{Binding Path=BigFileViewModel, RelativeSource={RelativeSource Self}}"
-             mc:Ignorable="d" Width="717.706" Height="207">
-    <Grid Background="White">
-        <StackPanel>
-            <StackPanel Orientation="Vertical">
-                <StackPanel Orientation="Horizontal" Margin="0,4,0,4">
-                    <Button x:Name="btnOpenFile" Content="Open..." Margin="0,0,10,0" IsEnabled="{Binding Path=BigFileLoaded}" Click="BtnOpenFile_Click"/>
-                    <Button x:Name="btnLoadReferences" Margin="20,0,0,0" Content="Load References" Click="BtnLoadReferences_Click" />
-                </StackPanel>
-                <local:BigFileFolderTree x:Name="BigFileFolderTreeComponent" MaxHeight="500" />
-            </StackPanel>
+             mc:Ignorable="d" Width="1437.5">
+    <Grid Background="White" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+        <StackPanel Orientation="Vertical">
+            <local:BigFileFileView x:Name="FileView" HorizontalAlignment="Stretch"/>
+            <local:BigFileFolderTree x:Name="FolderTree" 
+                                     Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:BigFileView},  Path=TreeHeight}" 
+                                     MaxHeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:BigFileView}, Path=TreeHeight}" 
+                                     SelectedFile="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:BigFileView}, Path=SelectedFile, Mode=TwoWay}" VerticalAlignment="Stretch"/>
         </StackPanel>
     </Grid>
 </UserControl>
