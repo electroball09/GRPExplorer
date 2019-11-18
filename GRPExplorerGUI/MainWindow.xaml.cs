@@ -47,7 +47,7 @@ namespace GRPExplorerGUI
             LogManager.LogInterface = logInterface;
             LogManager.GlobalLogFlags = LogFlags.Info | LogFlags.Error;
 
-            TypewriteTextblock("....", lblLoadingEllipses, new TimeSpan(0, 0, 2));
+            TypewriteTextblock("...................", lblLoadingEllipses, new TimeSpan(0, 0, 2));
         }
 
         private void BtnFindKey_Click(object sender, RoutedEventArgs e)
@@ -77,13 +77,6 @@ namespace GRPExplorerGUI
             BigFileFile file = bigFileview.BigFileViewModel.BigFile.FileMap[key];
             if (file != null)
             {
-                //groupFile.Header = file.Name;
-                //lblKey.Content = string.Format("{0:X8}", key);
-                //lblPath.Content = file.FullFolderPath;
-                //if (bigFileview.BigFileViewModel.BigFile is UnpackedBigFile)
-                //{
-                //    lblRenamed.Content = (bigFileview.BigFileViewModel.BigFile as UnpackedBigFile).RenamedMapping[key].FileName;
-                //}
                 bigFileview.FolderTree.SelectedFile = file;
             }
             else
