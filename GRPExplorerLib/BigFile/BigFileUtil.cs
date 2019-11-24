@@ -305,7 +305,8 @@ namespace GRPExplorerLib.BigFile
                 BigFileFile reference = file.MappingData[header[i]];
                 if (reference != null)
                 {
-                    reference.ReferencedBy.Add(file);
+                    if (!reference.ReferencedBy.Contains(file))
+                        reference.ReferencedBy.Add(file);
                 }
                 references[i] = reference;
             }
