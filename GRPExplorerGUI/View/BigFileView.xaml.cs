@@ -33,13 +33,13 @@ namespace GRPExplorerGUI.View
             DependencyProperty.Register("RootFolder", typeof(BigFileFolder), typeof(BigFileView));
         static DependencyProperty SelectedFolderProperty =
             DependencyProperty.Register("SelectedFolder", typeof(BigFileFolder), typeof(BigFileView));
-        static DependencyProperty SelectedFileProperty =
-            DependencyProperty.Register("SelectedFile_", typeof(BigFileFile), typeof(BigFileView));
+        //static DependencyProperty SelectedFileProperty =
+        //    DependencyProperty.Register("SelectedFile_", typeof(BigFileFile), typeof(BigFileView));
 
         public BigFileViewModel BigFileViewModel
         {
             get { return (BigFileViewModel)GetValue(BigFileViewModelProperty); }
-            set { SetValue(BigFileViewModelProperty, value); }
+            set { SetValue(BigFileViewModelProperty, value); FileView.ViewModel = value; }
         }
 
         public BigFileFolder RootFolder
@@ -56,8 +56,8 @@ namespace GRPExplorerGUI.View
 
         public BigFileFile SelectedFile
         {
-            get { return (BigFileFile)GetValue(SelectedFileProperty); }
-            set { SetValue(SelectedFileProperty, value); FileView.SelectedFile = value; }
+            get { return BigFileViewModel?.SelectedFile; } //{ return (BigFileFile)GetValue(SelectedFileProperty); }
+            set { BigFileViewModel.SelectedFile = value; }//{ SetValue(SelectedFileProperty, value); FileView.SelectedFile = value; }
         }
 
         public double TreeHeight

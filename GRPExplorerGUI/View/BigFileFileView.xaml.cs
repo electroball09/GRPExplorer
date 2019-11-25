@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using GRPExplorerLib.BigFile;
+using GRPExplorerGUI.ViewModel;
+using Microsoft.Win32;
 
 namespace GRPExplorerGUI.View
 {
@@ -21,17 +23,17 @@ namespace GRPExplorerGUI.View
     /// </summary>
     public partial class BigFileFileView : UserControl
     {
-        public static readonly DependencyProperty fileProperty =
-            DependencyProperty.Register("SelectedFile", typeof(BigFileFile), typeof(BigFileFileView), new FrameworkPropertyMetadata());
+        public static readonly DependencyProperty vmProperty =
+            DependencyProperty.Register("ViewModel", typeof(BigFileViewModel), typeof(BigFileFileView), new FrameworkPropertyMetadata());
 
-        public BigFileFile SelectedFile
+        public BigFileViewModel ViewModel
         {
-            get { return (BigFileFile)GetValue(fileProperty); }
+            get { return (BigFileViewModel)GetValue(vmProperty); }
             set
             {
                 if (value != null)
                 {
-                    SetValue(fileProperty, value);
+                    SetValue(vmProperty, value);
                 }
             }
         }
@@ -39,6 +41,13 @@ namespace GRPExplorerGUI.View
         public BigFileFileView()
         {
             InitializeComponent();
+        }
+
+        private void BtnExtractFile_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel?.ExtractSelectedFile();
+
+            //void log(string msg) => GRPExplorerLib.Logging.LogManager.Info(msg);
         }
     }
 }

@@ -60,6 +60,7 @@
       <DependentUpon>FEUtoSWFWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Model\LogModel.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="ViewModel\BigFileViewModel.cs" />
     <Compile Include="View\BigFileFileView.xaml.cs">
       <DependentUpon>BigFileFileView.xaml</DependentUpon>

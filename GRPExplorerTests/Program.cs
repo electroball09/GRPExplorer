@@ -10,6 +10,9 @@ using GRPExplorerLib.Logging;
 using GRPExplorerLib.BigFile.Files;
 using GRPExplorerLib.BigFile.Files.Archetypes;
 using GRPExplorerLib.Util;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Parameters;
 
 namespace GRPExplorerTests
 {
@@ -48,7 +51,9 @@ namespace GRPExplorerTests
 
         public static string ReadLine()
         {
-            return Console.ReadLine();
+            string str = Console.ReadLine();
+            log_sw.Write(str);
+            return str;
         }
 
         public static void Clear()
@@ -96,6 +101,7 @@ namespace GRPExplorerTests
             LogFiles,
             CheckFiles,
             LogFolderUnknowns,
+            DecryptOasis
         };
 
         static void Main(string[] args)
@@ -462,6 +468,50 @@ namespace GRPExplorerTests
 
             FolderRecursion(bigFile.RootFolder);
 
+            Out.ReadLine();
+        }
+
+        static void DecryptOasis()
+        {
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
+            if (!File.Exists(path))
+                Environment.Exit(69);
+
+            const string OasisKey = "570462DC49E9E51F0B55F30287A5C7CD";
+            const string OutputFile = "OASIS_OUTPUT.txt";
+            byte[] OasisKeyBytes = Encoding.ASCII.GetBytes(OasisKey);
+            //Array.Reverse(OasisKeyBytes);
+
+            TwofishEngine tf1 = new TwofishEngine();
+            TwofishEngine tf2 = new TwofishEngine();
+            tf1.Init(false, new KeyParameter(OasisKeyBytes, 0, OasisKeyBytes.Length));
+            tf2.Init(true, new KeyParameter(OasisKeyBytes, 0, OasisKeyBytes.Length));
+
+            byte[] buf = new byte[tf1.GetBlockSize()];
+            byte[] output = new byte[tf1.GetBlockSize()];
+
+            Out.WriteLine(string.Format("Decrypt Key: {0}", OasisKey));
+            Out.WriteLine(string.Format("Twofish block size: {0}", tf1.GetBlockSize()));
+            Out.WriteLine(string.Format("Output file: {0}", OutputFile));
+
+            using (FileStream fsin = File.OpenRead(path))
+            using (FileStream fsout = File.Create(OutputFile))
+            using (MemoryStream ms = new MemoryStream(buf))
+            {
+                Out.WriteLine(string.Format("File Stream Length: {0}", fsin.Length));
+
+                while (fsin.Position < fsin.Length)
+                {
+                    fsin.Read(buf, 0, buf.Length);
+                    int size = tf1.ProcessBlock(buf, 0, output, 0);
+                    fsout.Write(output, 0, size);
+                    Out.WriteLine(string.Format("position {0}   size {1}", fsin.Position.ToString(), size));
+                }
+            }
+
+            Out.WriteLine("");
+            Out.WriteLine("Finished!");
             Out.ReadLine();
         }
     }

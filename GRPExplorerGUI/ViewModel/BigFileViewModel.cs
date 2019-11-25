@@ -8,7 +8,10 @@ using System.Threading.Tasks;
 using GRPExplorerLib;
 using GRPExplorerLib.BigFile;
 using GRPExplorerLib.Logging;
+using GRPExplorerLib.Util;
 using System.Windows;
+using Microsoft.Win32;
+using System.IO;
 
 namespace GRPExplorerGUI.ViewModel
 {
@@ -18,7 +21,6 @@ namespace GRPExplorerGUI.ViewModel
         static Action<PropertyChangedEventHandler, BigFileViewModel, string> propChangedAction = 
             (ev, vm, prop) => 
             {
-                //MessageBox.Show("wat lol");
                 ev?.Invoke(vm, new PropertyChangedEventArgs(prop));
             };
         protected void NotifyPropertyChanged([CallerMemberName] string prop = "")
@@ -74,6 +76,18 @@ namespace GRPExplorerGUI.ViewModel
         {
             get { return (bigFile == null) ? "N/A" : (bigFile is UnpackedBigFile) ? "Unpacked" : "Packed"; }
             private set { NotifyPropertyChanged(); }
+        }
+
+        BigFileFile selectedFile;
+        public BigFileFile SelectedFile
+        {
+            get { return selectedFile; }
+            set
+            {
+                if (value == null) return;
+                selectedFile = value;
+                NotifyPropertyChanged();
+            }
         }
 
         private BackgroundWorker bgworker = new BackgroundWorker();
@@ -134,6 +148,49 @@ namespace GRPExplorerGUI.ViewModel
                 {
                     Application.Current.Dispatcher.Invoke(onFinished);
                 };
+        }
+
+        IOBuffers buffer = new IOBuffers();
+        public void ExtractSelectedFile()
+        {
+            if (selectedFile == null)
+            {
+                log.Error("No file selected!");
+                return;
+            }
+
+            string typeStr = selectedFile.FileInfo.FileType.ToString();
+            SaveFileDialog dlg = new SaveFileDialog()
+            {
+                FileName = selectedFile.NameWithExtension,
+                OverwritePrompt = true,
+                Title = "Choose save location",
+                Filter = string.Format("{0} files (*.{1})|*.{1}", typeStr.ToUpper(), typeStr),
+                InitialDirectory = Settings.LastExtractPath
+            };
+
+            bool? success = dlg.ShowDialog();
+
+            if (success == false)
+            {
+                log.Info("Extracting cancelled");
+                return;
+            }
+
+            Settings.LastExtractPath = Path.GetDirectoryName(dlg.FileName);
+
+            log.Info("Extracting file {0} to:", selectedFile.NameWithExtension);
+            log.Info("   {0}", dlg.FileName);
+            log.Info("...");
+
+            int size = bigFile.FileReader.ReadFileData(selectedFile, buffer, bigFile.FileReader.DefaultFlags);
+
+            using (FileStream fs = File.Create(dlg.FileName))
+            {
+                fs.Write(buffer[size], 0, size);
+            }
+
+            log.Info("File extracted!");
         }
     }
 }

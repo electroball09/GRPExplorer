@@ -10,7 +10,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Microsoft.Win32;
 using GRPExplorerLib.BigFile.Extra;
 using System.IO;
@@ -43,13 +42,19 @@ namespace GRPExplorerGUI.Extra
 
         private void btnOpenFile_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.AddExtension = true;
-            dialog.DefaultExt = ".feu";
-            dialog.Multiselect = false;
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                DefaultExt = ".feu",
+                Filter = "FEU files(*.feu)|*.feu",
+                Title = "Select file...",
+                InitialDirectory = Settings.LastFEUPath
+            };
             bool? res = dialog.ShowDialog(this);
             if (res == true)
+            {
+                Settings.LastFEUPath = Path.GetDirectoryName(dialog.FileName);
                 txtFileName.Text = dialog.FileName;
+            }
         }
     }
 }

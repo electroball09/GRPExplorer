@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Media.Animation;
 using GRPExplorerLib;
 using GRPExplorerLib.BigFile;
@@ -24,6 +23,7 @@ using GRPExplorerLib.Logging;
 using GRPExplorerLib.BigFile.Extra;
 using GRPExplorerGUI.Extra;
 using Microsoft.Win32;
+using System.IO;
 
 namespace GRPExplorerGUI
 {
@@ -129,13 +129,16 @@ namespace GRPExplorerGUI
             OpenFileDialog dialog = new OpenFileDialog
             {
                 DefaultExt = ".big",
-                Filter = "BIG files (*.big)|*.big"
+                Filter = "BIG files (*.big)|*.big",
+                InitialDirectory = Settings.LastBigfilePath
             };
 
             bool? result = dialog.ShowDialog();
 
             if (result == true)
             {
+                Settings.LastBigfilePath = Path.GetDirectoryName(dialog.FileName);
+
                 BigFile bf = new PackedBigFile(new System.IO.FileInfo(dialog.FileName));
                 bigFileview.BigFileViewModel = new BigFileViewModel();
                 bigFileview.BigFileViewModel.BigFile = bf;
