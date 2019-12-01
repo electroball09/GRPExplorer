@@ -480,7 +480,8 @@ namespace GRPExplorerTests
 
             const string OasisKey = "570462DC49E9E51F0B55F30287A5C7CD";
             const string OutputFile = "OASIS_OUTPUT.txt";
-            byte[] OasisKeyBytes = Encoding.ASCII.GetBytes(OasisKey);
+            byte[] OasisKeyBytes = StringToByteArrayFastest(OasisKey);// Encoding.ASCII.GetBytes(OasisKey);
+            Out.WriteLine(OasisKeyBytes.Length.ToString());
             //Array.Reverse(OasisKeyBytes);
 
             TwofishEngine tf1 = new TwofishEngine();
@@ -501,6 +502,8 @@ namespace GRPExplorerTests
             {
                 Out.WriteLine(string.Format("File Stream Length: {0}", fsin.Length));
 
+                Out.ReadLine();
+
                 while (fsin.Position < fsin.Length)
                 {
                     fsin.Read(buf, 0, buf.Length);
@@ -513,6 +516,32 @@ namespace GRPExplorerTests
             Out.WriteLine("");
             Out.WriteLine("Finished!");
             Out.ReadLine();
+        }
+
+        public static byte[] StringToByteArrayFastest(string hex)
+        {
+            if (hex.Length % 2 == 1)
+                throw new Exception("The binary key cannot have an odd number of digits");
+
+            byte[] arr = new byte[hex.Length >> 1];
+
+            for (int i = 0; i < hex.Length >> 1; ++i)
+            {
+                arr[i] = (byte)((GetHexVal(hex[i << 1]) << 4) + (GetHexVal(hex[(i << 1) + 1])));
+            }
+
+            return arr;
+        }
+
+        public static int GetHexVal(char hex)
+        {
+            int val = (int)hex;
+            //For uppercase A-F letters:
+            return val - (val < 58 ? 48 : 55);
+            //For lowercase a-f letters:
+            //return val - (val < 58 ? 48 : 87);
+            //Or the two combined, but a bit slower:
+            //return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
         }
     }
 }
