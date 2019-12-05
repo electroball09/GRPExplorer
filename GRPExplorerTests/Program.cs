@@ -66,6 +66,35 @@ namespace GRPExplorerTests
         }
     }
 
+    static class Helper
+    {
+        public static byte[] StringToByteArrayFastest(string hex)
+        {
+            if (hex.Length % 2 == 1)
+                throw new Exception("The binary key cannot have an odd number of digits");
+
+            byte[] arr = new byte[hex.Length >> 1];
+
+            for (int i = 0; i < hex.Length >> 1; ++i)
+            {
+                arr[i] = (byte)((GetHexVal(hex[i << 1]) << 4) + (GetHexVal(hex[(i << 1) + 1])));
+            }
+
+            return arr;
+        }
+
+        public static int GetHexVal(char hex)
+        {
+            int val = (int)hex;
+            //For uppercase A-F letters:
+            return val - (val < 58 ? 48 : 55);
+            //For lowercase a-f letters:
+            //return val - (val < 58 ? 48 : 87);
+            //Or the two combined, but a bit slower:
+            //return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
+        }
+    }
+
     class Program
     {
         class LogInterface : IGRPExplorerLibLogInterface
@@ -101,7 +130,8 @@ namespace GRPExplorerTests
             LogFiles,
             CheckFiles,
             LogFolderUnknowns,
-            DecryptOasis
+            DecryptOasis,
+            LogDatatables
         };
 
         static void Main(string[] args)
@@ -480,7 +510,7 @@ namespace GRPExplorerTests
 
             const string OasisKey = "570462DC49E9E51F0B55F30287A5C7CD";
             const string OutputFile = "OASIS_OUTPUT.txt";
-            byte[] OasisKeyBytes = StringToByteArrayFastest(OasisKey);// Encoding.ASCII.GetBytes(OasisKey);
+            byte[] OasisKeyBytes = Encoding.ASCII.GetBytes(OasisKey);
             Out.WriteLine(OasisKeyBytes.Length.ToString());
             //Array.Reverse(OasisKeyBytes);
 
@@ -518,30 +548,50 @@ namespace GRPExplorerTests
             Out.ReadLine();
         }
 
-        public static byte[] StringToByteArrayFastest(string hex)
+        static void LogDatatables()
         {
-            if (hex.Length % 2 == 1)
-                throw new Exception("The binary key cannot have an odd number of digits");
+            const string CSVDir = "DataTables\\";
 
-            byte[] arr = new byte[hex.Length >> 1];
+            Directory.CreateDirectory(CSVDir);
 
-            for (int i = 0; i < hex.Length >> 1; ++i)
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
+            if (!File.Exists(path))
+                Environment.Exit(69);
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
+            bigFile.LoadFromDisk();
+
+            List<BigFileFile> files = bigFile.RootFolder.GetAllFilesOfArchetype<DataTable>();
+
+            bigFile.FileLoader.LoadFiles(files);
+
+            foreach (BigFileFile f in files)
             {
-                arr[i] = (byte)((GetHexVal(hex[i << 1]) << 4) + (GetHexVal(hex[(i << 1) + 1])));
+                f.Archetype.Log(log);
+
+                using (StreamWriter sw = File.CreateText(CSVDir + f.Name + ".csv"))
+                {
+                    DataTable dt = f.ArchetypeAs<DataTable>();
+                    for (int i = 0; i < dt.NumColumns; i++)
+                        sw.Write(dt[i].ColumnName + ",");
+                    sw.Write("\n");
+
+                    for (int i = 0; i < dt.NumRows; i++)
+                    {
+                        for (int j = 0; j < dt.NumColumns; j++)
+                        {
+                            sw.Write(dt[j][i] + ",");
+                        }
+                        sw.Write("\n");
+                    }
+                }
             }
 
-            return arr;
-        }
-
-        public static int GetHexVal(char hex)
-        {
-            int val = (int)hex;
-            //For uppercase A-F letters:
-            return val - (val < 58 ? 48 : 55);
-            //For lowercase a-f letters:
-            //return val - (val < 58 ? 48 : 87);
-            //Or the two combined, but a bit slower:
-            //return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
+            Out.WriteLine("\nDONE");
+            Out.ReadLine();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace GRPExplorerLib.Util
 {
@@ -50,6 +51,15 @@ namespace GRPExplorerLib.Util
             }
 
             return buffer;
+        }
+
+        public static string ReadNullTerminatedString(Stream stream)
+        {
+            StringBuilder builder = new StringBuilder();
+            byte b;
+            while ((b = (byte)stream.ReadByte()) != 0x00)
+                builder.Append(Convert.ToChar(b));
+            return builder.ToString();
         }
     }
 }
