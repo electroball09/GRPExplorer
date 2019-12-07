@@ -127,7 +127,7 @@ namespace GRPExplorerLib.YetiObjects
         }
     }
 
-    public class DataTable : BigFileFileArchetype
+    public class DataTable : YetiObjectArchetype
     {
         public override YetiObjectType Identifier => YetiObjectType.dtb;
 

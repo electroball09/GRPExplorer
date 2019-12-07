@@ -16,7 +16,7 @@ namespace GRPExplorerLib.YetiObjects
         public byte flags; // maybe?
     }
 
-    public class CurveFileArchetype : BigFileFileArchetype
+    public class YetiCurve : YetiObjectArchetype
     {
         public override YetiObjectType Identifier => YetiObjectType.cur;
 

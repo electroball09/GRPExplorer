@@ -73,7 +73,7 @@ namespace GRPExplorerLib.BigFile
             name = infoStruct.Name.EncodeToGoodString();
         }
 
-        public List<BigFileFile> GetAllFilesOfArchetype<T>(List<BigFileFile> filesList = null) where T : BigFileFileArchetype
+        public List<BigFileFile> GetAllFilesOfArchetype<T>(List<BigFileFile> filesList = null) where T : YetiObjectArchetype
         {
             if (filesList == null)
                 filesList = new List<BigFileFile>();

@@ -10,7 +10,7 @@ using GRPExplorerLib.BigFile;
 
 namespace GRPExplorerLib.YetiObjects
 {
-    public abstract class BigFileFileArchetype
+    public abstract class YetiObjectArchetype
     {
         public abstract YetiObjectType Identifier { get; }
         public BigFileFile File { get; set; }
@@ -22,7 +22,7 @@ namespace GRPExplorerLib.YetiObjects
         public abstract void Log(ILogProxy log);
     }
 
-    public class DefaultFileArchetype : BigFileFileArchetype
+    public class DefaultFileArchetype : YetiObjectArchetype
     {
         public override YetiObjectType Identifier => YetiObjectType.NONE;
 
@@ -39,22 +39,22 @@ namespace GRPExplorerLib.YetiObjects
 
     public static class FileArchetypeFactory
     {
-        static readonly Dictionary<YetiObjectType, BigFileFileArchetype> archetypes = new Dictionary<YetiObjectType, BigFileFileArchetype>();
+        static readonly Dictionary<YetiObjectType, YetiObjectArchetype> archetypes = new Dictionary<YetiObjectType, YetiObjectArchetype>();
 
         static FileArchetypeFactory()
         {
-            IEnumerable<Type> archetypeTypes = Assembly.GetAssembly(typeof(BigFileFileArchetype)).GetTypes().Where(t => t.IsSubclassOf(typeof(BigFileFileArchetype)));
+            IEnumerable<Type> archetypeTypes = Assembly.GetAssembly(typeof(YetiObjectArchetype)).GetTypes().Where(t => t.IsSubclassOf(typeof(YetiObjectArchetype)));
             foreach (Type t in archetypeTypes)
             {
-                BigFileFileArchetype archetype = (BigFileFileArchetype)Activator.CreateInstance(t, null);
+                YetiObjectArchetype archetype = (YetiObjectArchetype)Activator.CreateInstance(t, null);
                 archetypes.Add(archetype.Identifier, archetype);
             }
         }
 
-        public static BigFileFileArchetype CreateArchetype(this BigFileFile file)
+        public static YetiObjectArchetype CreateArchetype(this BigFileFile file)
         {
             if (archetypes.ContainsKey(file.FileInfo.FileType))
-                return (BigFileFileArchetype)Activator.CreateInstance(archetypes[file.FileInfo.FileType].GetType());
+                return (YetiObjectArchetype)Activator.CreateInstance(archetypes[file.FileInfo.FileType].GetType());
 
             return new DefaultFileArchetype();
         }

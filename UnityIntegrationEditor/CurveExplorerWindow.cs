@@ -13,8 +13,8 @@ namespace UnityIntegrationEditor
 {
     public class CurveExplorerWindow : EditorWindow
     {
-        static List<CurveFileArchetype> archetypes;
-        static CurveFileArchetype arch;
+        static List<YetiCurve> archetypes;
+        static YetiCurve arch;
         static string[] options;
         static int selected = 0;
         static string BigFilePath = "";
@@ -39,12 +39,12 @@ namespace UnityIntegrationEditor
                 (BigFilePath,
                 (bigFile) =>
                 {
-                    List<BigFileFile> files = bigFile.RootFolder.GetAllFilesOfArchetype<CurveFileArchetype>();
+                    List<BigFileFile> files = bigFile.RootFolder.GetAllFilesOfArchetype<YetiCurve>();
                     bigFile.FileLoader.LoadFiles(files);
 
-                    archetypes = new List<CurveFileArchetype>();
+                    archetypes = new List<YetiCurve>();
                     foreach (BigFileFile file in files)
-                        archetypes.Add(file.ArchetypeAs<CurveFileArchetype>());
+                        archetypes.Add(file.ArchetypeAs<YetiCurve>());
 
                     options = new string[archetypes.Count];
                     for (int i = 0; i < archetypes.Count; i++)

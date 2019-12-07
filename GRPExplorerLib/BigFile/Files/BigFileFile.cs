@@ -35,7 +35,7 @@ namespace GRPExplorerLib.BigFile
         public List<BigFileFile> ReferencedBy { get; } = new List<BigFileFile>();
 
         public FileMappingData MappingData { get; set; }
-        public BigFileFileArchetype Archetype { get; private set; }
+        public YetiObjectArchetype Archetype { get; private set; }
 
         public string FullFolderPath
         {
@@ -62,12 +62,12 @@ namespace GRPExplorerLib.BigFile
             Archetype.File = this;
         }
 
-        public bool Is<T>() where T : BigFileFileArchetype
+        public bool Is<T>() where T : YetiObjectArchetype
         {
             return Archetype is T;
         }
 
-        public T ArchetypeAs<T>() where T : BigFileFileArchetype
+        public T ArchetypeAs<T>() where T : YetiObjectArchetype
         {
             if (Is<T>())
                 return Archetype as T;

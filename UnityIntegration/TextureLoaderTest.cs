@@ -63,7 +63,7 @@ namespace UnityIntegration
                 (currentFilePath,
                 (bigFile) =>
                 {
-                    textureMetadataFiles = bigFile.RootFolder.GetAllFilesOfArchetype<TextureMetadataFileArchetype>();
+                    textureMetadataFiles = bigFile.RootFolder.GetAllFilesOfArchetype<TextureMetadata>();
                     bigFile.FileLoader.LoadFiles(textureMetadataFiles);
                     m_bigFile = bigFile;
                 });
@@ -74,7 +74,7 @@ namespace UnityIntegration
             List<BigFileFile> imports = new List<BigFileFile>();
             foreach (BigFileFile textureFile in textureMetadataFiles)
             {
-                if (textureFile.ArchetypeAs<TextureMetadataFileArchetype>().Format == textureType)
+                if (textureFile.ArchetypeAs<TextureMetadata>().Format == textureType)
                     imports.Add(textureFile);
             }
 
@@ -114,7 +114,7 @@ namespace UnityIntegration
             loadedPayload?.Unload();
 
             BigFileFile curr = displayedFiles[sel];
-            TextureMetadataFileArchetype arch = curr.ArchetypeAs<TextureMetadataFileArchetype>();
+            TextureMetadata arch = curr.ArchetypeAs<TextureMetadata>();
 
             loadedPayload = arch.Payload.File;
             List<BigFileFile> list = new List<BigFileFile>

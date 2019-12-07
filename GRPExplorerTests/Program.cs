@@ -405,11 +405,11 @@ namespace GRPExplorerTests
             PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
             bigFile.LoadFromDisk();
 
-            List<BigFileFile> textureFiles = bigFile.RootFolder.GetAllFilesOfArchetype<TextureMetadataFileArchetype>();
+            List<BigFileFile> textureFiles = bigFile.RootFolder.GetAllFilesOfArchetype<TextureMetadata>();
             bigFile.FileLoader.LoadFiles(textureFiles);
             foreach (BigFileFile file in textureFiles)
             {
-                TextureMetadataFileArchetype archetype = file.ArchetypeAs<TextureMetadataFileArchetype>();
+                TextureMetadata archetype = file.ArchetypeAs<TextureMetadata>();
                 if (archetype.Format == format)
                     Out.WriteLine(file.FullFolderPath + file.Name + " " + string.Format("{0:X2} {1} {2}", archetype.Format, archetype.Width, archetype.Height));
             }
@@ -429,11 +429,11 @@ namespace GRPExplorerTests
             PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
             bigFile.LoadFromDisk();
 
-            List<BigFileFile> files = bigFile.RootFolder.GetAllFilesOfArchetype<CurveFileArchetype>();
+            List<BigFileFile> files = bigFile.RootFolder.GetAllFilesOfArchetype<YetiCurve>();
             bigFile.FileLoader.LoadFiles(files);
             foreach (BigFileFile file in files)
             {
-                CurveFileArchetype archetype = file.ArchetypeAs<CurveFileArchetype>();
+                YetiCurve archetype = file.ArchetypeAs<YetiCurve>();
                 log.Info(file.Name);
                 archetype.Log(log);
             }

@@ -20,14 +20,14 @@ namespace GRPExplorerLib.YetiObjects
         XBOX_B = 0x28
     }
 
-    public class TextureMetadataFileArchetype : BigFileFileArchetype
+    public class TextureMetadata : YetiObjectArchetype
     {
         public override YetiObjectType Identifier => YetiObjectType.tga;
 
         public ushort Width { get; private set; }
         public ushort Height { get; private set; }
         public YetiTextureFormat Format { get; private set; }
-        public TexturePayloadFileArchetype Payload { get; private set; }
+        public TexturePayload Payload { get; private set; }
 
         public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
         {
@@ -44,7 +44,7 @@ namespace GRPExplorerLib.YetiObjects
                 return;
             }
 
-            Payload = fileReferences[0]?.ArchetypeAs<TexturePayloadFileArchetype>();
+            Payload = fileReferences[0]?.ArchetypeAs<TexturePayload>();
         }
 
         public override void Log(ILogProxy log)
@@ -53,7 +53,7 @@ namespace GRPExplorerLib.YetiObjects
         }
     }
 
-    public class TexturePayloadFileArchetype : BigFileFileArchetype
+    public class TexturePayload : YetiObjectArchetype
     {
         public override YetiObjectType Identifier => YetiObjectType.txd;
 
