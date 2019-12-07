@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GRPExplorerLib.BigFile
+namespace GRPExplorerLib.YetiObjects
 {
-    public enum YetiFileType : short
+    public enum YetiObjectType : short
     {
         NONE = 0x0000,
         ini = 0x0001,

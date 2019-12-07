@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GRPExplorerLib.Logging;
+using GRPExplorerLib.BigFile;
 
-namespace GRPExplorerLib.BigFile.Files.Archetypes
+namespace GRPExplorerLib.YetiObjects
 {
     public enum YetiTextureFormat : byte
     {
@@ -21,7 +22,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public class TextureMetadataFileArchetype : BigFileFileArchetype
     {
-        public override YetiFileType Identifier => YetiFileType.tga;
+        public override YetiObjectType Identifier => YetiObjectType.tga;
 
         public ushort Width { get; private set; }
         public ushort Height { get; private set; }
@@ -54,7 +55,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public class TexturePayloadFileArchetype : BigFileFileArchetype
     {
-        public override YetiFileType Identifier => YetiFileType.txd;
+        public override YetiObjectType Identifier => YetiObjectType.txd;
 
         public byte[] Data { get; private set; }
 

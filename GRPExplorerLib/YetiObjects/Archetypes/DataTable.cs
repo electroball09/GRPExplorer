@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using GRPExplorerLib.Logging;
 using GRPExplorerLib.Util;
 using System.IO;
+using GRPExplorerLib.BigFile;
 
-namespace GRPExplorerLib.BigFile.Files.Archetypes
+namespace GRPExplorerLib.YetiObjects
 {
     public enum DataTableColumnType
     {
@@ -128,7 +129,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public class DataTable : BigFileFileArchetype
     {
-        public override YetiFileType Identifier => YetiFileType.dtb;
+        public override YetiObjectType Identifier => YetiObjectType.dtb;
 
         public int NumColumns { get; private set; }
         public int NumRows { get; private set; }

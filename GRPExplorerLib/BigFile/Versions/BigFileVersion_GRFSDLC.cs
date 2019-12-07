@@ -5,6 +5,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using GRPExplorerLib.Util;
 using GRPExplorerLib.Logging;
+using GRPExplorerLib.YetiObjects;
 
 namespace GRPExplorerLib.BigFile.Versions
 {
@@ -62,7 +63,7 @@ namespace GRPExplorerLib.BigFile.Versions
         public int Offset { get { return offset; } set { offset = value; } }
         public int Key { get { return key; } set { key = value; } }
         public int Unknown_01 { get { return unknown_01; } set { unknown_01 = value; } }
-        public YetiFileType FileType { get { return (YetiFileType)fileType; } set { fileType = (short)value; } }
+        public YetiObjectType FileType { get { return (YetiObjectType)fileType; } set { fileType = (short)value; } }
         public short Folder { get { return folder; } set { folder = value; } }
         public int TimeStamp { get { return timeStamp; } set { timeStamp = value; } }
         public int Flags { get { return flags; } set { flags = value; } }

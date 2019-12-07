@@ -46,7 +46,7 @@ namespace UnityIntegrationEditor
 
         void GUI_Texture(TextureLoaderTest test)
         {
-            test.textureType = (GRPExplorerLib.BigFile.Files.Archetypes.YetiTextureFormat)EditorGUILayout.EnumPopup(test.textureType);
+            test.textureType = (GRPExplorerLib.YetiObjects.YetiTextureFormat)EditorGUILayout.EnumPopup(test.textureType);
             EditorGUILayout.BeginHorizontal();
             test.ImportStart = EditorGUILayout.IntField("Import Start:", test.ImportStart);
             test.ImportCount = EditorGUILayout.IntField("Import Count:", test.ImportCount);

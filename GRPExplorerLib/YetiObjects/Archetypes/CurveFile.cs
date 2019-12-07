@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GRPExplorerLib.Logging;
+using GRPExplorerLib.BigFile;
 
-namespace GRPExplorerLib.BigFile.Files.Archetypes
+namespace GRPExplorerLib.YetiObjects
 {
     public struct CurveKeyframe
     {
@@ -17,7 +18,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public class CurveFileArchetype : BigFileFileArchetype
     {
-        public override YetiFileType Identifier => YetiFileType.cur;
+        public override YetiObjectType Identifier => YetiObjectType.cur;
 
         public int KeyframeCount { get; private set; }
 

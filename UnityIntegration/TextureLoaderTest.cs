@@ -4,7 +4,7 @@ using System.Text;
 using UnityEngine;
 using GRPExplorerLib.BigFile;
 using GRPExplorerLib.BigFile.Files;
-using GRPExplorerLib.BigFile.Files.Archetypes;
+using GRPExplorerLib.YetiObjects;
 using GRPExplorerLib.Logging;
 
 namespace UnityIntegration

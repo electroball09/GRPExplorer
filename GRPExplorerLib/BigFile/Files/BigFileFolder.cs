@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using GRPExplorerLib.Util;
 using GRPExplorerLib.BigFile.Versions;
-using GRPExplorerLib.BigFile.Files.Archetypes;
+using GRPExplorerLib.YetiObjects;
 
 namespace GRPExplorerLib.BigFile
 {

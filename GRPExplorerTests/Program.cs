@@ -8,7 +8,7 @@ using GRPExplorerLib;
 using GRPExplorerLib.BigFile;
 using GRPExplorerLib.Logging;
 using GRPExplorerLib.BigFile.Files;
-using GRPExplorerLib.BigFile.Files.Archetypes;
+using GRPExplorerLib.YetiObjects;
 using GRPExplorerLib.Util;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Engines;

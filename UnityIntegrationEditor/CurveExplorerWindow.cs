@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using GRPExplorerLib.BigFile;
-using GRPExplorerLib.BigFile.Files.Archetypes;
+using GRPExplorerLib.YetiObjects;
 using GRPExplorerLib.Logging;
 using System.IO;
 using System.Threading;

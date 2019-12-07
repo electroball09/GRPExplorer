@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using GRPExplorerLib.YetiObjects;
 
 namespace GRPExplorerLib.BigFile.Versions
 {
@@ -10,7 +11,7 @@ namespace GRPExplorerLib.BigFile.Versions
               int Offset { get; set; }
                  int Key { get; set; }
           int Unknown_01 { get; set; } // THIS IS ALWAYS 0
-   YetiFileType FileType { get; set; }
+   YetiObjectType FileType { get; set; }
             short Folder { get; set; }
            int TimeStamp { get; set; }
                int Flags { get; set; }

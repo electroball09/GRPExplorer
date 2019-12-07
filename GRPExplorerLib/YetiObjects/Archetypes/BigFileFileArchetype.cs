@@ -5,12 +5,14 @@ using System.Text;
 using System.Reflection;
 using GRPExplorerLib.BigFile.Versions;
 using GRPExplorerLib.Logging;
+using GRPExplorerLib.BigFile.Files;
+using GRPExplorerLib.BigFile;
 
-namespace GRPExplorerLib.BigFile.Files.Archetypes
+namespace GRPExplorerLib.YetiObjects
 {
     public abstract class BigFileFileArchetype
     {
-        public abstract YetiFileType Identifier { get; }
+        public abstract YetiObjectType Identifier { get; }
         public BigFileFile File { get; set; }
 
         public abstract void Load(byte[] buffer, int size, BigFileFile[] fileReferences);
@@ -22,7 +24,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public class DefaultFileArchetype : BigFileFileArchetype
     {
-        public override YetiFileType Identifier => YetiFileType.NONE;
+        public override YetiObjectType Identifier => YetiObjectType.NONE;
 
         public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
         {
@@ -37,7 +39,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
 
     public static class FileArchetypeFactory
     {
-        static readonly Dictionary<YetiFileType, BigFileFileArchetype> archetypes = new Dictionary<YetiFileType, BigFileFileArchetype>();
+        static readonly Dictionary<YetiObjectType, BigFileFileArchetype> archetypes = new Dictionary<YetiObjectType, BigFileFileArchetype>();
 
         static FileArchetypeFactory()
         {
