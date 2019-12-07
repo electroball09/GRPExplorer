@@ -32,9 +32,9 @@ namespace UnityIntegration
         public YetiTextureFormat textureType = YetiTextureFormat.RGBA32;
         public TextureFormat ImportAs = TextureFormat.RGBA32;
         public List<string> fileNames = new List<string>();
-        public List<BigFileFile> textureMetadataFiles = new List<BigFileFile>();
-        public List<BigFileFile> displayedFiles = new List<BigFileFile>();
-        public BigFileFile loadedPayload;
+        public List<YetiObject> textureMetadataFiles = new List<YetiObject>();
+        public List<YetiObject> displayedFiles = new List<YetiObject>();
+        public YetiObject loadedPayload;
         public bool Transparent = false;
         public int ImportCount = 50;
         public int ImportStart = 0;
@@ -63,7 +63,7 @@ namespace UnityIntegration
                 (currentFilePath,
                 (bigFile) =>
                 {
-                    textureMetadataFiles = bigFile.RootFolder.GetAllFilesOfArchetype<TextureMetadata>();
+                    textureMetadataFiles = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiTextureMetadata>();
                     bigFile.FileLoader.LoadFiles(textureMetadataFiles);
                     m_bigFile = bigFile;
                 });
@@ -71,10 +71,10 @@ namespace UnityIntegration
 
         public void ChangeDisplayedTextures()
         {
-            List<BigFileFile> imports = new List<BigFileFile>();
-            foreach (BigFileFile textureFile in textureMetadataFiles)
+            List<YetiObject> imports = new List<YetiObject>();
+            foreach (YetiObject textureFile in textureMetadataFiles)
             {
-                if (textureFile.ArchetypeAs<TextureMetadata>().Format == textureType)
+                if (textureFile.ArchetypeAs<YetiTextureMetadata>().Format == textureType)
                     imports.Add(textureFile);
             }
 
@@ -94,7 +94,7 @@ namespace UnityIntegration
             displayedFiles.Clear();
             for (int i = ImportStart; i < ImportStart + ImportCount; i++)
             {
-                BigFileFile file = imports[i];
+                YetiObject file = imports[i];
                 fileNames.Add(file.Name);
                 displayedFiles.Add(file);
             }
@@ -113,11 +113,11 @@ namespace UnityIntegration
 
             loadedPayload?.Unload();
 
-            BigFileFile curr = displayedFiles[sel];
-            TextureMetadata arch = curr.ArchetypeAs<TextureMetadata>();
+            YetiObject curr = displayedFiles[sel];
+            YetiTextureMetadata arch = curr.ArchetypeAs<YetiTextureMetadata>();
 
-            loadedPayload = arch.Payload.File;
-            List<BigFileFile> list = new List<BigFileFile>
+            loadedPayload = arch.Payload.Object;
+            List<YetiObject> list = new List<YetiObject>
             {
                 loadedPayload
             };

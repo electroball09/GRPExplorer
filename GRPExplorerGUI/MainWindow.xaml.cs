@@ -74,7 +74,7 @@ namespace GRPExplorerGUI
                 return;
             }
 
-            BigFileFile file = bigFileview.BigFileViewModel.BigFile.FileMap[key];
+            YetiObject file = bigFileview.BigFileViewModel.BigFile.FileMap[key];
             if (file != null)
             {
                 bigFileview.FolderTree.SelectedFile = file;

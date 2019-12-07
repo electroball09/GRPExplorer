@@ -39,6 +39,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -52,6 +54,7 @@
     <Compile Include="BigFile\Extra\FEUtoSWF.cs" />
     <Compile Include="YetiObjects\BigFileFileArchetype.cs" />
     <Compile Include="YetiObjects\CurveFile.cs" />
+    <Compile Include="YetiObjects\GameObject.cs" />
     <Compile Include="YetiObjects\TextureFiles.cs" />
     <Compile Include="YetiObjects\WorldFiles.cs" />
     <Compile Include="BigFile\Files\BigFileFileLoader.cs" />
@@ -66,7 +69,7 @@
     <Compile Include="BigFile\Files\UnpackedBigFileFileReader.cs" />
     <Compile Include="BigFile\PackedBigFile.cs" />
     <Compile Include="BigFile\BigFileConst.cs" />
-    <Compile Include="BigFile\Files\BigFileFile.cs" />
+    <Compile Include="BigFile\Files\YetiObject.cs" />
     <Compile Include="BigFile\Files\BigFileFolder.cs" />
     <Compile Include="BigFile\Versions\BigFileVersion_GRFSDLC.cs" />
     <Compile Include="BigFile\Versions\BigFileVersion_GRP.cs" />

@@ -54,7 +54,7 @@ namespace GRPExplorerGUI.View
             set { SetValue(SelectedFolderProperty, value); }
         }
 
-        public BigFileFile SelectedFile
+        public YetiObject SelectedFile
         {
             get { return BigFileViewModel?.SelectedFile; } //{ return (BigFileFile)GetValue(SelectedFileProperty); }
             set { BigFileViewModel.SelectedFile = value; }//{ SetValue(SelectedFileProperty, value); FileView.SelectedFile = value; }

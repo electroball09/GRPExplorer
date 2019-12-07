@@ -75,7 +75,7 @@ namespace GRPExplorerLib.BigFile
             public bool isPacking = false;
             public DiagTools diag = new DiagTools();
             public BigFile bigFile;
-            public BigFileFile[] filesList;
+            public YetiObject[] filesList;
             public Action<BigFilePackInfo> OnCompleted;
             public int filesChunked = 0;
 
@@ -174,7 +174,7 @@ namespace GRPExplorerLib.BigFile
             int dividedRemainder = bigFile.FileMap.FilesList.Length % options.Threads;
             log.Info("Divided files into " + options.Threads + " pools of " + dividedCount + " with " + dividedRemainder + " left over (to be tacked onto the last!)");
 
-            BigFileFile[] files = new BigFileFile[bigFile.FileMap.FilesList.Length];
+            YetiObject[] files = new YetiObject[bigFile.FileMap.FilesList.Length];
             Array.Copy(bigFile.FileMap.FilesList, files, files.Length);
             Array.Sort(files,
                 (fileA, fileB) =>
@@ -223,13 +223,13 @@ namespace GRPExplorerLib.BigFile
                 //fill 8 bytes to be filled with number of files chunked and final size later
                 metaFS.Write(BitConverter.GetBytes((long)0), 0, 8);
 
-                BigFileFile[] filesToWrite = new BigFileFile[info.count];
+                YetiObject[] filesToWrite = new YetiObject[info.count];
                 Array.Copy(info.filesList, info.startIndex, filesToWrite, 0, info.count);
 
                 log.Error("Thread ID {0} - First file is {1}", info.ThreadID, filesToWrite[0].Name);
                 log.Error("Thread ID {0} - Last file is {1}", info.ThreadID, filesToWrite[filesToWrite.Length - 1].Name);
                 
-                BigFileFile currFile = null;
+                YetiObject currFile = null;
 
                 int index = -1;
                 foreach (int size in bigFile.FileReader.ReadAllRaw(filesToWrite, info.IOBuffers, info.Options.Flags))

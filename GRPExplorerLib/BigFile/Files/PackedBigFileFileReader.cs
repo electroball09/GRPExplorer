@@ -30,7 +30,7 @@ namespace GRPExplorerLib.BigFile.Files
             packedBigFile = _bigFile;
         }
 
-        public int GetBytesSizeAndSeekToStartOfFileData(Stream stream, BigFileFile file, BigFileFlags flags = DEFAULT_FLAGS)
+        public int GetBytesSizeAndSeekToStartOfFileData(Stream stream, YetiObject file, BigFileFlags flags = DEFAULT_FLAGS)
         {
             if (file.FileInfo.Offset == -1)
             {
@@ -65,7 +65,7 @@ namespace GRPExplorerLib.BigFile.Files
             return size;
         }
 
-        private int internal_ReadFileRaw(Stream stream, BigFileFile file, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
+        private int internal_ReadFileRaw(Stream stream, YetiObject file, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
         {
             log.Debug("Reading file: " + file.Name);
 
@@ -102,7 +102,7 @@ namespace GRPExplorerLib.BigFile.Files
             return bytesSize;
         }
 
-        private int[] internal_ReadFileHeader(Stream stream, BigFileFile file, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
+        private int[] internal_ReadFileHeader(Stream stream, YetiObject file, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
         {
             int fileSize = internal_ReadFileRaw(stream, file, buffers, flags);
             if (fileSize == -1)
@@ -125,7 +125,7 @@ namespace GRPExplorerLib.BigFile.Files
             return header;
         }
 
-        private int internal_ReadFileData(Stream stream, BigFileFile file, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
+        private int internal_ReadFileData(Stream stream, YetiObject file, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
         {
             int fileSize = internal_ReadFileRaw(stream, file, buffers, flags);
             if (fileSize == -1)
@@ -150,7 +150,7 @@ namespace GRPExplorerLib.BigFile.Files
             return dataSize;
         }
 
-        public override int ReadFileRaw(BigFileFile file, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
+        public override int ReadFileRaw(YetiObject file, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
         {
             int size = -1;
             using (FileStream fs = File.OpenRead(packedBigFile.MetadataFileInfo.FullName))
@@ -160,7 +160,7 @@ namespace GRPExplorerLib.BigFile.Files
             return size;
         }
 
-        public override int[] ReadFileHeader(BigFileFile file, IOBuffers buffers, BigFileFlags flags)
+        public override int[] ReadFileHeader(YetiObject file, IOBuffers buffers, BigFileFlags flags)
         {
             int[] header;
             using (FileStream fs = File.OpenRead(packedBigFile.MetadataFileInfo.FullName))
@@ -170,7 +170,7 @@ namespace GRPExplorerLib.BigFile.Files
             return header;
         }
 
-        public override int ReadFileData(BigFileFile file, IOBuffers buffers, BigFileFlags flags)
+        public override int ReadFileData(YetiObject file, IOBuffers buffers, BigFileFlags flags)
         {
             int size = -1;
             using (FileStream fs = File.OpenRead(packedBigFile.MetadataFileInfo.FullName))
@@ -180,7 +180,7 @@ namespace GRPExplorerLib.BigFile.Files
             return size;
         }
 
-        public override IEnumerable<int> ReadAllRaw(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
+        public override IEnumerable<int> ReadAllRaw(YetiObject[] filesToRead, IOBuffers buffers, BigFileFlags flags = DEFAULT_FLAGS)
         {
             using (FileStream fs = File.OpenRead(packedBigFile.MetadataFileInfo.FullName))
             {
@@ -191,7 +191,7 @@ namespace GRPExplorerLib.BigFile.Files
             }
         }
 
-        public override IEnumerable<int[]> ReadAllHeaders(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags)
+        public override IEnumerable<int[]> ReadAllHeaders(YetiObject[] filesToRead, IOBuffers buffers, BigFileFlags flags)
         {
             using (FileStream fs = File.OpenRead(packedBigFile.MetadataFileInfo.FullName))
             {
@@ -202,7 +202,7 @@ namespace GRPExplorerLib.BigFile.Files
             }
         }
 
-        public override IEnumerable<int> ReadAllData(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags)
+        public override IEnumerable<int> ReadAllData(YetiObject[] filesToRead, IOBuffers buffers, BigFileFlags flags)
         {
             using (FileStream fs = File.OpenRead(packedBigFile.MetadataFileInfo.FullName))
             {

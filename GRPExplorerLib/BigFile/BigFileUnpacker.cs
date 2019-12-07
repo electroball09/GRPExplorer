@@ -254,7 +254,7 @@ namespace GRPExplorerLib.BigFile
             
             //int segmentDataOffset = info.bigFile.FileUtil.CalculateDataOffset(ref info.bigFile.SegmentHeader, ref info.bigFile.FileHeader);
             //byte[] buffer = info.buffers[4];
-            BigFileFile[] files = new BigFileFile[info.count];
+            YetiObject[] files = new YetiObject[info.count];
             Array.Copy(info.bigFile.FileMap.FilesList, info.startIndex, files, 0, info.count);
 
             IEnumerator<int[]> headers = info.bigFile.FileReader.ReadAllHeaders(files, info.buffers, info.options.Flags).GetEnumerator();
@@ -421,7 +421,7 @@ namespace GRPExplorerLib.BigFile
                 stopwatch.Start();
             }
 
-            foreach (BigFileFile file in folder.Files)
+            foreach (YetiObject file in folder.ChildObjects)
             {
                 string fullName = file.FullFolderPath + file.Name;
 

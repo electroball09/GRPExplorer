@@ -23,9 +23,9 @@ namespace GRPExplorerLib.BigFile.Files
         /// </summary>
         /// <param name="filesToLoad"></param>
         /// <param name="loadReferences"></param>
-        public void LoadFiles(List<BigFileFile> filesToLoad)
+        public void LoadFiles(List<YetiObject> filesToLoad)
         {
-            foreach (BigFileFile file in filesToLoad)
+            foreach (YetiObject file in filesToLoad)
             {
                 log.Debug("Loading file {0} (key:{1:X8})", file, file.FileInfo.Key);
                 int[] header = bigFile.FileReader.ReadFileHeader(file, buffer, bigFile.FileReader.DefaultFlags);
@@ -40,12 +40,12 @@ namespace GRPExplorerLib.BigFile.Files
             }
         }
 
-        public void LoadReferences(List<BigFileFile> files)
+        public void LoadReferences(List<YetiObject> files)
         {
             LoadReferences(ListExtensions.GetInternalArray(files));
         }
 
-        public void LoadReferences(BigFileFile[] files)
+        public void LoadReferences(YetiObject[] files)
         {
             int count = 0;
 

@@ -23,7 +23,7 @@ namespace GRPExplorerGUI.View
         static DependencyProperty SelectedFolderProperty =
             DependencyProperty.Register("SelectedFolder", typeof(BigFileFolder), typeof(BigFileFolderTree));
         static DependencyProperty SelectedFileProperty =
-            DependencyProperty.Register("SelectedFile", typeof(BigFileFile), typeof(BigFileFolderTree));
+            DependencyProperty.Register("SelectedFile", typeof(YetiObject), typeof(BigFileFolderTree));
 
         public BigFileFolder RootFolder
         {
@@ -37,9 +37,9 @@ namespace GRPExplorerGUI.View
             set { SetValue(SelectedFolderProperty, value); }
         }
 
-        public BigFileFile SelectedFile
+        public YetiObject SelectedFile
         {
-            get { return (BigFileFile)GetValue(SelectedFileProperty); }
+            get { return (YetiObject)GetValue(SelectedFileProperty); }
             set { SetValue(SelectedFileProperty, value); }
         }
 

@@ -13,9 +13,9 @@ namespace GRPExplorerLib.YetiObjects
     public abstract class YetiObjectArchetype
     {
         public abstract YetiObjectType Identifier { get; }
-        public BigFileFile File { get; set; }
+        public YetiObject Object { get; set; }
 
-        public abstract void Load(byte[] buffer, int size, BigFileFile[] fileReferences);
+        public abstract void Load(byte[] buffer, int size, YetiObject[] objectReferences);
 
         public virtual void Unload() { }
 
@@ -26,7 +26,7 @@ namespace GRPExplorerLib.YetiObjects
     {
         public override YetiObjectType Identifier => YetiObjectType.NONE;
 
-        public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
+        public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
             return;
         }
@@ -51,7 +51,7 @@ namespace GRPExplorerLib.YetiObjects
             }
         }
 
-        public static YetiObjectArchetype CreateArchetype(this BigFileFile file)
+        public static YetiObjectArchetype CreateArchetype(this YetiObject file)
         {
             if (archetypes.ContainsKey(file.FileInfo.FileType))
                 return (YetiObjectArchetype)Activator.CreateInstance(archetypes[file.FileInfo.FileType].GetType());

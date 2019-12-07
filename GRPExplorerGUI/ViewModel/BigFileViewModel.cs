@@ -78,8 +78,8 @@ namespace GRPExplorerGUI.ViewModel
             private set { NotifyPropertyChanged(); }
         }
 
-        BigFileFile selectedFile;
-        public BigFileFile SelectedFile
+        YetiObject selectedFile;
+        public YetiObject SelectedFile
         {
             get { return selectedFile; }
             set

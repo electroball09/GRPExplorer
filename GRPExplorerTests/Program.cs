@@ -13,6 +13,7 @@ using GRPExplorerLib.Util;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Parameters;
+using System.Numerics;
 
 namespace GRPExplorerTests
 {
@@ -162,7 +163,7 @@ namespace GRPExplorerTests
 
             for (int i = 0; i < bigFile.FileMap.FilesList.Length; i++)
             {
-                BigFileFile file = bigFile.FileMap.FilesList[i];
+                YetiObject file = bigFile.FileMap.FilesList[i];
 
                 if ((file.FileInfo.Flags & 0x00FF0000) != 0)
                 {
@@ -215,7 +216,7 @@ namespace GRPExplorerTests
             if (file1.FileMap.FilesList.Length != file2.FileMap.FilesList.Length)
             {
                 Out.WriteLine("Files count don't match!");
-                foreach (BigFileFile file1file in file1.FileMap.FilesList)
+                foreach (YetiObject file1file in file1.FileMap.FilesList)
                 {
                     if (file2.FileMap[file1file.FileInfo.Key] == null)
                     {
@@ -224,7 +225,7 @@ namespace GRPExplorerTests
                     }
                 }
                 Out.ReadLine();
-                foreach (BigFileFile file2file in file2.FileMap.FilesList)
+                foreach (YetiObject file2file in file2.FileMap.FilesList)
                 {
                     if (file1.FileMap[file2file.FileInfo.Key] == null)
                     {
@@ -245,7 +246,7 @@ namespace GRPExplorerTests
             IEnumerator<int[]> headers1 = file1.FileReader.ReadAllHeaders(file1.FileMap.FilesList, buffer1, file1.FileReader.DefaultFlags).GetEnumerator();
             IEnumerator<int[]> headers2 = file2.FileReader.ReadAllHeaders(file2.FileMap.FilesList, buffer1, file2.FileReader.DefaultFlags).GetEnumerator();
 
-            void CompareHeaders(BigFileFile file1file, BigFileFile file2file, int[] a, int[] b)
+            void CompareHeaders(YetiObject file1file, YetiObject file2file, int[] a, int[] b)
             {
                 bool foundError = a.Length != b.Length;
                 if (!foundError)
@@ -315,8 +316,8 @@ namespace GRPExplorerTests
             Out.Write("Press enter...");
             Out.ReadLine();
 
-            BigFileFile bigFileFile1 = file1.FileMap[key];
-            BigFileFile bigFileFile2 = file2.FileMap[key];
+            YetiObject bigFileFile1 = file1.FileMap[key];
+            YetiObject bigFileFile2 = file2.FileMap[key];
 
             int[] header1 = file1.FileReader.ReadFileHeader(bigFileFile1, buffer1, file1.FileReader.DefaultFlags);
             int[] header2 = file2.FileReader.ReadFileHeader(bigFileFile2, buffer2, file2.FileReader.DefaultFlags);
@@ -405,11 +406,11 @@ namespace GRPExplorerTests
             PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
             bigFile.LoadFromDisk();
 
-            List<BigFileFile> textureFiles = bigFile.RootFolder.GetAllFilesOfArchetype<TextureMetadata>();
+            List<YetiObject> textureFiles = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiTextureMetadata>();
             bigFile.FileLoader.LoadFiles(textureFiles);
-            foreach (BigFileFile file in textureFiles)
+            foreach (YetiObject file in textureFiles)
             {
-                TextureMetadata archetype = file.ArchetypeAs<TextureMetadata>();
+                YetiTextureMetadata archetype = file.ArchetypeAs<YetiTextureMetadata>();
                 if (archetype.Format == format)
                     Out.WriteLine(file.FullFolderPath + file.Name + " " + string.Format("{0:X2} {1} {2}", archetype.Format, archetype.Width, archetype.Height));
             }
@@ -429,9 +430,9 @@ namespace GRPExplorerTests
             PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
             bigFile.LoadFromDisk();
 
-            List<BigFileFile> files = bigFile.RootFolder.GetAllFilesOfArchetype<YetiCurve>();
+            List<YetiObject> files = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiCurve>();
             bigFile.FileLoader.LoadFiles(files);
-            foreach (BigFileFile file in files)
+            foreach (YetiObject file in files)
             {
                 YetiCurve archetype = file.ArchetypeAs<YetiCurve>();
                 log.Info(file.Name);
@@ -550,6 +551,12 @@ namespace GRPExplorerTests
 
         static void LogDatatables()
         {
+            Matrix4x4 m = Matrix4x4.Identity;
+            m.Translation = new Vector3(69f, 420f, 4815162342f);
+            Out.Write(m.ToString());
+            Out.ReadLine();
+
+            return;
             const string CSVDir = "DataTables\\";
 
             Directory.CreateDirectory(CSVDir);
@@ -564,17 +571,17 @@ namespace GRPExplorerTests
             PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
             bigFile.LoadFromDisk();
 
-            List<BigFileFile> files = bigFile.RootFolder.GetAllFilesOfArchetype<DataTable>();
+            List<YetiObject> files = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiDataTable>();
 
             bigFile.FileLoader.LoadFiles(files);
 
-            foreach (BigFileFile f in files)
+            foreach (YetiObject f in files)
             {
                 f.Archetype.Log(log);
 
                 using (StreamWriter sw = File.CreateText(CSVDir + f.Name + ".csv"))
                 {
-                    DataTable dt = f.ArchetypeAs<DataTable>();
+                    YetiDataTable dt = f.ArchetypeAs<YetiDataTable>();
                     for (int i = 0; i < dt.NumColumns; i++)
                         sw.Write(dt[i].ColumnName + ",");
                     sw.Write("\n");

@@ -22,12 +22,12 @@ namespace GRPExplorerLib.BigFile.Files
             bigFile = _bigFile;
         }
         
-        public abstract int ReadFileRaw(BigFileFile file, IOBuffers buffers, BigFileFlags flags);
-        public abstract int[] ReadFileHeader(BigFileFile file, IOBuffers buffers, BigFileFlags flags);
-        public abstract int ReadFileData(BigFileFile file, IOBuffers buffers, BigFileFlags flags);
+        public abstract int ReadFileRaw(YetiObject file, IOBuffers buffers, BigFileFlags flags);
+        public abstract int[] ReadFileHeader(YetiObject file, IOBuffers buffers, BigFileFlags flags);
+        public abstract int ReadFileData(YetiObject file, IOBuffers buffers, BigFileFlags flags);
 
-        public abstract IEnumerable<int> ReadAllRaw(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags);
-        public abstract IEnumerable<int[]> ReadAllHeaders(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags);
-        public abstract IEnumerable<int> ReadAllData(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags);
+        public abstract IEnumerable<int> ReadAllRaw(YetiObject[] filesToRead, IOBuffers buffers, BigFileFlags flags);
+        public abstract IEnumerable<int[]> ReadAllHeaders(YetiObject[] filesToRead, IOBuffers buffers, BigFileFlags flags);
+        public abstract IEnumerable<int> ReadAllData(YetiObject[] filesToRead, IOBuffers buffers, BigFileFlags flags);
     }
 }

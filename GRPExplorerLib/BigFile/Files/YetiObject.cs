@@ -8,7 +8,7 @@ using GRPExplorerLib.YetiObjects;
 
 namespace GRPExplorerLib.BigFile
 {
-    public class BigFileFile
+    public class YetiObject
     {
         private string name;
         public string Name
@@ -30,9 +30,9 @@ namespace GRPExplorerLib.BigFile
         }
         public IBigFileFileInfo FileInfo { get; set; }
         public BigFileFolder ParentFolder { get; }
-        public BigFileFile[] FileReferences { get; set; }
+        public YetiObject[] ObjectReferences { get; set; } = new YetiObject[0];
 
-        public List<BigFileFile> ReferencedBy { get; } = new List<BigFileFile>();
+        public List<YetiObject> ReferencedBy { get; } = new List<YetiObject>();
 
         public FileMappingData MappingData { get; set; }
         public YetiObjectArchetype Archetype { get; private set; }
@@ -53,13 +53,13 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
-        public BigFileFile(IBigFileFileInfo _fileInfo, BigFileFolder _parentFolder)
+        public YetiObject(IBigFileFileInfo _fileInfo, BigFileFolder _parentFolder)
         {
             FileInfo = _fileInfo;
             ParentFolder = _parentFolder;
             name = FileInfo.Name.EncodeToGoodString();
             Archetype = this.CreateArchetype();
-            Archetype.File = this;
+            Archetype.Object = this;
         }
 
         public bool Is<T>() where T : YetiObjectArchetype
@@ -76,7 +76,7 @@ namespace GRPExplorerLib.BigFile
 
         public void Load(byte[] buffer, int size)
         {
-            Archetype.Load(buffer, size, FileReferences);
+            Archetype.Load(buffer, size, ObjectReferences);
         }
 
         public void Unload()

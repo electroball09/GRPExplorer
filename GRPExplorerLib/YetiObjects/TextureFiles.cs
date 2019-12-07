@@ -20,16 +20,16 @@ namespace GRPExplorerLib.YetiObjects
         XBOX_B = 0x28
     }
 
-    public class TextureMetadata : YetiObjectArchetype
+    public class YetiTextureMetadata : YetiObjectArchetype
     {
         public override YetiObjectType Identifier => YetiObjectType.tga;
 
         public ushort Width { get; private set; }
         public ushort Height { get; private set; }
         public YetiTextureFormat Format { get; private set; }
-        public TexturePayload Payload { get; private set; }
+        public YetiTexturePayload Payload { get; private set; }
 
-        public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
+        public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
             if (size < 10)
                 return;
@@ -40,11 +40,11 @@ namespace GRPExplorerLib.YetiObjects
 
             if (fileReferences.Length == 0)
             {
-                LogManager.Error("WTF " + File.Name);
+                LogManager.Error("WTF " + Object.Name);
                 return;
             }
 
-            Payload = fileReferences[0]?.ArchetypeAs<TexturePayload>();
+            Payload = fileReferences[0]?.ArchetypeAs<YetiTexturePayload>();
         }
 
         public override void Log(ILogProxy log)
@@ -53,13 +53,13 @@ namespace GRPExplorerLib.YetiObjects
         }
     }
 
-    public class TexturePayload : YetiObjectArchetype
+    public class YetiTexturePayload : YetiObjectArchetype
     {
         public override YetiObjectType Identifier => YetiObjectType.txd;
 
         public byte[] Data { get; private set; }
 
-        public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
+        public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
             Data = new byte[size - 8];
             Array.Copy(buffer, 8, Data, 0, Data.Length);

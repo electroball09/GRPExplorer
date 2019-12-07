@@ -113,7 +113,7 @@ namespace GRPExplorerLib.BigFile
 
         public override void LoadExtraData(BigFileOperationStatus statusToUse)
         {
-            BigFileFile[] files = fileMap.KeyMapping.Values.ToArray();
+            YetiObject[] files = fileMap.KeyMapping.Values.ToArray();
 
             int count = 0;
             foreach (int[] header in fileReader.ReadAllHeaders(files, fileUtil.IOBuffers, fileReader.DefaultFlags))

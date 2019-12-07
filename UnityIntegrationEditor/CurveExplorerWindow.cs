@@ -39,11 +39,11 @@ namespace UnityIntegrationEditor
                 (BigFilePath,
                 (bigFile) =>
                 {
-                    List<BigFileFile> files = bigFile.RootFolder.GetAllFilesOfArchetype<YetiCurve>();
+                    List<YetiObject> files = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiCurve>();
                     bigFile.FileLoader.LoadFiles(files);
 
                     archetypes = new List<YetiCurve>();
-                    foreach (BigFileFile file in files)
+                    foreach (YetiObject file in files)
                         archetypes.Add(file.ArchetypeAs<YetiCurve>());
 
                     options = new string[archetypes.Count];

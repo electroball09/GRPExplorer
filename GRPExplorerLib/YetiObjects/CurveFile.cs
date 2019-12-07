@@ -24,7 +24,7 @@ namespace GRPExplorerLib.YetiObjects
 
         public CurveKeyframe[] Keyframes { get; private set; }
 
-        public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
+        public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
             KeyframeCount = BitConverter.ToInt16(buffer, 4);
             Keyframes = new CurveKeyframe[KeyframeCount];

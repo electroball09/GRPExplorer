@@ -16,7 +16,7 @@ namespace GRPExplorerLib.BigFile
         public IBigFileFolderInfo InfoStruct { get { return infoStruct; } }
         public List<BigFileFolder> SubFolders { get; } = new List<BigFileFolder>();
         public Dictionary<short, BigFileFolder> FolderMap { get; }
-        public List<BigFileFile> Files { get; } = new List<BigFileFile>();
+        public List<YetiObject> ChildObjects { get; } = new List<YetiObject>();
 
         private string name;
         public string Name { get { return name.Trim(); } }
@@ -73,20 +73,36 @@ namespace GRPExplorerLib.BigFile
             name = infoStruct.Name.EncodeToGoodString();
         }
 
-        public List<BigFileFile> GetAllFilesOfArchetype<T>(List<BigFileFile> filesList = null) where T : YetiObjectArchetype
+        public List<YetiObject> GetAllObjectsOfArchetype<T>(List<YetiObject> objectsList = null) where T : YetiObjectArchetype
         {
-            if (filesList == null)
-                filesList = new List<BigFileFile>();
-            foreach (BigFileFile file in Files)
+            if (objectsList == null)
+                objectsList = new List<YetiObject>();
+            foreach (YetiObject obj in ChildObjects)
             {
-                if (file.Is<T>())
-                    filesList.Add(file);
+                if (obj.Is<T>())
+                    objectsList.Add(obj);
             }
             foreach (BigFileFolder folder in SubFolders)
             {
-                folder.GetAllFilesOfArchetype<T>(filesList);
+                folder.GetAllObjectsOfArchetype<T>(objectsList);
             }
-            return filesList;
+            return objectsList;
+        }
+
+        public List<YetiObject> GetAllObjectsOfType(YetiObjectType type, List<YetiObject> objectsList = null)
+        {
+            if (objectsList == null)
+                objectsList = new List<YetiObject>();
+            foreach (YetiObject obj in ChildObjects)
+            {
+                if (obj.FileInfo.FileType == type)
+                    objectsList.Add(obj);
+            }
+            foreach (BigFileFolder folder in SubFolders)
+            {
+                folder.GetAllObjectsOfType(type, objectsList);
+            }
+            return objectsList;
         }
     }
 }

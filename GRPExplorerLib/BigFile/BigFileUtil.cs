@@ -126,14 +126,14 @@ namespace GRPExplorerLib.BigFile
 
             FileMappingData mappingData = new FileMappingData();
 
-            BigFileFile[] filesList = new BigFileFile[fileInfos.Length];
+            YetiObject[] filesList = new YetiObject[fileInfos.Length];
 
             for (int i = 0; i < fileInfos.Length; i++)
             {
-                BigFileFile newFile = null;
+                YetiObject newFile = null;
                 if (fileInfos[i] != null)
                 {
-                    newFile = new BigFileFile(fileInfos[i], rootFolder.FolderMap[fileInfos[i].Folder]);
+                    newFile = new YetiObject(fileInfos[i], rootFolder.FolderMap[fileInfos[i].Folder]);
                     newFile.MappingData = mappingData;
                     filesList[i] = newFile;
                 }
@@ -150,7 +150,7 @@ namespace GRPExplorerLib.BigFile
             stopwatch.Reset();
             stopwatch.Start();
 
-            Dictionary<int, BigFileFile> fileKeyMapping = new Dictionary<int, BigFileFile>();
+            Dictionary<int, YetiObject> fileKeyMapping = new Dictionary<int, YetiObject>();
 
             for (int i = 0; i < filesList.Length; i++)
             {
@@ -196,12 +196,12 @@ namespace GRPExplorerLib.BigFile
 
             for (int i = 0; i < mapping.FilesList.Length; i++)
             {
-                BigFileFile file = mapping.FilesList[i];
+                YetiObject file = mapping.FilesList[i];
                 if (file != null)
                 {
                     BigFileFolder folder = rootFolder.FolderMap[mapping.FilesList[i].FileInfo.Folder];
                     if (folder != null)
-                        folder.Files.Add(mapping.FilesList[i]);
+                        folder.ChildObjects.Add(mapping.FilesList[i]);
                 }
             }
 
@@ -287,22 +287,22 @@ namespace GRPExplorerLib.BigFile
             };
         }
 
-        public void AddFileReferencesToFile(BigFileFile file, int[] header)
+        public void AddFileReferencesToFile(YetiObject file, int[] header)
         {
             log.Debug("Loading file references for file: " + file.Name);
             log.Debug("  Reference count: " + header.Length.ToString());
 
-            if (file.FileReferences != null)
+            if (file.ObjectReferences != null)
             {
                 log.Debug("File {0} (key{1:X8}) already has references loaded!", file.Name, file.FileInfo.Key);
                 return;
             }
 
-            BigFileFile[] references = new BigFileFile[header.Length];
+            YetiObject[] references = new YetiObject[header.Length];
 
             for (int i = 0; i < header.Length; i++)
             {
-                BigFileFile reference = file.MappingData[header[i]];
+                YetiObject reference = file.MappingData[header[i]];
                 if (reference != null)
                 {
                     if (!reference.ReferencedBy.Contains(file))
@@ -311,7 +311,7 @@ namespace GRPExplorerLib.BigFile
                 references[i] = reference;
             }
 
-            file.FileReferences = references;
+            file.ObjectReferences = references;
         }
 
         public void SortFolderTree(BigFileFolder folder, bool recursive = true, bool sortFiles = true)
@@ -322,9 +322,9 @@ namespace GRPExplorerLib.BigFile
 
             if (sortFiles)
             {
-                List<BigFileFile> newFiles = folder.Files.OrderBy(f => f.Name).ToList();
-                for (int i = 0; i < folder.Files.Count; i++)
-                    folder.Files[i] = newFiles[i];
+                List<YetiObject> newFiles = folder.ChildObjects.OrderBy(f => f.Name).ToList();
+                for (int i = 0; i < folder.ChildObjects.Count; i++)
+                    folder.ChildObjects[i] = newFiles[i];
             }
 
             if (recursive)
@@ -345,7 +345,7 @@ namespace GRPExplorerLib.BigFile
                     fileString += " ";
                 }
                 log.Debug(folderString + Encoding.Default.GetString(folder.InfoStruct.Name));
-                foreach (BigFileFile file in folder.Files)
+                foreach (YetiObject file in folder.ChildObjects)
                     log.Debug(fileString + file.Name);
                 foreach (BigFileFolder subFolder in folder.SubFolders)
                     recursion.Invoke(subFolder, depth + 1);
@@ -451,12 +451,12 @@ namespace GRPExplorerLib.BigFile
 
     public class FileMappingData
     {
-        private BigFileFile[] filesList;
-        public BigFileFile[] FilesList { get { return filesList; } set { filesList = value; } }
-        private Dictionary<int, BigFileFile> keyMapping;
-        public Dictionary<int, BigFileFile> KeyMapping { get { return keyMapping; } set { keyMapping = value; } }
+        private YetiObject[] filesList;
+        public YetiObject[] FilesList { get { return filesList; } set { filesList = value; } }
+        private Dictionary<int, YetiObject> keyMapping;
+        public Dictionary<int, YetiObject> KeyMapping { get { return keyMapping; } set { keyMapping = value; } }
 
-        public BigFileFile this[int key]
+        public YetiObject this[int key]
         {
             get
             {
@@ -472,7 +472,7 @@ namespace GRPExplorerLib.BigFile
 
         }
 
-        public FileMappingData(BigFileFile[] _filesList, Dictionary<int, BigFileFile> _keyMapping)
+        public FileMappingData(YetiObject[] _filesList, Dictionary<int, YetiObject> _keyMapping)
         {
             filesList = _filesList;
             keyMapping = _keyMapping;

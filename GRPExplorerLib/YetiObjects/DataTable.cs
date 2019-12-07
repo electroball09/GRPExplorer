@@ -127,7 +127,7 @@ namespace GRPExplorerLib.YetiObjects
         }
     }
 
-    public class DataTable : YetiObjectArchetype
+    public class YetiDataTable : YetiObjectArchetype
     {
         public override YetiObjectType Identifier => YetiObjectType.dtb;
 
@@ -137,7 +137,7 @@ namespace GRPExplorerLib.YetiObjects
         public DataTableColumn[] Columns { get; private set; }
         public DataTableColumn this[int index] => Columns[index]; 
 
-        public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
+        public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
             NumColumns = BitConverter.ToInt32(buffer, 0);
             NumRows = BitConverter.ToInt32(buffer, 4);

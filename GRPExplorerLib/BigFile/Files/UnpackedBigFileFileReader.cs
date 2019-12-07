@@ -27,7 +27,7 @@ namespace GRPExplorerLib.BigFile.Files
             unpackedBigFile = _bigFile;
         }
 
-        public override int ReadFileRaw(BigFileFile file, IOBuffers buffers, BigFileFlags flags)
+        public override int ReadFileRaw(YetiObject file, IOBuffers buffers, BigFileFlags flags)
         {
             int[] header = ReadFileHeader(file, buffers, flags);
             int dataSize = ReadFileData(file, buffers, flags);
@@ -50,7 +50,7 @@ namespace GRPExplorerLib.BigFile.Files
             return dataSize + headerSize;
         }
 
-        public override int[] ReadFileHeader(BigFileFile file, IOBuffers buffers, BigFileFlags flags)
+        public override int[] ReadFileHeader(YetiObject file, IOBuffers buffers, BigFileFlags flags)
         {
             string fileName = unpackedBigFile.Directory.FullName + "\\"
                                 + BigFileConst.UNPACK_DIR
@@ -84,7 +84,7 @@ namespace GRPExplorerLib.BigFile.Files
             return header;
         }
 
-        public override int ReadFileData(BigFileFile file, IOBuffers buffers, BigFileFlags flags)
+        public override int ReadFileData(YetiObject file, IOBuffers buffers, BigFileFlags flags)
         {
             string fullFileName = unpackedBigFile.Directory.FullName
                                     + "\\" + BigFileConst.UNPACK_DIR
@@ -105,7 +105,7 @@ namespace GRPExplorerLib.BigFile.Files
             return size;
         }
 
-        public override IEnumerable<int> ReadAllRaw(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags = BigFileFlags.None)
+        public override IEnumerable<int> ReadAllRaw(YetiObject[] filesToRead, IOBuffers buffers, BigFileFlags flags = BigFileFlags.None)
         {
             for (int i = 0; i < filesToRead.Length; i++)
             {
@@ -113,7 +113,7 @@ namespace GRPExplorerLib.BigFile.Files
             }
         }
 
-        public override IEnumerable<int> ReadAllData(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags)
+        public override IEnumerable<int> ReadAllData(YetiObject[] filesToRead, IOBuffers buffers, BigFileFlags flags)
         {
             for (int i = 0; i < filesToRead.Length; i++)
             {
@@ -121,7 +121,7 @@ namespace GRPExplorerLib.BigFile.Files
             }
         }
 
-        public override IEnumerable<int[]> ReadAllHeaders(BigFileFile[] filesToRead, IOBuffers buffers, BigFileFlags flags)
+        public override IEnumerable<int[]> ReadAllHeaders(YetiObject[] filesToRead, IOBuffers buffers, BigFileFlags flags)
         {
             for (int i = 0; i < filesToRead.Length; i++)
             {
