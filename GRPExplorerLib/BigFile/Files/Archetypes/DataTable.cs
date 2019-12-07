@@ -112,7 +112,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
                     DefaultRow = new DataTableRow.StringRow();
                     break;
                 case DataTableColumnType.AssetKey:
-                case DataTableColumnType.UNK01:
+                case DataTableColumnType.UNK01: //use assetkeyrow to display the value for this kind of parameter in hexadecimal
                     DefaultRow = new DataTableRow.AssetKeyRow();
                     break;
                 default:
@@ -134,7 +134,7 @@ namespace GRPExplorerLib.BigFile.Files.Archetypes
         public int NumRows { get; private set; }
 
         public DataTableColumn[] Columns { get; private set; }
-        public DataTableColumn this[int index] => Columns[index];
+        public DataTableColumn this[int index] => Columns[index]; 
 
         public override void Load(byte[] buffer, int size, BigFileFile[] fileReferences)
         {
