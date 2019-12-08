@@ -21,18 +21,18 @@ namespace GRPExplorerLib.BigFile.Files
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="filesToLoad"></param>
+        /// <param name="objects"></param>
         /// <param name="loadReferences"></param>
-        public void LoadFiles(List<YetiObject> filesToLoad)
+        public void LoadAll(List<YetiObject> objects)
         {
-            foreach (YetiObject file in filesToLoad)
+            foreach (YetiObject file in objects)
             {
-                log.Debug("Loading file {0} (key:{1:X8})", file, file.FileInfo.Key);
+                log.Debug("Loading object {0} (key:{1:X8})", file, file.FileInfo.Key);
                 int[] header = bigFile.FileReader.ReadFileHeader(file, buffer, bigFile.FileReader.DefaultFlags);
                 int size = bigFile.FileReader.ReadFileData(file, buffer, BigFileFlags.Decompress);
                 if (size != -1)
                 {
-                    bigFile.FileUtil.AddFileReferencesToFile(file, header);
+                    bigFile.FileUtil.AddReferencesToObject(file, header);
                     file.Load(buffer[size], size);
                 }
                 else
@@ -42,7 +42,7 @@ namespace GRPExplorerLib.BigFile.Files
 
         public void LoadReferences(List<YetiObject> files)
         {
-            LoadReferences(ListExtensions.GetInternalArray(files));
+            LoadReferences(files.ToArray());
         }
 
         public void LoadReferences(YetiObject[] files)
@@ -63,7 +63,7 @@ namespace GRPExplorerLib.BigFile.Files
 
             foreach (int[] header in bigFile.FileReader.ReadAllHeaders(files, bigFile.FileUtil.IOBuffers, bigFile.FileReader.DefaultFlags))
             {
-                bigFile.FileUtil.AddFileReferencesToFile(files[count], header);
+                bigFile.FileUtil.AddReferencesToObject(files[count], header);
                 count++;
             }
         }

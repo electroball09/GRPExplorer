@@ -6,34 +6,44 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:GRPExplorerGUI.View"
              xmlns:Model="clr-namespace:GRPExplorerGUI.Model"
+             xmlns:logging="clr-namespace:GRPExplorerLib.Logging;assembly=GRPExplorerLib"
              DataContext="{Binding RelativeSource={RelativeSource Self}}"
              mc:Ignorable="d">
-    <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <DockPanel>
+        <GroupBox Header="Logs" DockPanel.Dock="Right">
+            <DockPanel Margin="10,0,0,0">
+                <CheckBox x:Name="chkERROR" Margin="0,0,40,0" Content="ERROR" DockPanel.Dock="Top" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                <CheckBox x:Name="chkINFO"  Margin="0,0,40,0" Content="INFO"  DockPanel.Dock="Top" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+                <CheckBox x:Name="chkDEBUG" Margin="0,0,40,0" Content="DEBUG" DockPanel.Dock="Top" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"/>
+
+                <Button x:Name="btnClearLog" Margin="0, 15, 0, 0" Content="Clear Log" Click="BtnClearLog_Click"/>
+            </DockPanel>
+        </GroupBox>
         <ListBox x:Name="listBox" 
-                 Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}, Path=Width}"
-                 Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}, Path=Height}" 
-                 MaxHeight="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}, Path=Height}" 
                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding LogList.LogProxy.Messages}">
                 <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Label x:Name="MessageText" Content="{Binding Message}" VerticalAlignment="Stretch" Padding="0"/>
-                        </Grid>
-                        <DataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding LogType}" Value="{x:Static Model:LogType.Debug}">
-                                <Setter TargetName="MessageText" Property="Foreground" Value="#FF4848FF"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding LogType}" Value="{x:Static Model:LogType.Error}">
-                                <Setter TargetName="MessageText" Property="Foreground" Value="#FFFF1717"/>
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Label x:Name="MessageText" Content="{Binding Message}" VerticalAlignment="Stretch" Padding="0"/>
+                    </Grid>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding LogType}" Value="{x:Static Model:LogType.Debug}">
+                            <Setter TargetName="MessageText" Property="Foreground" Value="#FF4848FF"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding LogType}" Value="{x:Static Model:LogType.Error}">
+                            <Setter TargetName="MessageText" Property="Foreground" Value="#FFFF1717"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsVisible}" Value="false">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="{x:Type ListBoxItem}">
                         <Setter Property="Height" Value="20"/>
                     </Style>
                 </ListBox.ItemContainerStyle>
         </ListBox>
-    </StackPanel>
+    </DockPanel>
 </UserControl>

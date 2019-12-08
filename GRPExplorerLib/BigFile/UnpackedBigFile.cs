@@ -111,7 +111,7 @@ namespace GRPExplorerLib.BigFile
             log.Info("  Time taken: " + status.TimeTaken + "ms");
         }
 
-        public override void LoadExtraData(BigFileOperationStatus statusToUse)
+        public override void LoadReferences(BigFileOperationStatus statusToUse)
         {
             YetiObject[] files = fileMap.KeyMapping.Values.ToArray();
 
@@ -119,7 +119,7 @@ namespace GRPExplorerLib.BigFile
             foreach (int[] header in fileReader.ReadAllHeaders(files, fileUtil.IOBuffers, fileReader.DefaultFlags))
             {
                 statusToUse.UpdateProgress((float)files.Length / (float)count);
-                fileUtil.AddFileReferencesToFile(files[count], header);
+                fileUtil.AddReferencesToObject(files[count], header);
                 count++;
             }
         }

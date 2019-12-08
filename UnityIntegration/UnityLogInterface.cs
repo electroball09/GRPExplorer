@@ -7,6 +7,11 @@ namespace UnityIntegration
 {
     public class UnityLogInterface : IGRPExplorerLibLogInterface
     {
+        public LogFlags CombineFlags(LogFlags original)
+        {
+            return original;
+        }
+
         public void Debug(string msg)
         {
             UnityEngine.Debug.Log(msg);

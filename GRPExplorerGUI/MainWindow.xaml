@@ -8,20 +8,23 @@
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         x:Class="GRPExplorerGUI.MainWindow"
         mc:Ignorable="d"
-        Title="GRPExplorer" Height="867.554" Width="1230" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+        Title="{Binding Path=bigFileview.BigFileViewModel.BigFile.MetadataFileInfo.DirectoryName, FallbackValue='GRPExplorer'}" Height="867.554" Width="1230" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
     <Grid>
-        <StatusBar VerticalAlignment="Bottom" Height="30">
+        <StatusBar VerticalAlignment="Bottom" Height="30" Grid.ColumnSpan="3">
             <StackPanel x:Name="stkLoadingReferences" Visibility="Collapsed" Orientation="Horizontal">
                 <Label x:Name="lblLoadingReferences" Padding="4,4,0,4" Content="LOADING REFERENCES"/>
                 <Label x:Name="lblLoadingEllipses" Padding="0,4,4,4" Content="..."/>
             </StackPanel>
         </StatusBar>
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="1200" Margin="0,25,0,10">
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="1200" Margin="0,25,0,10" Grid.ColumnSpan="3">
             <View:BigFileView x:Name="bigFileview" HorizontalAlignment="Stretch" Width="1200" Margin="10,0,0,0" VerticalAlignment="Top" ScrollViewer.CanContentScroll="True" Height="654"/>
             <View:LogView x:Name="logView" HorizontalAlignment="Stretch" Height="110" MaxHeight="110" Margin="10,0,0,654" />
         </StackPanel>
-        <Menu x:Name="menu" Height="20" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalAlignment="Stretch">
-            <MenuItem x:Name="menuOpenBigfile" Header="Open Bigfile..." Click="MenuOpenBigfile_Click"/>
+        <Menu x:Name="menu" Height="20" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" Grid.ColumnSpan="3">
+            <MenuItem x:Name="menuOpenBigfile" Header="Open Bigfile...">
+                <MenuItem x:Name="menuOpenPackedBigfile" Header="Packed..." Click="MenuOpenBigfile_Click"/>
+                <MenuItem x:Name="menuOpenUnpackedBigfile" Header="Unpacked..." Click="MenuOpenUnpackedBigfile_Click"/>
+            </MenuItem>
             <MenuItem Header="Tools">
                 <MenuItem Header="Find...">
                     <StackPanel Orientation="Horizontal">

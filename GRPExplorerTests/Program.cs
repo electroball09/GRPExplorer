@@ -53,7 +53,7 @@ namespace GRPExplorerTests
         public static string ReadLine()
         {
             string str = Console.ReadLine();
-            log_sw.Write(str);
+            log_sw.WriteLine(str);
             return str;
         }
 
@@ -100,6 +100,11 @@ namespace GRPExplorerTests
     {
         class LogInterface : IGRPExplorerLibLogInterface
         {
+            public LogFlags CombineFlags(LogFlags original)
+            {
+                return original;
+            }
+
             public void Debug(string msg)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
@@ -132,7 +137,8 @@ namespace GRPExplorerTests
             CheckFiles,
             LogFolderUnknowns,
             DecryptOasis,
-            LogDatatables
+            LogDatatables,
+            LoadFilesOfType,
         };
 
         static void Main(string[] args)
@@ -147,6 +153,9 @@ namespace GRPExplorerTests
             int num = int.Parse(Out.ReadLine());
             Out.Clear();
             funcs[num]();
+            Out.WriteLine("");
+            Out.WriteLine("Routine ended");
+            Out.ReadLine();
         }
 
         static void CheckFiles()
@@ -172,8 +181,6 @@ namespace GRPExplorerTests
                     LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
                 }
             }
-
-            Out.ReadLine();
         }
 
         static void CompareAllFiles()
@@ -353,8 +360,6 @@ namespace GRPExplorerTests
             bigFileFile1.FileInfo.DebugLog(log);
             bigFileFile2.FileInfo.DebugLog(log);
 
-
-            Out.ReadLine();
         }
 
         static void ProcessBigmap()
@@ -383,9 +388,6 @@ namespace GRPExplorerTests
                     }
                 }
             }
-
-            Out.Write("End!");
-            Out.ReadLine();
         }
 
         static void TestTextures()
@@ -407,15 +409,13 @@ namespace GRPExplorerTests
             bigFile.LoadFromDisk();
 
             List<YetiObject> textureFiles = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiTextureMetadata>();
-            bigFile.FileLoader.LoadFiles(textureFiles);
+            bigFile.FileLoader.LoadAll(textureFiles);
             foreach (YetiObject file in textureFiles)
             {
                 YetiTextureMetadata archetype = file.ArchetypeAs<YetiTextureMetadata>();
                 if (archetype.Format == format)
                     Out.WriteLine(file.FullFolderPath + file.Name + " " + string.Format("{0:X2} {1} {2}", archetype.Format, archetype.Width, archetype.Height));
             }
-
-            Out.ReadLine();
         }
 
         static void LogFiles()
@@ -431,15 +431,13 @@ namespace GRPExplorerTests
             bigFile.LoadFromDisk();
 
             List<YetiObject> files = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiCurve>();
-            bigFile.FileLoader.LoadFiles(files);
+            bigFile.FileLoader.LoadAll(files);
             foreach (YetiObject file in files)
             {
                 YetiCurve archetype = file.ArchetypeAs<YetiCurve>();
                 log.Info(file.Name);
                 archetype.Log(log);
             }
-
-            Out.ReadLine();
         }
 
         static void LogFolderUnknowns()
@@ -498,8 +496,6 @@ namespace GRPExplorerTests
             }
 
             FolderRecursion(bigFile.RootFolder);
-
-            Out.ReadLine();
         }
 
         static void DecryptOasis()
@@ -543,20 +539,10 @@ namespace GRPExplorerTests
                     Out.WriteLine(string.Format("position {0}   size {1}", fsin.Position.ToString(), size));
                 }
             }
-
-            Out.WriteLine("");
-            Out.WriteLine("Finished!");
-            Out.ReadLine();
         }
 
         static void LogDatatables()
         {
-            Matrix4x4 m = Matrix4x4.Identity;
-            m.Translation = new Vector3(69f, 420f, 4815162342f);
-            Out.Write(m.ToString());
-            Out.ReadLine();
-
-            return;
             const string CSVDir = "DataTables\\";
 
             Directory.CreateDirectory(CSVDir);
@@ -573,7 +559,7 @@ namespace GRPExplorerTests
 
             List<YetiObject> files = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiDataTable>();
 
-            bigFile.FileLoader.LoadFiles(files);
+            bigFile.FileLoader.LoadAll(files);
 
             foreach (YetiObject f in files)
             {
@@ -596,9 +582,36 @@ namespace GRPExplorerTests
                     }
                 }
             }
+        }
 
-            Out.WriteLine("\nDONE");
-            Out.ReadLine();
+        static void LoadFilesOfType()
+        {
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
+            if (!File.Exists(path))
+                Environment.Exit(69);
+
+            Out.Write("Type: ");
+            string t = Out.ReadLine();
+            YetiObjectType type;
+            Enum.TryParse(t, out type);
+            if (type == YetiObjectType.NONE)
+                return;
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
+            bigFile.LoadFromDisk();
+            //LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info | LogFlags.Debug;
+
+            List<YetiObject> objects = bigFile.RootFolder.GetAllObjectsOfType(type);
+            bigFile.FileLoader.LoadReferences(objects);
+            bigFile.FileLoader.LoadAll(objects);
+
+            foreach (YetiObject obj in objects)
+            {
+                obj.Archetype.Log(log);
+            }
         }
     }
 }

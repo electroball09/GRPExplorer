@@ -38,13 +38,13 @@ namespace GRPExplorerLib.YetiObjects
             Height = BitConverter.ToUInt16(buffer, 6);
             Format = (YetiTextureFormat)buffer[9];
 
-            if (fileReferences.Length == 0)
+            if (objectReferences.Length == 0)
             {
                 LogManager.Error("WTF " + Object.Name);
                 return;
             }
 
-            Payload = fileReferences[0]?.ArchetypeAs<YetiTexturePayload>();
+            Payload = objectReferences[0]?.ArchetypeAs<YetiTexturePayload>();
         }
 
         public override void Log(ILogProxy log)

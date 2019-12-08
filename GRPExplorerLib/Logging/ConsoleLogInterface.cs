@@ -7,6 +7,11 @@ namespace GRPExplorerLib.Logging
 {
     internal class ConsoleLogInterface : IGRPExplorerLibLogInterface
     {
+        public LogFlags CombineFlags(LogFlags original)
+        {
+            return original;
+        }
+
         public void Debug(string msg)
         {
             Console.WriteLine(msg);

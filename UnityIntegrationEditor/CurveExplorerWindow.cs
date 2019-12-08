@@ -40,7 +40,7 @@ namespace UnityIntegrationEditor
                 (bigFile) =>
                 {
                     List<YetiObject> files = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiCurve>();
-                    bigFile.FileLoader.LoadFiles(files);
+                    bigFile.FileLoader.LoadAll(files);
 
                     archetypes = new List<YetiCurve>();
                     foreach (YetiObject file in files)

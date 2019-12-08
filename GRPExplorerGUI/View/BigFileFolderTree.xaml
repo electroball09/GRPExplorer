@@ -30,7 +30,7 @@
                             </Expander>
                             <Label Padding ="0" x:Name="lblHeader" Content="{Binding Path=Name}"/>
                         </StackPanel>
-                        <ListBox x:Name="listFiles" ItemsSource="{Binding Path=Files}" 
+                        <ListBox x:Name="listFiles" ItemsSource="{Binding Path=ChildObjects}" 
                                      SelectedItem="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=SelectedFile, Mode=TwoWay}"
                                      LostFocus="listFiles_LostFocus"
                                      Margin="5,0,0,0" Padding="0" ScrollViewer.CanContentScroll="False" BorderThickness="2,0,0,0" ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled" BorderBrush="Black">
@@ -42,7 +42,7 @@
                         </ListBox>
                     </StackPanel>
                     <HierarchicalDataTemplate.Triggers>
-                        <DataTrigger Binding="{Binding Path=Files.Count}" Value="0">
+                        <DataTrigger Binding="{Binding Path=ChildObjects.Count}" Value="0">
                             <Setter TargetName="listFiles" Property="Visibility" Value="Collapsed"/>
                             <Setter TargetName="expHeader" Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>

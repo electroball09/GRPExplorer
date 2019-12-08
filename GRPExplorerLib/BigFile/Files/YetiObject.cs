@@ -30,7 +30,7 @@ namespace GRPExplorerLib.BigFile
         }
         public IBigFileFileInfo FileInfo { get; set; }
         public BigFileFolder ParentFolder { get; }
-        public YetiObject[] ObjectReferences { get; set; } = new YetiObject[0];
+        public YetiObject[] ObjectReferences { get; set; }
 
         public List<YetiObject> ReferencedBy { get; } = new List<YetiObject>();
 

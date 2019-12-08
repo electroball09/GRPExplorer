@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,39 +9,84 @@ using System.Timers;
 using System.Windows;
 using GRPExplorerLib;
 using GRPExplorerLib.Logging;
+using System.ComponentModel;
 
 namespace GRPExplorerGUI.Model
 {
-    public class LogModel
+    public class LogModel : INotifyPropertyChanged
     {
-        private GRPExplorerGUILogProxy logProxy = new GRPExplorerGUILogProxy();
-        public GRPExplorerGUILogProxy LogProxy
+        public event PropertyChangedEventHandler PropertyChanged;
+        static Action<PropertyChangedEventHandler, LogModel, string> propChangedAction =
+            (ev, vm, prop) =>
+            {
+                ev?.Invoke(vm, new PropertyChangedEventArgs(prop));
+            };
+        protected void NotifyPropertyChanged([CallerMemberName] string prop = "")
         {
-            get { return logProxy; }
+            Application.Current.Dispatcher.Invoke(propChangedAction, PropertyChanged, this, prop);
+        }
+
+        public GRPExplorerGUILogProxy LogProxy { get; } = new GRPExplorerGUILogProxy();
+
+        private LogFlags flags = LogFlags.Error | LogFlags.Info;
+        public LogFlags LogFlags
+        {
+            get { return flags; }
+            set { flags = value; LogProxy.SetFlags(value); NotifyPropertyChanged(); }
         }
 
         public LogModel()
         {
-
+            LogProxy.SetFlags(flags);
         }
     }
 
-    public class LogMessage
+    public class LogMessage : INotifyPropertyChanged
     {
-        string msg;
-        public string Message { get { return msg; } }
-        LogType logType;
-        public LogType LogType { get { return logType; } }
+        public event PropertyChangedEventHandler PropertyChanged;
+        static Action<PropertyChangedEventHandler, LogMessage, string> propChangedAction =
+            (ev, vm, prop) =>
+            {
+                ev?.Invoke(vm, new PropertyChangedEventArgs(prop));
+            };
+        protected void NotifyPropertyChanged([CallerMemberName] string prop = "")
+        {
+            Application.Current.Dispatcher.Invoke(propChangedAction, PropertyChanged, this, prop);
+        }
+
+        public string Message { get; }
+        public LogType LogType { get; }
+
+        bool visible = true;
+        public bool IsVisible { get { return visible; } private set { visible = value; NotifyPropertyChanged(); } }
 
         public LogMessage(LogType _logType, string _msg)
         {
-            msg = _msg;
-            logType = _logType;
+            Message = _msg;
+            LogType = _logType;
+        }
+
+        public void SetVisibility(LogFlags flags)
+        {
+            switch (LogType)
+            {
+                case LogType.Debug:
+                    IsVisible = (flags & LogFlags.Debug) != 0;
+                    break;
+                case LogType.Info:
+                    IsVisible = (flags & LogFlags.Info) != 0;
+                    break;
+                case LogType.Error:
+                    IsVisible = (flags & LogFlags.Error) != 0;
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override string ToString()
         {
-            return msg;
+            return Message;
         }
     }
 
@@ -53,11 +99,9 @@ namespace GRPExplorerGUI.Model
 
     public class GRPExplorerGUILogProxy : IGRPExplorerLibLogInterface
     {
-        ObservableCollection<LogMessage> messages = new ObservableCollection<LogMessage>();
-        public ObservableCollection<LogMessage> Messages
-        {
-            get { return messages; }
-        }
+        public ObservableCollection<LogMessage> Messages { get; } = new ObservableCollection<LogMessage>();
+
+        private LogFlags flags = LogFlags.All;
 
         public GRPExplorerGUILogProxy()
         {
@@ -68,24 +112,46 @@ namespace GRPExplorerGUI.Model
         {
             try
             {
-                Application.Current.Dispatcher.BeginInvoke((Action<LogMessage>)messages.Add, msg);
+                Application.Current.Dispatcher.BeginInvoke((Action<LogMessage>)Messages.Add, msg);
             }
             catch { } //sometimes there's an exception when closing the program so i'm cancelling it
         }
 
-        public void Debug(string msg)
+        public void SetFlags(LogFlags flags)
         {
-            AddMsg(new LogMessage(LogType.Debug, msg));
+            this.flags = flags;
+
+            lock(Messages)
+            {
+                foreach (LogMessage msg in Messages)
+                    msg.SetVisibility(flags);
+            }
         }
 
-        public void Error(string msg)
+        public LogFlags CombineFlags(LogFlags original)
         {
-            AddMsg(new LogMessage(LogType.Error, msg));
+            return LogFlags.All;
+        }
+
+        public void Debug(string msg)
+        {
+            LogMessage message = new LogMessage(LogType.Debug, msg);
+            message.SetVisibility(flags);
+            AddMsg(message);
         }
 
         public void Info(string msg)
         {
-            AddMsg(new LogMessage(LogType.Info, msg));
+            LogMessage message = new LogMessage(LogType.Info, msg);
+            message.SetVisibility(flags);
+            AddMsg(message);
+        }
+
+        public void Error(string msg)
+        {
+            LogMessage message = new LogMessage(LogType.Error, msg);
+            message.SetVisibility(flags);
+            AddMsg(message);
         }
     }
 }

@@ -13,6 +13,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Timers;
 using GRPExplorerGUI.Model;
+using System.Globalization;
+using GRPExplorerLib.Logging;
 
 namespace GRPExplorerGUI.View
 {
@@ -53,9 +55,44 @@ namespace GRPExplorerGUI.View
                         listBox.SelectedIndex = listBox.Items.Count - 1;
                         listBox.ScrollIntoView(listBox.SelectedItem);
                         listBox.SelectedIndex = -1;
+
+                        chkERROR.IsChecked = (Log.LogFlags & LogFlags.Error) != 0;
+                        chkINFO.IsChecked  = (Log.LogFlags & LogFlags.Info) != 0;
+                        chkDEBUG.IsChecked = (Log.LogFlags & LogFlags.Debug) != 0;
                     });
             }
             catch { } //sometimes it crashes on exit ¯\_(ツ)_/¯
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (Log == null)
+                return;
+
+            if (sender == chkERROR)
+                Log.LogFlags = Log.LogFlags | LogFlags.Error;
+            if (sender == chkINFO)            
+                Log.LogFlags = Log.LogFlags | LogFlags.Info;
+            if (sender == chkDEBUG)           
+                Log.LogFlags = Log.LogFlags | LogFlags.Debug;
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (Log == null)
+                return;
+
+            if (sender == chkERROR)
+                Log.LogFlags = Log.LogFlags ^ LogFlags.Error;
+            if (sender == chkINFO)
+                Log.LogFlags = Log.LogFlags ^ LogFlags.Info;
+            if (sender == chkDEBUG)
+                Log.LogFlags = Log.LogFlags ^ LogFlags.Debug;
+        }
+
+        private void BtnClearLog_Click(object sender, RoutedEventArgs e)
+        {
+            Log.LogProxy.Messages.Clear();
         }
     }
 }

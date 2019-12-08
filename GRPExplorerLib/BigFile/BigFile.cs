@@ -72,7 +72,7 @@ namespace GRPExplorerLib.BigFile
         }
 
         public abstract void LoadFromDisk();
-        public abstract void LoadExtraData(BigFileOperationStatus statusToUse);
+        public abstract void LoadReferences(BigFileOperationStatus statusToUse);
     }
 
     public sealed class BigFileLoadOperationStatus : BigFileOperationStatus

@@ -99,7 +99,7 @@ namespace GRPExplorerLib.BigFile
             log.Info("Time taken: " + status.TimeTaken + "ms");
         }
 
-        public override void LoadExtraData(BigFileOperationStatus statusToUse)
+        public override void LoadReferences(BigFileOperationStatus statusToUse)
         {
             YetiObject[] files = fileMap.KeyMapping.Values.ToArray();
 

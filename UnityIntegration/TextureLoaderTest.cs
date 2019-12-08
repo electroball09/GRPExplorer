@@ -64,7 +64,7 @@ namespace UnityIntegration
                 (bigFile) =>
                 {
                     textureMetadataFiles = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiTextureMetadata>();
-                    bigFile.FileLoader.LoadFiles(textureMetadataFiles);
+                    bigFile.FileLoader.LoadAll(textureMetadataFiles);
                     m_bigFile = bigFile;
                 });
         }
@@ -121,7 +121,7 @@ namespace UnityIntegration
             {
                 loadedPayload
             };
-            m_bigFile.FileLoader.LoadFiles(list);
+            m_bigFile.FileLoader.LoadAll(list);
             
             texture = new Texture2D(arch.Width, arch.Height, ImportAs, false);
             texture.wrapMode = TextureWrapMode.Clamp;

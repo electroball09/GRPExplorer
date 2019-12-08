@@ -139,9 +139,53 @@ namespace GRPExplorerGUI
             {
                 Settings.LastBigfilePath = Path.GetDirectoryName(dialog.FileName);
 
-                BigFile bf = new PackedBigFile(new System.IO.FileInfo(dialog.FileName));
-                bigFileview.BigFileViewModel = new BigFileViewModel();
-                bigFileview.BigFileViewModel.BigFile = bf;
+                BigFile bf = new PackedBigFile(new FileInfo(dialog.FileName));
+                bigFileview.BigFileViewModel = new BigFileViewModel
+                {
+                    BigFile = bf
+                };
+
+                stkLoadingReferences.Visibility = Visibility.Visible;
+                lblLoadingReferences.Content = "Loading bigfile";
+
+                bigFileview.BigFileViewModel.LoadFromDisk
+                    (() =>
+                    {
+                        bf.FileUtil.SortFolderTree(bf.RootFolder);
+                        bigFileview.FolderTree.RootFolder = bigFileview.BigFileViewModel.BigFile.RootFolder;
+
+                        lblLoadingReferences.Content = "Loading references";
+
+                        bigFileview.BigFileViewModel.LoadExtraData
+                            (() =>
+                            {
+                                stkLoadingReferences.Visibility = Visibility.Collapsed;
+                                LogManager.Info("REFERENCES LOADED");
+                            });
+                    });
+            }
+        }
+
+        private void MenuOpenUnpackedBigfile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                DefaultExt = ".gex",
+                Filter = "GEX files (*.gex)|*.gex",
+                InitialDirectory = Settings.LastUnpackedBigfilePath
+            };
+
+            bool? result = dialog.ShowDialog();
+
+            if (result == true)
+            {
+                Settings.LastUnpackedBigfilePath = Path.GetDirectoryName(dialog.FileName);
+
+                BigFile bf = new UnpackedBigFile(new DirectoryInfo(Path.GetDirectoryName(dialog.FileName)));
+                bigFileview.BigFileViewModel = new BigFileViewModel
+                {
+                    BigFile = bf
+                };
 
                 stkLoadingReferences.Visibility = Visibility.Visible;
                 lblLoadingReferences.Content = "Loading bigfile";

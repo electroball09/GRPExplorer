@@ -308,6 +308,9 @@ namespace GRPExplorerLib.BigFile
                 metaFS.Write(BitConverter.GetBytes(info.filesChunked), 0, 4);
                 metaFS.Write(BitConverter.GetBytes(chunkFS.Length), 0, 4);
 
+                if (chunkFS.Length % 8 != 0)
+                    throw new Exception("oh shit what happened");
+
                 WinMessageBox.Show(chunkFS.Length.ToString(), "HA", WinMessageBoxFlags.btnOkay);
             }
 

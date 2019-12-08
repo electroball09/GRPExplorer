@@ -11,7 +11,7 @@
         <Rectangle Fill="#FFF4F4F5" Margin="0" Stroke="White"/>
         <GroupBox x:Name="grpFileData" Margin="0,4,0,0">
             <GroupBox.Header>
-                <TextBlock Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.NameWithExtension, StringFormat='File: {0}'}"/>
+                <TextBlock Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.NameWithExtension, StringFormat='File: {0}', FallbackValue='No file selected', TargetNullValue='No file selected'}"/>
             </GroupBox.Header>
             <StackPanel Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
@@ -42,7 +42,7 @@
                 <TabControl x:Name="tabControl" HorizontalAlignment="Stretch" Height="250" Width="500" VerticalAlignment="Top">
                     <TabItem>
                         <TabItem.Header>
-                            <TextBlock Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.ObjectReferences.Length, StringFormat='References ({0})'}"/>
+                            <TextBlock Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.ObjectReferences.Length, StringFormat='References ({0})', FallbackValue='References'}"/>
                         </TabItem.Header>
                         <Grid Background="#FFE5E5E5">
                             <ListBox x:Name="listFileReferences" ItemsSource="{Binding ViewModel.SelectedFile.ObjectReferences}" HorizontalAlignment="Stretch" MinWidth="250" ScrollViewer.HorizontalScrollBarVisibility="Visible">
@@ -59,7 +59,7 @@
                     </TabItem>
                     <TabItem>
                         <TabItem.Header>
-                            <TextBlock Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.ReferencedBy.Count, StringFormat='Referenced by ({0})'}"/>
+                            <TextBlock Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.ReferencedBy.Count, StringFormat='Referenced by ({0})', FallbackValue='Referenced by'}"/>
                         </TabItem.Header>
                         <Grid Background="#FFE5E5E5">
                             <ListBox x:Name="listFileReferencedBy" ItemsSource="{Binding ViewModel.SelectedFile.ReferencedBy}" HorizontalAlignment="Stretch" MinWidth="250" ScrollViewer.HorizontalScrollBarVisibility="Visible">

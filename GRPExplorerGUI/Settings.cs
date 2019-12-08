@@ -53,6 +53,18 @@ namespace GRPExplorerGUI
             }
         }
 
+        public static string LastUnpackedBigfilePath
+        {
+            get
+            {
+                return GetValue(defaultValue: Environment.CurrentDirectory) as string;
+            }
+            set
+            {
+                SetValue(value);
+            }
+        }
+
         public static string LastExtractPath
         {
             get

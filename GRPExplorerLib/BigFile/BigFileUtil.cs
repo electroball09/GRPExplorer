@@ -287,14 +287,14 @@ namespace GRPExplorerLib.BigFile
             };
         }
 
-        public void AddFileReferencesToFile(YetiObject file, int[] header)
+        public void AddReferencesToObject(YetiObject obj, int[] header)
         {
-            log.Debug("Loading file references for file: " + file.Name);
+            log.Debug("Loading file references for object: " + obj.Name);
             log.Debug("  Reference count: " + header.Length.ToString());
 
-            if (file.ObjectReferences != null)
+            if (obj.ObjectReferences != null)
             {
-                log.Debug("File {0} (key{1:X8}) already has references loaded!", file.Name, file.FileInfo.Key);
+                log.Debug("Object {0} (key{1:X8}) already has references loaded!", obj.Name, obj.FileInfo.Key);
                 return;
             }
 
@@ -302,16 +302,16 @@ namespace GRPExplorerLib.BigFile
 
             for (int i = 0; i < header.Length; i++)
             {
-                YetiObject reference = file.MappingData[header[i]];
+                YetiObject reference = obj.MappingData[header[i]];
                 if (reference != null)
                 {
-                    if (!reference.ReferencedBy.Contains(file))
-                        reference.ReferencedBy.Add(file);
+                    if (!reference.ReferencedBy.Contains(obj))
+                        reference.ReferencedBy.Add(obj);
                 }
                 references[i] = reference;
             }
 
-            file.ObjectReferences = references;
+            obj.ObjectReferences = references;
         }
 
         public void SortFolderTree(BigFileFolder folder, bool recursive = true, bool sortFiles = true)

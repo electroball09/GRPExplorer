@@ -15,7 +15,7 @@ namespace GRPExplorerLib.YetiObjects
 
         public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
-            throw new NotImplementedException();
+            //
         }
 
         public override void Log(ILogProxy log)

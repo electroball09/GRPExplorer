@@ -80,27 +80,25 @@ namespace GRPExplorerLib.Logging
             return newLogProxy;
         }
 
-        private static IGRPExplorerLibLogInterface logInterface = new ConsoleLogInterface();
-        public static IGRPExplorerLibLogInterface LogInterface { get { return logInterface; } set { logInterface = value; } }
-        private static LogFlags globalLogFlags = LogFlags.Debug | LogFlags.Info | LogFlags.Error;
-        public static LogFlags GlobalLogFlags { get { return globalLogFlags; } set { globalLogFlags = value; } }
+        public static IGRPExplorerLibLogInterface LogInterface { get; set; } = new ConsoleLogInterface();
+        public static LogFlags GlobalLogFlags { get; set; } = LogFlags.Debug | LogFlags.Info | LogFlags.Error;
 
         public static void Debug(string msg)
         {
-            if ((globalLogFlags & LogFlags.Debug) != 0)
-                logInterface.Debug(msg);
+            if ((LogInterface.CombineFlags(GlobalLogFlags) & LogFlags.Debug) != 0)
+                LogInterface.Debug(msg);
         }
 
         public static void Info(string msg)
         {
-            if ((globalLogFlags & LogFlags.Info) != 0)
-                logInterface.Info(msg);
+            if ((LogInterface.CombineFlags(GlobalLogFlags) & LogFlags.Info) != 0)
+                LogInterface.Info(msg);
         }
 
         public static void Error(string msg)
         {
-            if ((globalLogFlags & LogFlags.Error) != 0)
-                logInterface.Error(msg);
+            if ((LogInterface.CombineFlags(GlobalLogFlags) & LogFlags.Error) != 0)
+                LogInterface.Error(msg);
         }
     }
 

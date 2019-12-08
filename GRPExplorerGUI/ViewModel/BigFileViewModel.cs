@@ -103,7 +103,7 @@ namespace GRPExplorerGUI.ViewModel
 
         private void ExtraDataWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            bigFile?.LoadExtraData(e.Argument as BigFileOperationStatus);
+            bigFile?.LoadReferences(e.Argument as BigFileOperationStatus);
         }
 
         private void Bgworker_DoWork(object sender, DoWorkEventArgs e)
