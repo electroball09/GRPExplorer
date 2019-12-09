@@ -111,7 +111,7 @@ namespace GRPExplorerLib.BigFile.Files
             int referenceNum = BitConverter.ToInt32(buffers[fileSize], 0);
             if (referenceNum * 4 >= fileSize)
             {
-                log.Error("referenceNum * 4 > fileSize\n{0}>{1}", referenceNum, fileSize);
+                log.Error("{2} {3} referenceNum * 4 > fileSize\n{0}>{1}", referenceNum, fileSize, file.FullFolderPath, file.NameWithExtension);
                 return new int[0];
             }
 

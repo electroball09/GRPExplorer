@@ -112,7 +112,10 @@ namespace GRPExplorerGUI.Model
         {
             try
             {
-                Application.Current.Dispatcher.BeginInvoke((Action<LogMessage>)Messages.Add, msg);
+                lock (Messages)
+                {
+                    Application.Current.Dispatcher.BeginInvoke((Action<LogMessage>)Messages.Add, msg);
+                }
             }
             catch { } //sometimes there's an exception when closing the program so i'm cancelling it
         }

@@ -226,8 +226,8 @@ namespace GRPExplorerLib.BigFile
                 YetiObject[] filesToWrite = new YetiObject[info.count];
                 Array.Copy(info.filesList, info.startIndex, filesToWrite, 0, info.count);
 
-                log.Error("Thread ID {0} - First file is {1}", info.ThreadID, filesToWrite[0].Name);
-                log.Error("Thread ID {0} - Last file is {1}", info.ThreadID, filesToWrite[filesToWrite.Length - 1].Name);
+                log.Info("Thread ID {0} - First file is {1}", info.ThreadID, filesToWrite[0].Name);
+                log.Info("Thread ID {0} - Last file is {1}", info.ThreadID, filesToWrite[filesToWrite.Length - 1].Name);
                 
                 YetiObject currFile = null;
 
@@ -254,7 +254,6 @@ namespace GRPExplorerLib.BigFile
                         metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.FileNumber), 0, 4);
                         metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.Key), 0, 4);
                         metaFS.Write(BitConverter.GetBytes(-1), 0, 4);
-                        log.Error("WAIT WHAT");
                     }
                     else
                     {
@@ -310,8 +309,6 @@ namespace GRPExplorerLib.BigFile
 
                 if (chunkFS.Length % 8 != 0)
                     throw new Exception("oh shit what happened");
-
-                WinMessageBox.Show(chunkFS.Length.ToString(), "HA", WinMessageBoxFlags.btnOkay);
             }
 
             info.isPacking = false;

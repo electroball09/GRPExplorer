@@ -36,10 +36,12 @@ namespace GRPExplorerGUI.Extra
         private void btnUnpackBigfile_Click(object sender, RoutedEventArgs e)
         {
             Clicked = clicked.unpack;
+            this.Close();
         }
         private void btnPackBigFile_Click(object sender, RoutedEventArgs e)
         {
             Clicked = clicked.pack;
+            this.Close();
         }
     }
 }

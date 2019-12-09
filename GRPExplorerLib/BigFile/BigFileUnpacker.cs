@@ -267,7 +267,7 @@ namespace GRPExplorerLib.BigFile
                 headers.MoveNext();
                 data.MoveNext();
 
-                log.Info("Unpacking file {0}", files[i].Name);
+                log.Debug("Unpacking file {0}", files[i].Name);
 
                 //********************************************//
                 //DON'T FORGET THE ******* UNPACK SUBDIRECTORY//
@@ -293,7 +293,7 @@ namespace GRPExplorerLib.BigFile
                         {
                             headerFS.Write(header[j].ToByteArray(info.buffers[4]), 0, 4);
                             if (header[j] == 0)
-                                log.Error("WTF");
+                                log.Error("{0:X8} {1} {2}", header[j], headerCount, files[i].NameWithExtension);
                         }
                     }
                     else
