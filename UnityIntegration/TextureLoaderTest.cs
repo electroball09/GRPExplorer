@@ -27,7 +27,7 @@ namespace UnityIntegration
         }
 
         public GameObject testPlane;
-        public BigFile m_bigFile;
+        public static BigFile m_bigFile;
         public string currentFilePath = "";
         public YetiTextureFormat textureType = YetiTextureFormat.RGBA32;
         public TextureFormat ImportAs = TextureFormat.RGBA32;

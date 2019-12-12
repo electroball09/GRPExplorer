@@ -49,14 +49,14 @@
   <ItemGroup>
     <Compile Include="BigFile\BigFile.cs" />
     <Compile Include="BigFile\BigFileExtension.cs" />
-    <Compile Include="YetiObjects\DataTable.cs" />
+    <Compile Include="YetiObjects\YetiDataTable.cs" />
     <Compile Include="BigFile\YetiFileType.cs" />
     <Compile Include="BigFile\Extra\FEUtoSWF.cs" />
     <Compile Include="YetiObjects\BigFileFileArchetype.cs" />
-    <Compile Include="YetiObjects\CurveFile.cs" />
-    <Compile Include="YetiObjects\GameObject.cs" />
-    <Compile Include="YetiObjects\TextureFiles.cs" />
-    <Compile Include="YetiObjects\WorldFiles.cs" />
+    <Compile Include="YetiObjects\YetiCurve.cs" />
+    <Compile Include="YetiObjects\YetiGameObject.cs" />
+    <Compile Include="YetiObjects\YetiTexture.cs" />
+    <Compile Include="YetiObjects\YetiWorld.cs" />
     <Compile Include="BigFile\Files\BigFileFileLoader.cs" />
     <Compile Include="BigFile\Files\BigFileFileReader.cs" />
     <Compile Include="BigFile\Files\BigFileFilesAndFolders.cs" />
@@ -99,6 +99,7 @@
     <Compile Include="Util\StructConverter.cs" />
     <Compile Include="Util\TimeUtil.cs" />
     <Compile Include="Util\WinMessageBox.cs" />
+    <Compile Include="YetiObjects\YetiMesh.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
