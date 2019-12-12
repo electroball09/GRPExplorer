@@ -63,8 +63,8 @@ namespace UnityIntegration
                 (currentFilePath,
                 (bigFile) =>
                 {
-                    textureMetadataFiles = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiTextureMetadata>();
-                    bigFile.FileLoader.LoadAll(textureMetadataFiles);
+                    //textureMetadataFiles = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiTextureMetadata>();
+                    //bigFile.FileLoader.LoadAll(textureMetadataFiles);
                     m_bigFile = bigFile;
                 });
         }

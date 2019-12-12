@@ -21,7 +21,7 @@ namespace UnityIntegrationEditor
                 return;
             }
 
-            if (test.m_bigFile == null)
+            if (TextureLoaderTest.m_bigFile == null)
             {
                 GUI_Load(test);
             }

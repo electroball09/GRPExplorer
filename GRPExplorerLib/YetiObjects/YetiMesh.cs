@@ -61,19 +61,27 @@ namespace GRPExplorerLib.YetiObjects
                     short tu = br.ReadInt16();
                     short tv = (short)(br.ReadInt16() * -1); //idk why
 
-                    Vertices[i] = new Vector3((vx * vw) / 655350f, (vy * vw) / 655350f, (vz * vw) / 655350f);
+                    Vertices[i] = new Vector3((vx * vw) / -655350f, (vy * vw) / 655350f, (vz * vw) / 655350f);
                     UVs[i] = new Vector2(tu / 1024f, tv / 1024f);
 
-                    ms.Seek(8, SeekOrigin.Current);
+                    ms.Seek(20, SeekOrigin.Current);
                 }
+
+                LogManager.Info(string.Format("current pos: {0}", ms.Position));
 
                 Faces = new int[FaceCount];
 
                 for (int i = 0; i < FaceCount / 3; i++)
                 {
-                    Faces[i * 3 + 1] = br.ReadUInt16() + 1;
-                    Faces[i * 3 + 2] = br.ReadUInt16() + 1;
-                    Faces[i * 3 + 0] = br.ReadUInt16() + 1;
+                    Faces[i * 3 + 0] = br.ReadUInt16();
+                    Faces[i * 3 + 1] = br.ReadUInt16();
+                    Faces[i * 3 + 2] = br.ReadUInt16();
+                }
+
+                for (int i = 0; i < FaceCount; i++)
+                {
+                    if (Faces[i] >= VertexCount)
+                        LogManager.Error(string.Format("index: {0}  vert: {1}", i, Faces[i]));
                 }
             }
         }
