@@ -58,7 +58,7 @@ namespace GRPExplorerLib.BigFile
             FileInfo = _fileInfo;
             ParentFolder = _parentFolder;
             name = FileInfo.Name.EncodeToGoodString();
-            Archetype = this.CreateArchetype();
+            Archetype = YetiObjectArchetype.CreateArchetype(this);
             Archetype.Object = this;
         }
 

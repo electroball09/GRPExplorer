@@ -12,6 +12,8 @@ namespace GRPExplorerLib.YetiObjects
 {
     public class YetiMeshData : YetiObjectArchetype
     {
+        public static int[] TriangleOrder = new int[] { 1, 2, 0 };
+
         public override YetiObjectType Identifier => YetiObjectType.msd;
 
         public int VertexCount { get; private set; }
@@ -19,6 +21,12 @@ namespace GRPExplorerLib.YetiObjects
         public Vector2[] UVs { get; private set; }
         public int FaceCount { get; private set; }
         public int[] Faces { get; private set; }
+        public Vector3 BoundingBox { get; private set; }
+
+        private float snorm16ToFloat(short val)
+        {
+            return Math.Max(val / 32767f, -1f);
+        }
 
         public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
@@ -41,9 +49,8 @@ namespace GRPExplorerLib.YetiObjects
                 FaceCount = br.ReadInt32();
                 br.ReadInt32();
                 br.ReadInt32();
-                float bbx = br.ReadSingle();
-                float bby = br.ReadSingle();
-                float bbz = br.ReadSingle();
+                BoundingBox = new Vector3(br.ReadSingle(), br.ReadSingle(), br.ReadSingle());
+                BoundingBox = new Vector3(BoundingBox.Z, -BoundingBox.X, BoundingBox.Y);
 
                 int startOff = (int)ms.Position;
 
@@ -54,28 +61,46 @@ namespace GRPExplorerLib.YetiObjects
 
                 for (int i = 0; i < VertexCount; i++)
                 {
-                    short vx = br.ReadInt16();
-                    short vy = br.ReadInt16();
-                    short vz = br.ReadInt16();
-                    short vw = br.ReadInt16();
-                    short tu = br.ReadInt16();
-                    short tv = (short)(br.ReadInt16() * -1); //idk why
+                    //yeti seems to use right-handed z-up coordinates (at least for models)
+                    //  unity uses left-handed y-up coordinates
+                    //  for this reason, to fix the models in unity i'm switching the coords at load-time
+                    //    so Yeti  X  Y  Z  becomes
+                    //   in Unity  Z -X  Y
+                    //  kinda bonkers but it works
+                    float vertex_z = snorm16ToFloat(br.ReadInt16()); //  Yeti X
+                    float vertex_x = -snorm16ToFloat(br.ReadInt16()); // Yeti Y
+                    float vertex_y = snorm16ToFloat(br.ReadInt16()); //  Yeti Z
+                    float vertex_scale = snorm16ToFloat(br.ReadInt16());
+                    float uv_u = br.ReadInt16() / 1024f;
+                    float uv_v = br.ReadInt16() / -1024f;
+                    //short vx = br.ReadInt16();
+                    //short vy = br.ReadInt16();
+                    //short vz = br.ReadInt16();
+                    //short vw = br.ReadInt16();
+                    //short tu = br.ReadInt16();
+                    //short tv = (short)(br.ReadInt16() * -1); //idk why
 
-                    Vertices[i] = new Vector3((vx * vw) / -655350f, (vy * vw) / 655350f, (vz * vw) / 655350f);
-                    UVs[i] = new Vector2(tu / 1024f, tv / 1024f);
+                    Vertices[i] = new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale;
+                    UVs[i] = new Vector2(uv_u, uv_v);
 
                     ms.Seek(20, SeekOrigin.Current);
                 }
 
-                LogManager.Info(string.Format("current pos: {0}", ms.Position));
+                LogManager.Info(string.Format("current pos: {0}", ms.Position)); 
 
                 Faces = new int[FaceCount];
 
                 for (int i = 0; i < FaceCount / 3; i++)
                 {
-                    Faces[i * 3 + 0] = br.ReadUInt16();
-                    Faces[i * 3 + 1] = br.ReadUInt16();
+                    //for (int j = 0; j < 3; j++)
+                    //{
+                    //    Faces[i * 3 + TriangleOrder[j]] = br.ReadUInt16();
+                    //}
+
+                    //also due to the coordinate flipping from above triangles have to be loaded in this order
                     Faces[i * 3 + 2] = br.ReadUInt16();
+                    Faces[i * 3 + 1] = br.ReadUInt16();
+                    Faces[i * 3 + 0] = br.ReadUInt16();
                 }
 
                 for (int i = 0; i < FaceCount; i++)
