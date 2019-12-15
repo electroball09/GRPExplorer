@@ -101,7 +101,7 @@ namespace GRPExplorerLib.BigFile
 
         public override void LoadReferences(BigFileOperationStatus statusToUse)
         {
-            YetiObject[] files = fileMap.KeyMapping.Values.ToArray();
+            List<YetiObject> files = fileMap.KeyMapping.Values.ToList();
 
             fileLoader.LoadReferences(files);
         }

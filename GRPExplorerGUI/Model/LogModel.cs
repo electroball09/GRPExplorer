@@ -126,8 +126,12 @@ namespace GRPExplorerGUI.Model
 
             lock(Messages)
             {
-                foreach (LogMessage msg in Messages)
-                    msg.SetVisibility(flags);
+                try
+                {
+                    foreach (LogMessage msg in Messages)
+                        msg.SetVisibility(flags);
+                }
+                catch (Exception ex) { /* lol who cares */ }
             }
         }
 

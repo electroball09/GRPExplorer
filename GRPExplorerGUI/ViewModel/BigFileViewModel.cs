@@ -12,6 +12,7 @@ using GRPExplorerLib.Util;
 using System.Windows;
 using Microsoft.Win32;
 using System.IO;
+using GRPExplorerLib.BigFile.Files;
 
 namespace GRPExplorerGUI.ViewModel
 {
@@ -183,11 +184,11 @@ namespace GRPExplorerGUI.ViewModel
             log.Info("   {0}", dlg.FileName);
             log.Info("...");
 
-            int size = bigFile.FileReader.ReadFileData(selectedFile, buffer, bigFile.FileReader.DefaultFlags);
+            BigFileFileRead fileRead = bigFile.FileReader.ReadFile(selectedFile, buffer, bigFile.FileReader.DefaultFlags);
 
             using (FileStream fs = File.Create(dlg.FileName))
             {
-                fs.Write(buffer[size], 0, size);
+                fs.Write(buffer[fileRead.dataSize], 0, fileRead.dataSize);
             }
 
             log.Info("File extracted!");

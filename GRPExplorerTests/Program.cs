@@ -250,8 +250,11 @@ namespace GRPExplorerTests
 
             Out.Clear();
 
-            IEnumerator<int[]> headers1 = file1.FileReader.ReadAllHeaders(file1.FileMap.FilesList, buffer1, file1.FileReader.DefaultFlags).GetEnumerator();
-            IEnumerator<int[]> headers2 = file2.FileReader.ReadAllHeaders(file2.FileMap.FilesList, buffer1, file2.FileReader.DefaultFlags).GetEnumerator();
+            //IEnumerator<int[]> headers1 = file1.FileReader.ReadAllHeaders(file1.FileMap.FilesList, buffer1, file1.FileReader.DefaultFlags).GetEnumerator();
+            //IEnumerator<int[]> headers2 = file2.FileReader.ReadAllHeaders(file2.FileMap.FilesList, buffer1, file2.FileReader.DefaultFlags).GetEnumerator();
+
+            IEnumerator<BigFileFileRead> reads1 = file1.FileReader.ReadAllFiles(file1.FileMap.FilesList.ToList(), buffer1, file1.FileReader.DefaultFlags).GetEnumerator();
+            IEnumerator<BigFileFileRead> reads2 = file1.FileReader.ReadAllFiles(file2.FileMap.FilesList.ToList(), buffer2, file2.FileReader.DefaultFlags).GetEnumerator();
 
             void CompareHeaders(YetiObject file1file, YetiObject file2file, int[] a, int[] b)
             {
@@ -326,32 +329,29 @@ namespace GRPExplorerTests
             YetiObject bigFileFile1 = file1.FileMap[key];
             YetiObject bigFileFile2 = file2.FileMap[key];
 
-            int[] header1 = file1.FileReader.ReadFileHeader(bigFileFile1, buffer1, file1.FileReader.DefaultFlags);
-            int[] header2 = file2.FileReader.ReadFileHeader(bigFileFile2, buffer2, file2.FileReader.DefaultFlags);
-            
-            int size1 = file1.FileReader.ReadFileRaw(bigFileFile1, buffer1, file1.FileReader.DefaultFlags);
-            int size2 = file2.FileReader.ReadFileRaw(bigFileFile2, buffer2, file2.FileReader.DefaultFlags);
+            BigFileFileRead read1 = file1.FileReader.ReadFile(bigFileFile1, buffer1, file1.FileReader.DefaultFlags);
+            BigFileFileRead read2 = file1.FileReader.ReadFile(bigFileFile2, buffer2, file2.FileReader.DefaultFlags);
 
             int chksum1 = 0;
             int chksum2 = 0;
-            for (int i = 0; i < size1; i++)
-                chksum1 += buffer1[size1][i];
-            for (int i = 0; i < size2; i++)
-                chksum2 += buffer2[size2][i];
+            for (int i = 0; i < read1.dataSize; i++)
+                chksum1 += buffer1[read1.dataSize][i];
+            for (int i = 0; i < read2.dataSize; i++)
+                chksum2 += buffer2[read2.dataSize][i];
 
             Out.Clear();
 
-            Out.WriteLine("Size 1: " + size1);
+            Out.WriteLine("Size 1: " + read1.dataSize);
             Out.WriteLine("Checksum 1: " + chksum1);
-            Out.WriteLine("Size 2: " + size2);
+            Out.WriteLine("Size 2: " + read2.dataSize);
             Out.WriteLine("Checksum 2: " + chksum2);
 
-            Out.Write("Header 1, length: {0} : ", header1.Length);
-            for (int i = 0; i < header1.Length; i++)
-                Out.Write("{0:X8} ", header1[i]);
-            Out.Write("\nHeader 2, length: {0} : ", header2.Length);
-            for (int i = 0; i < header2.Length; i++)
-                Out.Write("{0:X8} ", header2[i]);
+            Out.Write("Header 1, length: {0} : ", read1.header.Length);
+            for (int i = 0; i < read1.header.Length; i++)
+                Out.Write("{0:X8} ", read1.header[i]);
+            Out.Write("\nHeader 2, length: {0} : ", read2.header.Length);
+            for (int i = 0; i < read2.header.Length; i++)
+                Out.Write("{0:X8} ", read2.header[i]);
 
             Out.WriteLine("");
 
@@ -359,7 +359,6 @@ namespace GRPExplorerTests
 
             bigFileFile1.FileInfo.DebugLog(log);
             bigFileFile2.FileInfo.DebugLog(log);
-
         }
 
         static void ProcessBigmap()

@@ -9,6 +9,7 @@ using System.IO.Compression;
 using System.Threading;
 using GRPExplorerLib.Logging;
 using GRPExplorerLib.BigFile.Extra;
+using GRPExplorerLib.BigFile.Files;
 
 namespace GRPExplorerLib.BigFile
 {
@@ -257,15 +258,19 @@ namespace GRPExplorerLib.BigFile
             YetiObject[] files = new YetiObject[info.count];
             Array.Copy(info.bigFile.FileMap.FilesList, info.startIndex, files, 0, info.count);
 
-            IEnumerator<int[]> headers = info.bigFile.FileReader.ReadAllHeaders(files, info.buffers, info.options.Flags).GetEnumerator();
-            IEnumerator<int> data = info.bigFile.FileReader.ReadAllData(files, info.buffers, info.options.Flags).GetEnumerator();
+            //IEnumerator<int[]> headers = info.bigFile.FileReader.ReadAllHeaders(files, info.buffers, info.options.Flags).GetEnumerator();
+            //IEnumerator<int> data = info.bigFile.FileReader.ReadAllData(files, info.buffers, info.options.Flags).GetEnumerator();
+
+            IEnumerator<BigFileFileRead> reads = info.bigFile.FileReader.ReadAllFiles(files.ToList(), info.buffers, info.options.Flags).GetEnumerator();
 
             for (int i = 0; i < files.Length; i++)
             {
                 info.progress = i;
 
-                headers.MoveNext();
-                data.MoveNext();
+                //headers.MoveNext();
+                //data.MoveNext();
+
+                reads.MoveNext();
 
                 log.Debug("Unpacking file {0}", files[i].Name);
 
@@ -281,8 +286,8 @@ namespace GRPExplorerLib.BigFile
                 using (FileStream dataFS = File.Create(dataFileName))
                 using (FileStream headerFS = File.Create(headerFileName))
                 {
-                    int size = data.Current;
-                    int[] header = headers.Current;
+                    int size = reads.Current.dataSize;
+                    int[] header = reads.Current.header;
                     if (size != -1)
                     {
                         int headerCount = header.Length;

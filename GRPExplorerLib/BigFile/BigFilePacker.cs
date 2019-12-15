@@ -9,6 +9,7 @@ using System.IO.Compression;
 using System.Threading;
 using GRPExplorerLib.Logging;
 using GRPExplorerLib.BigFile.Versions;
+using GRPExplorerLib.BigFile.Files;
 using Ionic.Zlib;
 
 namespace GRPExplorerLib.BigFile
@@ -219,6 +220,7 @@ namespace GRPExplorerLib.BigFile
             
             using (FileStream chunkFS = new FileStream(chunkFileName, FileMode.Create, FileAccess.Write))
             using (FileStream metaFS = new FileStream(metadataFilename, FileMode.Create, FileAccess.Write))
+            using (BinaryWriter chunkBW = new BinaryWriter(chunkFS))
             {
                 //fill 8 bytes to be filled with number of files chunked and final size later
                 metaFS.Write(BitConverter.GetBytes((long)0), 0, 8);
@@ -228,17 +230,18 @@ namespace GRPExplorerLib.BigFile
 
                 log.Info("Thread ID {0} - First file is {1}", info.ThreadID, filesToWrite[0].Name);
                 log.Info("Thread ID {0} - Last file is {1}", info.ThreadID, filesToWrite[filesToWrite.Length - 1].Name);
-                
+
                 YetiObject currFile = null;
 
                 int index = -1;
-                foreach (int size in bigFile.FileReader.ReadAllRaw(filesToWrite, info.IOBuffers, info.Options.Flags))
+                //foreach (int size in bigFile.FileReader.ReadAllRaw(filesToWrite, info.IOBuffers, info.Options.Flags))
+                foreach (BigFileFileRead read in bigFile.FileReader.ReadAllFiles(filesToWrite.ToList(), info.IOBuffers, info.Options.Flags))
                 {
                     index++;
 
                     currFile = filesToWrite[index];
 
-                    int size2 = size;
+                    int totalSize = read.dataSize + (read.header.Length * 4 + 4);
 
                     //if (currFile.FileInfo.FileType == 0x3c)
                     //{
@@ -247,9 +250,9 @@ namespace GRPExplorerLib.BigFile
                     //    continue;
                     //}
 
-                    log.Debug("Packing file {0}, size: {1}, ZIP: {2}", currFile.Name, size, currFile.FileInfo.ZIP);
+                    log.Debug("Packing file {0}, size: {1}, ZIP: {2}", currFile.Name, read.dataSize, currFile.FileInfo.ZIP);
 
-                    if (size2 < 0)
+                    if (read.dataSize < 0)
                     {
                         metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.FileNumber), 0, 4);
                         metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.Key), 0, 4);
@@ -267,8 +270,12 @@ namespace GRPExplorerLib.BigFile
                             int sizePos = (int)chunkFS.Position;
                             chunkFS.Write(info.IOBuffers[8], 0, 8); //write 8 bytes of garbage to fill the space for decompressed and compressed size
                             using (ZlibStream zs = new ZlibStream(chunkFS, Ionic.Zlib.CompressionMode.Compress, true))
+                            using (BinaryWriter bw = new BinaryWriter(zs))
                             {
-                                zs.Write(info.IOBuffers[size], 0, size);
+                                bw.Write(read.header.Length);
+                                for (int i = 0; i < read.header.Length; i++)
+                                    bw.Write(read.header[i]);
+                                zs.Write(info.IOBuffers[read.dataSize], 0, read.dataSize);
                             }
 
                             int newPos = (int)chunkFS.Position;
@@ -284,18 +291,21 @@ namespace GRPExplorerLib.BigFile
 
                             //go back to the file offset and write the compressed and decompressed sizes
                             chunkFS.Seek(sizePos, SeekOrigin.Begin);
-                            chunkFS.Write(BitConverter.GetBytes(compressedSize), 0, 4);
-                            chunkFS.Write(BitConverter.GetBytes(size), 0, 4);
+                            chunkBW.Write(compressedSize);
+                            chunkBW.Write(totalSize);
                             chunkFS.Seek(newPos, SeekOrigin.Begin);
                         }
                         else
                         {
                             int sizePos = (int)chunkFS.Position;
-                            chunkFS.Write(BitConverter.GetBytes(size), 0, 4);
-                            chunkFS.Write(info.IOBuffers[size], 0, size);
+                            chunkBW.Write(totalSize);
+                            chunkBW.Write(read.header.Length);
+                            for (int i = 0; i < read.header.Length; i++)
+                                chunkBW.Write(read.header[i]);
+                            chunkFS.Write(info.IOBuffers[read.dataSize], 0, read.dataSize);
                             int remainder = (((((int)chunkFS.Position - sizePos) - 1) / 8 + 1) * 8) - ((int)chunkFS.Position - sizePos);
                             for (int i = 0; i < remainder; i++)
-                                chunkFS.WriteByte(0x00);   
+                                chunkFS.WriteByte(0x00);
                         }
                     }
 
