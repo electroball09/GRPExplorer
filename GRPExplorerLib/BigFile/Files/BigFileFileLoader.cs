@@ -67,5 +67,26 @@ namespace GRPExplorerLib.BigFile.Files
                 count++;
             }
         }
+
+        public List<YetiObject> BuildLoadList(YetiObject rootObj)
+        {
+            HashSet<YetiObject> objList = new HashSet<YetiObject>();
+
+            void Recurse(YetiObject obj)
+            {
+                if (obj == null)
+                    return;
+
+                if (!objList.Contains(obj))
+                    objList.Add(obj);
+
+                foreach (YetiObject obj2 in obj.ObjectReferences)
+                    Recurse(obj2);
+            }
+
+            Recurse(rootObj);
+
+            return objList.ToList();
+        }
     }
 }

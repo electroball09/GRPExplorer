@@ -14,7 +14,7 @@ namespace GRPExplorerLib.YetiObjects
     {
         public override YetiObjectType Identifier => YetiObjectType.gao;
 
-        public Matrix4x4 Transform { get; private set; }
+        public Matrix4x4 Matrix { get; private set; }
 
         public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
@@ -23,7 +23,7 @@ namespace GRPExplorerLib.YetiObjects
             {
                 ms.Seek(15, SeekOrigin.Current);
 
-                Transform =
+                Matrix =
                     new Matrix4x4
                     (
                         m11: br.ReadSingle(),
@@ -51,7 +51,7 @@ namespace GRPExplorerLib.YetiObjects
 
         public override void Log(ILogProxy log)
         {
-            log.Info(Transform.ToString());
+            log.Info(Matrix.ToString());
         }
     }
 }
