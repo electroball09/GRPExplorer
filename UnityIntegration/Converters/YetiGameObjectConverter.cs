@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GRPExplorerLib.BigFile;
 using GRPExplorerLib.YetiObjects;
 using UnityEngine;
+using UnityIntegration.Components;
 
 namespace UnityIntegration.Converters
 {
@@ -37,6 +38,9 @@ namespace UnityIntegration.Converters
             gameObject.transform.position = pos;
             gameObject.transform.rotation = rot;
             gameObject.transform.localScale = scale;
+
+            cYetiObjectReference cmp = gameObject.AddComponent<cYetiObjectReference>();
+            cmp.Key = yetiObject.FileInfo.Key;
 
             foreach (YetiObject subObj in yetiObject.ObjectReferences)
             {

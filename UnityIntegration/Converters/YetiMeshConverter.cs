@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GRPExplorerLib.BigFile;
 using GRPExplorerLib.YetiObjects;
 using UnityEngine;
+using UnityIntegration.Components;
 
 namespace UnityIntegration.Converters
 {
@@ -23,8 +24,6 @@ namespace UnityIntegration.Converters
     {
         public override Type ArchetypeType => typeof(YetiMeshData);
 
-        Material meshMat = (Material)Resources.Load("MeshTestMat");
-
         public override void Convert(YetiObject yetiObject, GameObject gameObject)
         {
             YetiMeshData meshData = yetiObject.ArchetypeAs<YetiMeshData>();
@@ -32,21 +31,10 @@ namespace UnityIntegration.Converters
             GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
             thisObj.transform.SetParent(gameObject.transform, false);
 
-            MeshFilter meshFilter = thisObj.AddComponent<MeshFilter>();
-            MeshRenderer renderer = thisObj.AddComponent<MeshRenderer>();
-
-            Mesh mesh = new Mesh();
-
-            mesh.vertices = meshData.Vertices.ConvertToUnity();
-            mesh.uv = meshData.UVs.ConvertToUnity();
-            mesh.triangles = meshData.Faces;
-            mesh.RecalculateBounds();
-            mesh.RecalculateNormals();
-            mesh.RecalculateTangents();
-
-            meshFilter.mesh = mesh;
-
-            renderer.material = meshMat;
+            cYetiObjectReference objRef = thisObj.AddComponent<cYetiObjectReference>();
+            objRef.Key = yetiObject.FileInfo.Key;
+            cYetiMesh meshCmp = thisObj.AddComponent<cYetiMesh>();
+            meshCmp.LoadMesh(meshData);
         }
     }
 }

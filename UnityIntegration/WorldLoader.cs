@@ -49,24 +49,11 @@ namespace UnityIntegration
 
                 YetiObjectConverter.GetConverter(obj).Convert(obj, null);
 
-                foreach (YetiObject subObj in obj.ObjectReferences)
+                count++;
+                if (count >= NumObjectsLoadedPerFrame)
                 {
-                    if (subObj == null)
-                        continue;
-
-                    GameObject subGameObject = new GameObject(subObj.NameWithExtension);
-                    subGameObject.transform.parent = gameObject.transform;
-                    subGameObject.transform.localPosition = Vector3.zero;
-                    subGameObject.transform.localRotation = Quaternion.identity;
-
-                    YetiObjectConverter.GetConverter(subObj).Convert(subObj, subGameObject);
-
-                    count++;
-                    if (count >= NumObjectsLoadedPerFrame)
-                    {
-                        count = 0;
-                        yield return null;
-                    }
+                    count = 0;
+                    yield return null;
                 }
             }
 

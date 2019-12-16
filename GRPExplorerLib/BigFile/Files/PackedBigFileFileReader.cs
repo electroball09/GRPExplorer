@@ -62,9 +62,7 @@ namespace GRPExplorerLib.BigFile.Files
 
             int dataOffset = packedBigFile.FileUtil.CalculateDataOffset(ref packedBigFile.SegmentHeader, ref packedBigFile.FileHeader);
 
-            log.Info("data offset: {0:X8}  file offset: {1:X8}", dataOffset, file.FileInfo.Offset);
-
-            stream.Seek(dataOffset + (file.FileInfo.Offset * 8), SeekOrigin.Begin);
+            stream.Seek(dataOffset + (file.FileInfo.Offset * 8L), SeekOrigin.Begin); //make sure it converts to LONG to avoid overflow
 
             int dataSize = -1;
             int[] header;

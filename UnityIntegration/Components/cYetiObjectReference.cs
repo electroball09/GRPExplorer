@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace UnityIntegration.Components
 {
-    public class YetiObjectReference : MonoBehaviour
+    public class cYetiObjectReference : MonoBehaviour
     {
         public int Key { get; set; }
     }
