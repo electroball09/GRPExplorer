@@ -42,12 +42,12 @@ namespace UnityIntegration
 
             ClickMe = false;
 
-            if (TextureLoaderTest.m_bigFile == null)
+            if (LibManager.BigFile == null)
                 return;
 
             int key = Convert.ToInt32(FileKeyHex, 16);
 
-            YetiObject obj = TextureLoaderTest.m_bigFile.FileMap[key];
+            YetiObject obj = LibManager.BigFile.FileMap[key];
             if (obj == null)
                 return;
 
@@ -55,15 +55,11 @@ namespace UnityIntegration
             if (meshData == null)
                 return;
 
-            YetiMeshData.TriangleOrder = TriangleOrder;
-
-            TextureLoaderTest.m_bigFile.FileLoader.LoadAll(new List<YetiObject>() { obj });
+            LibManager.BigFile.FileLoader.LoadObjectSimple(obj);
 
             mesh.Clear();
-            Vector3[] verts = new Vector3[meshData.VertexCount];
-            Vector2[] uvs = new Vector2[meshData.VertexCount];
-            CopyArray(meshData.Vertices, verts);
-            CopyArray(meshData.UVs, uvs);
+            Vector3[] verts = meshData.Vertices.ConvertToUnity();
+            Vector2[] uvs = meshData.UVs.ConvertToUnity();
             mesh.vertices = verts;
             mesh.uv = uvs;
             mesh.triangles = meshData.Faces;
@@ -72,41 +68,6 @@ namespace UnityIntegration
 
             bounds = new Vector3(meshData.BoundingBox.X, meshData.BoundingBox.Y, meshData.BoundingBox.Z);
             bounds2 = mesh.bounds.size;
-
-            //mesh.bounds = new Bounds(bounds, mesh.bounds.size);
-        }
-
-        private void CopyArray(System.Numerics.Vector3[] from, UnityEngine.Vector3[] to)
-        {
-            for (int i = 0; i < from.Length; i++)
-            {
-                if (Test)
-                {
-                    to[i].x = from[i].X;
-                    to[i].y = from[i].Y;
-                    to[i].z = from[i].Z;
-                }
-                else
-                {
-                    to[i].x = from[i].X;
-                    to[i].y = -from[i].Y;
-                    to[i].z = from[i].Z;
-                }
-
-                //Quaternion quat = Quaternion.AngleAxis(rot, rotDir);
-                //Matrix4x4 matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1, -1, 1));
-
-                //to[i] = matrix * to[i];
-            }
-        }
-
-        private void CopyArray(System.Numerics.Vector2[] from, UnityEngine.Vector2[] to)
-        {
-            for (int i = 0; i < from.Length; i++)
-            {
-                to[i].x = from[i].X;
-                to[i].y = from[i].Y;
-            }
         }
     }
 }

@@ -21,7 +21,7 @@ namespace UnityIntegrationEditor
                 return;
             }
 
-            if (TextureLoaderTest.m_bigFile == null)
+            if (LibManager.BigFile == null)
             {
                 GUI_Load(test);
             }
@@ -35,10 +35,6 @@ namespace UnityIntegrationEditor
         {
             EditorGUILayout.BeginVertical();
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Load", GUILayout.Width(75)))
-            {
-                test.LoadBigFile();
-            }
             test.currentFilePath = EditorGUILayout.TextField(test.currentFilePath);
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();

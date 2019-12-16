@@ -12,8 +12,6 @@ namespace GRPExplorerLib.YetiObjects
 {
     public class YetiMeshData : YetiObjectArchetype
     {
-        public static int[] TriangleOrder = new int[] { 1, 2, 0 };
-
         public override YetiObjectType Identifier => YetiObjectType.msd;
 
         public int VertexCount { get; private set; }
@@ -30,6 +28,8 @@ namespace GRPExplorerLib.YetiObjects
 
         public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
+            log.Debug("loading mesh {0}", Object.NameWithExtension);
+
             using (MemoryStream ms = new MemoryStream(buffer))
             using (BinaryReader br = new BinaryReader(ms))
             {
@@ -54,6 +54,10 @@ namespace GRPExplorerLib.YetiObjects
 
                 int startOff = (int)ms.Position;
 
+                log.Debug("> dataOff: {0}  startOff: {1}", dataOff, startOff);
+                log.Debug("> VertexCount: {0}  FaceCount: {1}", VertexCount, FaceCount);
+                log.Debug("> BoneCount: {0}  BoneCount2: {1}", boneCount, boneCount2);
+
                 ms.Seek(dataOff, SeekOrigin.Current);
 
                 Vertices = new Vector3[VertexCount];
@@ -73,12 +77,6 @@ namespace GRPExplorerLib.YetiObjects
                     float vertex_scale = snorm16ToFloat(br.ReadInt16());
                     float uv_u = br.ReadInt16() / 1024f;
                     float uv_v = br.ReadInt16() / -1024f;
-                    //short vx = br.ReadInt16();
-                    //short vy = br.ReadInt16();
-                    //short vz = br.ReadInt16();
-                    //short vw = br.ReadInt16();
-                    //short tu = br.ReadInt16();
-                    //short tv = (short)(br.ReadInt16() * -1); //idk why
 
                     Vertices[i] = new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale;
                     UVs[i] = new Vector2(uv_u, uv_v);
@@ -86,17 +84,12 @@ namespace GRPExplorerLib.YetiObjects
                     ms.Seek(20, SeekOrigin.Current);
                 }
 
-                LogManager.Info(string.Format("current pos: {0}", ms.Position)); 
+                log.Debug("> current pos: {0}", ms.Position); 
 
                 Faces = new int[FaceCount];
 
                 for (int i = 0; i < FaceCount / 3; i++)
                 {
-                    //for (int j = 0; j < 3; j++)
-                    //{
-                    //    Faces[i * 3 + TriangleOrder[j]] = br.ReadUInt16();
-                    //}
-
                     //also due to the coordinate flipping from above triangles have to be loaded in this order
                     Faces[i * 3 + 2] = br.ReadUInt16();
                     Faces[i * 3 + 1] = br.ReadUInt16();
@@ -106,7 +99,14 @@ namespace GRPExplorerLib.YetiObjects
                 for (int i = 0; i < FaceCount; i++)
                 {
                     if (Faces[i] >= VertexCount)
-                        LogManager.Error(string.Format("index: {0}  vert: {1}", i, Faces[i]));
+                    {
+                        log.Error("Mesh {0} ({1:X8}) has invalid triangle indexes!", Object.NameWithExtension, Object.FileInfo.Key);
+                        VertexCount = 0;
+                        FaceCount = 0;
+                        Vertices = new Vector3[0];
+                        Faces = new int[0];
+                        UVs = new Vector2[0];
+                    }
                 }
             }
         }

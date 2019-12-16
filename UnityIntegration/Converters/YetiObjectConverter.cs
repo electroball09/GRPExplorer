@@ -7,6 +7,7 @@ using GRPExplorerLib.YetiObjects;
 using GRPExplorerLib.BigFile.Files;
 using GRPExplorerLib.BigFile;
 using UnityEngine;
+using GRPExplorerLib.Logging;
 
 namespace UnityIntegration.Converters
 {
@@ -33,16 +34,23 @@ namespace UnityIntegration.Converters
             return defaultConverter;
         }
 
+        protected ILogProxy log;
+
+        protected YetiObjectConverter()
+        {
+            log = LogManager.GetLogProxy(GetType().Name);
+        }
+
         public abstract Type ArchetypeType { get; }
 
-        public abstract void Convert(YetiObject yetiObject, GameObject gameObject);
+        public abstract void Convert(YetiObject yetiObject, GameObject parentObject);
     }
 
     public class DefaultObjectConverter : YetiObjectConverter
     {
         public override Type ArchetypeType => typeof(DefaultFileArchetype);
 
-        public override void Convert(YetiObject yetiObject, GameObject gameObject)
+        public override void Convert(YetiObject yetiObject, GameObject parentObject)
         {
             
         }

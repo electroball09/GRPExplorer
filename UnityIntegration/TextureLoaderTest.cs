@@ -27,7 +27,7 @@ namespace UnityIntegration
         }
 
         public GameObject testPlane;
-        public static BigFile m_bigFile;
+        //public static BigFile m_bigFile;
         public string currentFilePath = "";
         public YetiTextureFormat textureType = YetiTextureFormat.RGBA32;
         public TextureFormat ImportAs = TextureFormat.RGBA32;
@@ -42,31 +42,16 @@ namespace UnityIntegration
 
         Texture2D texture;
 
-        bool isLoaded = false;
-
         void Start()
         {
             testPlane = (GameObject)Instantiate(Resources.Load("TextureTester"));
 
             Matrix4x4 m = Matrix4x4.identity;
             m.SetTRS(new Vector3(35f, 0.4325f, -5f), Quaternion.identity, Vector3.one);
+            System.Numerics.Matrix4x4 m2 = new System.Numerics.Matrix4x4();
+            m2.Translation = new System.Numerics.Vector3(35f, 0.4325f, -5f);
             Debug.Log(m);
-        }
-
-        public void LoadBigFile()
-        {
-            if (isLoaded)
-                return;
-
-            isLoaded = true;
-            IntegrationUtil.LoadBigFileInBackground
-                (currentFilePath,
-                (bigFile) =>
-                {
-                    //textureMetadataFiles = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiTextureMetadata>();
-                    //bigFile.FileLoader.LoadAll(textureMetadataFiles);
-                    m_bigFile = bigFile;
-                });
+            Debug.Log(m2.ToString());
         }
 
         public void ChangeDisplayedTextures()
@@ -121,7 +106,7 @@ namespace UnityIntegration
             {
                 loadedPayload
             };
-            m_bigFile.FileLoader.LoadAll(list);
+            LibManager.BigFile.FileLoader.LoadAllSimple(list);
             
             texture = new Texture2D(arch.Width, arch.Height, ImportAs, false);
             texture.wrapMode = TextureWrapMode.Clamp;

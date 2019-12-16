@@ -14,11 +14,13 @@ namespace GRPExplorerLib.BigFile.Files
     {
         public static readonly BigFileFileRead Error = new BigFileFileRead()
         {
+            file = null,
             header = null,
             buffer = null,
             dataSize = -1
         };
 
+        public YetiObject file;
         public int[] header;
         public byte[] buffer;
         public int dataSize;

@@ -34,6 +34,12 @@ namespace GRPExplorerLib.YetiObjects
 
         public abstract YetiObjectType Identifier { get; }
         public YetiObject Object { get; set; }
+        protected readonly ILogProxy log;
+
+        protected YetiObjectArchetype()
+        {
+            log = LogManager.GetLogProxy(this.GetType().Name);
+        }
 
         public abstract void Load(byte[] buffer, int size, YetiObject[] objectReferences);
 

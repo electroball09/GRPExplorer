@@ -27,23 +27,23 @@ namespace GRPExplorerLib.YetiObjects
                     new Matrix4x4
                     (
                         m11: br.ReadSingle(),
-                        m12: br.ReadSingle(),
-                        m13: br.ReadSingle(),
-                        m14: br.ReadSingle(),
-
                         m21: br.ReadSingle(),
-                        m22: br.ReadSingle(),
-                        m23: br.ReadSingle(),
-                        m24: br.ReadSingle(),
-
                         m31: br.ReadSingle(),
-                        m32: br.ReadSingle(),
-                        m33: br.ReadSingle(),
-                        m34: br.ReadSingle(),
-
                         m41: br.ReadSingle(),
+
+                        m12: br.ReadSingle(),
+                        m22: br.ReadSingle(),
+                        m32: br.ReadSingle(),
                         m42: br.ReadSingle(),
+
+                        m13: br.ReadSingle(),
+                        m23: br.ReadSingle(),
+                        m33: br.ReadSingle(),
                         m43: br.ReadSingle(),
+
+                        m14: br.ReadSingle(),
+                        m24: br.ReadSingle(),
+                        m34: br.ReadSingle(),
                         m44: br.ReadSingle()
                     );
             }

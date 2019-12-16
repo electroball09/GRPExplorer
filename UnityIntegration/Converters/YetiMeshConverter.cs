@@ -23,12 +23,17 @@ namespace UnityIntegration.Converters
     {
         public override Type ArchetypeType => typeof(YetiMeshData);
 
+        Material meshMat = (Material)Resources.Load("MeshTestMat");
+
         public override void Convert(YetiObject yetiObject, GameObject gameObject)
         {
             YetiMeshData meshData = yetiObject.ArchetypeAs<YetiMeshData>();
 
-            MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
-            MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
+            GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
+            thisObj.transform.SetParent(gameObject.transform, false);
+
+            MeshFilter meshFilter = thisObj.AddComponent<MeshFilter>();
+            MeshRenderer renderer = thisObj.AddComponent<MeshRenderer>();
 
             Mesh mesh = new Mesh();
 
@@ -40,6 +45,8 @@ namespace UnityIntegration.Converters
             mesh.RecalculateTangents();
 
             meshFilter.mesh = mesh;
+
+            renderer.material = meshMat;
         }
     }
 }

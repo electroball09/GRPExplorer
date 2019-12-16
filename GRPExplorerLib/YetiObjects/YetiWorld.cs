@@ -13,9 +13,16 @@ namespace GRPExplorerLib.YetiObjects
     {
         public override YetiObjectType Identifier => YetiObjectType.wor;
 
+        public YetiGameObjectList GameObjectList { get; private set; }
+
         public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
-            //
+            GameObjectList = objectReferences[0].ArchetypeAs<YetiGameObjectList>();
+            LogManager.Info("test test test");
+            if (GameObjectList == null)
+            {
+                throw new Exception(objectReferences[0].Archetype.GetType().Name);
+            }
         }
 
         public override void Log(ILogProxy log)
