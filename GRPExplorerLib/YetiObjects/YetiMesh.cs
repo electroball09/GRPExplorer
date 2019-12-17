@@ -19,7 +19,7 @@ namespace GRPExplorerLib.YetiObjects
         public Vector2[] UVs { get; private set; }
         public int FaceCount { get; private set; }
         public int[] Faces { get; private set; }
-        public Vector3 BoundingBox { get; private set; }
+        public Vector3 CenterOffset { get; private set; }
 
         private float snorm16ToFloat(short val)
         {
@@ -49,8 +49,8 @@ namespace GRPExplorerLib.YetiObjects
                 FaceCount = br.ReadInt32();
                 br.ReadInt32();
                 br.ReadInt32();
-                BoundingBox = new Vector3(br.ReadSingle(), br.ReadSingle(), br.ReadSingle());
-                BoundingBox = new Vector3(BoundingBox.Z, -BoundingBox.X, BoundingBox.Y);
+                CenterOffset = new Vector3(br.ReadSingle(), br.ReadSingle(), br.ReadSingle());
+                CenterOffset = new Vector3(-CenterOffset.Y, CenterOffset.Z, CenterOffset.X);
 
                 int startOff = (int)ms.Position;
 
@@ -78,7 +78,7 @@ namespace GRPExplorerLib.YetiObjects
                     float uv_u = br.ReadInt16() / 1024f;
                     float uv_v = br.ReadInt16() / -1024f;
 
-                    Vertices[i] = new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale;
+                    Vertices[i] = (new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale);
                     UVs[i] = new Vector2(uv_u, uv_v);
 
                     ms.Seek(20, SeekOrigin.Current);

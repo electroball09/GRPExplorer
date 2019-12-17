@@ -8,9 +8,16 @@ using GRPExplorerLib.BigFile.Files;
 using GRPExplorerLib.BigFile;
 using UnityEngine;
 using GRPExplorerLib.Logging;
+using UnityIntegration.Components;
 
 namespace UnityIntegration.Converters
 {
+    public class YetiWorldLoadContext
+    {
+        public HashSet<YetiObject> loadedList = new HashSet<YetiObject>();
+        public HashSet<YetiWorld> loadedWorlds = new HashSet<YetiWorld>();
+    }
+
     public abstract class YetiObjectConverter
     {
         static readonly Dictionary<Type, YetiObjectConverter> typeList = new Dictionary<Type, YetiObjectConverter>();
@@ -43,16 +50,22 @@ namespace UnityIntegration.Converters
 
         public abstract Type ArchetypeType { get; }
 
-        public abstract void Convert(YetiObject yetiObject, GameObject parentObject);
+        public abstract object Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context);
     }
 
     public class DefaultObjectConverter : YetiObjectConverter
     {
         public override Type ArchetypeType => typeof(DefaultFileArchetype);
 
-        public override void Convert(YetiObject yetiObject, GameObject parentObject)
+        public override object Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
         {
-            
+            GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
+            if (parentObject)
+                thisObj.transform.SetParent(parentObject.transform, false);
+
+            cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(thisObj, yetiObject);
+
+            return null;
         }
     }
 }

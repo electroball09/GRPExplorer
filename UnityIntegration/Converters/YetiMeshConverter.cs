@@ -10,13 +10,26 @@ using UnityIntegration.Components;
 
 namespace UnityIntegration.Converters
 {
-    public class YetiMeshConverter : YetiObjectConverter
+    public class YetiMeshMetadataConverter : YetiObjectConverter
     {
         public override Type ArchetypeType => typeof(YetiMeshMetadata);
 
-        public override void Convert(YetiObject yetiObject, GameObject gameObject)
+        public override object Convert(YetiObject yetiObject, GameObject gameObject, YetiWorldLoadContext context)
         {
-            
+            GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
+            thisObj.transform.SetParent(gameObject.transform, false);
+
+            cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(thisObj, yetiObject);
+
+            foreach (YetiObject subObj in yetiObject.ObjectReferences)
+            {
+                if (subObj == null)
+                    continue;
+
+                GetConverter(subObj).Convert(subObj, thisObj, context);
+            }
+
+            return null;
         }
     }
 
@@ -24,17 +37,19 @@ namespace UnityIntegration.Converters
     {
         public override Type ArchetypeType => typeof(YetiMeshData);
 
-        public override void Convert(YetiObject yetiObject, GameObject gameObject)
+        public override object Convert(YetiObject yetiObject, GameObject gameObject, YetiWorldLoadContext context)
         {
             YetiMeshData meshData = yetiObject.ArchetypeAs<YetiMeshData>();
 
             GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
             thisObj.transform.SetParent(gameObject.transform, false);
 
-            cYetiObjectReference objRef = thisObj.AddComponent<cYetiObjectReference>();
-            objRef.Key = yetiObject.FileInfo.Key;
-            cYetiMesh meshCmp = thisObj.AddComponent<cYetiMesh>();
+            cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(thisObj, yetiObject);
+
+            cYetiMesh meshCmp = cYetiObjectReference.AddYetiComponent<cYetiMesh>(thisObj, yetiObject);
             meshCmp.LoadMesh(meshData);
+
+            return null;
         }
     }
 }

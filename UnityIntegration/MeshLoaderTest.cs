@@ -66,7 +66,7 @@ namespace UnityIntegration
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
 
-            bounds = new Vector3(meshData.BoundingBox.X, meshData.BoundingBox.Y, meshData.BoundingBox.Z);
+            bounds = new Vector3(meshData.CenterOffset.X, meshData.CenterOffset.Y, meshData.CenterOffset.Z);
             bounds2 = mesh.bounds.size;
         }
     }

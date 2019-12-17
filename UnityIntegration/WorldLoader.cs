@@ -19,48 +19,6 @@ namespace UnityIntegration
         public int NumObjectsLoadedPerFrame = 10;
         public string fileKey = "0x";
 
-        IEnumerator LoadWorld(YetiWorld world)
-        {
-            //LogManager.GlobalLogFlags = LogFlags.All;
-
-            log.Info("loading world {0}", world.Object.Name);
-
-            int count = 0;
-
-            foreach (YetiObject obj in LibManager.BigFile.FileLoader.LoadObjectRecursive(world.Object))
-            {
-                count++;
-                if (count >= NumObjectsLoadedPerFrame)
-                {
-                    count = 0;
-                    yield return null;
-                }
-            }
-
-            YetiGameObjectList gol = world.GameObjectList;
-            if (gol == null)
-            {
-                throw new Exception("wtf");
-            }
-
-            foreach (YetiObject obj in gol.ObjectList)
-            {
-                log.Info("Instantiating object {0}", obj.NameWithExtension);
-
-                YetiObjectConverter.GetConverter(obj).Convert(obj, null);
-
-                count++;
-                if (count >= NumObjectsLoadedPerFrame)
-                {
-                    count = 0;
-                    yield return null;
-                }
-            }
-
-            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
-        }
-
-
         void OnGUI()
         {
             if (LibManager.BigFile == null)
@@ -81,7 +39,7 @@ namespace UnityIntegration
                 if (world == null)
                     return;
 
-                StartCoroutine(LoadWorld(world));
+                YetiObjectConverter.GetConverter(obj).Convert(obj, null, new YetiWorldLoadContext());
             }
         }
     }

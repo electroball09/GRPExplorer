@@ -21,7 +21,7 @@ namespace UnityIntegrationEditor.Inspectors
 
         public static void Draw(cYetiObjectReference cmp)
         {
-            EditorGUILayout.LabelField(string.Format("Key: {0:X8}", cmp.Key));
+            EditorGUILayout.TextField("Key:", string.Format("{0:X8}", cmp.yetiObject.FileInfo.Key));
         }
     }
 }

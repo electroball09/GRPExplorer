@@ -14,11 +14,12 @@ namespace GRPExplorerLib.YetiObjects
         public override YetiObjectType Identifier => YetiObjectType.wor;
 
         public YetiGameObjectList GameObjectList { get; private set; }
+        public YetiSubWorldList SubWorldList { get; private set; }
 
         public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
             GameObjectList = objectReferences[0].ArchetypeAs<YetiGameObjectList>();
-            LogManager.Info("test test test");
+            SubWorldList = objectReferences[4]?.ArchetypeAs<YetiSubWorldList>();
             if (GameObjectList == null)
             {
                 throw new Exception(objectReferences[0].Archetype.GetType().Name);
@@ -74,6 +75,25 @@ namespace GRPExplorerLib.YetiObjects
         public override void Log(ILogProxy log)
         {
             log.Info("GAMEOBJECTLIST count: {0}", ObjectList.Length);
+        }
+    }
+
+    public class YetiSubWorldList : YetiObjectArchetype
+    {
+        public override YetiObjectType Identifier => YetiObjectType.wil;
+
+        public YetiWorld[] SubWorlds { get; private set; }
+
+        public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
+        {
+            SubWorlds = new YetiWorld[objectReferences.Length];
+            for (int i = 0; i < objectReferences.Length; i++)
+                SubWorlds[i] = objectReferences[i].ArchetypeAs<YetiWorld>();
+        }
+
+        public override void Log(ILogProxy log)
+        {
+            
         }
     }
 }

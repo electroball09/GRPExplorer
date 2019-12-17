@@ -13,7 +13,6 @@ namespace UnityIntegration
     {
         static TextureLoaderTest inst;
 
-        [RuntimeInitializeOnLoadMethod]
         static void Load()
         {
             if (inst)
@@ -27,7 +26,6 @@ namespace UnityIntegration
         }
 
         public GameObject testPlane;
-        //public static BigFile m_bigFile;
         public string currentFilePath = "";
         public YetiTextureFormat textureType = YetiTextureFormat.RGBA32;
         public TextureFormat ImportAs = TextureFormat.RGBA32;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GRPExplorerLib.BigFile;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,13 @@ namespace UnityIntegration.Components
 {
     public class cYetiObjectReference : MonoBehaviour
     {
-        public int Key { get; set; }
+        public static T AddYetiComponent<T>(GameObject obj, YetiObject yetiObject) where T : cYetiObjectReference
+        {
+            T objRef = obj.AddComponent<T>();
+            objRef.yetiObject = yetiObject;
+            return objRef;
+        }
+
+        public YetiObject yetiObject { get; private set; }
     }
 }

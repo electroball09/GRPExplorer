@@ -51,7 +51,23 @@ namespace GRPExplorerLib.YetiObjects
 
         public override void Log(ILogProxy log)
         {
-            log.Info(Matrix.ToString());
+            log.Info("YETIGAMEOBJECT");
+            log.Info("> {0}", Matrix.ToString());
+        }
+    }
+
+    public class YetiGraphicObjectTable : YetiObjectArchetype
+    {
+        public override YetiObjectType Identifier => YetiObjectType.got;
+
+        public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
+        {
+            
+        }
+
+        public override void Log(ILogProxy log)
+        {
+            log.Info("YETIGAMEOBJECTEX");
         }
     }
 }

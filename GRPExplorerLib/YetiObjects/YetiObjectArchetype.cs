@@ -41,6 +41,11 @@ namespace GRPExplorerLib.YetiObjects
             log = LogManager.GetLogProxy(this.GetType().Name);
         }
 
+        public override int GetHashCode()
+        {
+            return Object.GetHashCode();
+        }
+
         public abstract void Load(byte[] buffer, int size, YetiObject[] objectReferences);
 
         public virtual void Unload() { }

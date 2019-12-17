@@ -14,14 +14,8 @@ namespace UnityIntegration.Converters
     {
         public override Type ArchetypeType => typeof(YetiGameObject);
 
-        public override void Convert(YetiObject yetiObject, GameObject parentObject)
+        public override object Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
         {
-            if (parentObject)
-            {
-                return;
-                log.Error("This YetiGameObject has a Unity GameObject parent! {0}", yetiObject.NameWithExtension);
-            }
-
             YetiGameObject obj = yetiObject.ArchetypeAs<YetiGameObject>();
 
             Matrix4x4 matrix = obj.Matrix.ConvertToUnity();
@@ -35,23 +29,64 @@ namespace UnityIntegration.Converters
             pos = pos.ConvertYetiToUnityCoords();
 
             GameObject gameObject = new GameObject(yetiObject.NameWithExtension);
-            gameObject.transform.position = pos;
-            gameObject.transform.rotation = rot;
-            gameObject.transform.localScale = scale;
+            if (parentObject)
+            {
+                gameObject.transform.SetParent(parentObject.transform, false);
+            }
+            else
+            {
+                gameObject.transform.position = pos;
+                gameObject.transform.rotation = rot;
+                gameObject.transform.localScale = scale;
+            }
 
-            cYetiObjectReference cmp = gameObject.AddComponent<cYetiObjectReference>();
-            cmp.Key = yetiObject.FileInfo.Key;
+            cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(gameObject, yetiObject);
 
             foreach (YetiObject subObj in yetiObject.ObjectReferences)
             {
                 if (subObj == null)
                     continue;
 
-                if (subObj.Is<YetiGameObject>())
+                if (subObj.Is<YetiGraphicObjectTable>())
+                    GetConverter(subObj).Convert(subObj, gameObject, context);
+            }
+
+            return null;
+        }
+    }
+
+    public class YetiGraphicObjectTableConverter : YetiObjectConverter
+    {
+        public override Type ArchetypeType => typeof(YetiGraphicObjectTable);
+
+        public override object Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
+        {
+            YetiGraphicObjectTable got = yetiObject.ArchetypeAs<YetiGraphicObjectTable>();
+
+            GameObject gameObject = new GameObject(yetiObject.NameWithExtension);
+            if (!parentObject)
+            {
+                log.Error("This GOT has no parent object! {0}", yetiObject.NameWithExtension);
+            }
+            else
+            {
+                gameObject.transform.SetParent(parentObject.transform, false);
+            }
+
+            cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(gameObject, yetiObject);
+
+            foreach (YetiObject subObj in yetiObject.ObjectReferences)
+            {
+                if (subObj == null)
                     continue;
 
-                GetConverter(subObj).Convert(subObj, gameObject);
+                //if (subObj.Is<YetiGameObject>())
+                //    continue;
+
+                GetConverter(subObj).Convert(subObj, gameObject, context);
             }
+
+            return null;
         }
     }
 }

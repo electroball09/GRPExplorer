@@ -37,6 +37,11 @@ namespace GRPExplorerLib.BigFile
         public FileMappingData MappingData { get; set; }
         public YetiObjectArchetype Archetype { get; private set; }
 
+        public override int GetHashCode()
+        {
+            return FileInfo.Key;
+        }
+
         public string FullFolderPath
         {
             get

@@ -9,9 +9,12 @@ using UnityEngine;
 namespace UnityIntegration.Components
 {
     [RequireComponent(typeof(cYetiObjectReference))]
-    public class cYetiMesh : MonoBehaviour
+    public class cYetiMesh : cYetiObjectReference
     {
         static Material meshMat;
+
+        public Vector3 calcBounds;
+        public Vector3 yetiBounds;
 
         public void LoadMesh(YetiMeshData meshData)
         {
@@ -34,6 +37,9 @@ namespace UnityIntegration.Components
             meshFilter.mesh = mesh;
 
             renderer.material = meshMat;
+
+            calcBounds = mesh.bounds.size;
+            yetiBounds = meshData.CenterOffset.ConvertToUnity().ConvertYetiToUnityCoords();
         }
     }
 }

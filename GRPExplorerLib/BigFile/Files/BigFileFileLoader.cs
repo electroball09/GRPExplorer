@@ -41,12 +41,21 @@ namespace GRPExplorerLib.BigFile.Files
             }
         }
 
-        public IEnumerable<YetiObject> LoadObjectRecursive(YetiObject obj)
+        public IEnumerable<YetiObject> LoadObjectRecursive(YetiObject obj, HashSet<YetiObject> alreadyLoaded)
         {
-            HashSet<YetiObject> loadedList = new HashSet<YetiObject>();
+            HashSet<YetiObject> loadedList;
+            if (alreadyLoaded != null)
+                loadedList = alreadyLoaded;
+            else
+                loadedList = new HashSet<YetiObject>();
 
             IEnumerable<YetiObject> Recurse(YetiObject toLoad)
             {
+                if (loadedList.Contains(toLoad))
+                    yield break;
+
+                loadedList.Add(toLoad);
+
                 log.Info("Loading object {0}", toLoad.NameWithExtension);
 
                 BigFileFileRead fileRead = bigFile.FileReader.ReadFile(toLoad, buffer, bigFile.FileReader.DefaultFlags);
@@ -59,9 +68,8 @@ namespace GRPExplorerLib.BigFile.Files
 
                     foreach (YetiObject refObj in toLoad.ObjectReferences)
                     {
-                        if (refObj != null && !loadedList.Contains(refObj))
+                        if (refObj != null)
                         {
-                            loadedList.Add(refObj);
                             foreach (YetiObject nextLoad in Recurse(refObj))
                             {
                                 yield return nextLoad;
@@ -73,7 +81,8 @@ namespace GRPExplorerLib.BigFile.Files
 
             foreach (YetiObject loadedObj in Recurse(obj))
             {
-                yield return loadedObj;
+                if (loadedObj != null)
+                    yield return loadedObj;
             }
         }
 
