@@ -14,6 +14,8 @@ namespace UnityIntegration
 {
     public class WorldLoader : MonoBehaviour
     {
+        public bool showMenu = true;
+
         ILogProxy log = LogManager.GetLogProxy("WorldLoader");
 
         public int NumObjectsLoadedPerFrame = 10;
@@ -23,7 +25,15 @@ namespace UnityIntegration
         bool didLoad = false;
         Vector2 scrollPos = Vector2.zero;
 
+        YetiWorldLoadContext context;
+
         void OnGUI()
+        {
+            DoLoadGUI();
+            DoWorldBrowserGUI();
+        }
+
+        private void DoLoadGUI()
         {
             if (didLoad)
                 return;
@@ -42,7 +52,8 @@ namespace UnityIntegration
             {
                 if (GUI.Button(btnRect, obj.Name))
                 {
-                    YetiObjectConverter.GetConverter(obj).Convert(obj, null, new YetiWorldLoadContext());
+                    context = new YetiWorldLoadContext();
+                    YetiObjectConverter.GetConverter(obj).Convert(obj, null, context);
                     didLoad = true;
                     break;
                 }
@@ -50,23 +61,40 @@ namespace UnityIntegration
                 btnRect.y += btnRect.height;
             }
             GUI.EndScrollView();
+        }
 
-            //fileKey = GUI.TextField(rect, fileKey);
-            //rect.y += rect.height;
-            //if (GUI.Button(rect, "Load"))
-            //{
-            //    int key = Convert.ToInt32(fileKey, 16);
+        private void DoWorldBrowserGUI()
+        {
+            if (context == null)
+                return;
 
-            //    YetiObject obj = LibManager.BigFile.FileMap[key];
-            //    if (obj == null)
-            //        return;
+            if (Input.GetKeyDown(KeyCode.Tab))
+                showMenu = !showMenu;
 
-            //    YetiWorld world = obj.ArchetypeAs<YetiWorld>();
-            //    if (world == null)
-            //        return;
+            if (!showMenu)
+                return;
 
-            //    YetiObjectConverter.GetConverter(obj).Convert(obj, null, new YetiWorldLoadContext());
-            //}
+            Rect rect = new Rect(Screen.width - 250f, 0, 250f, 25f);
+            if (context.parentContext != null)
+            {
+                if (GUI.Button(rect, " <- " + (context.parentContext.currentWorld != null ? context.parentContext.currentWorld.Object.Name : "---")))
+                {
+                    context = context.parentContext;
+                    return;
+                }
+                rect.y += rect.height;
+            }
+            GUI.Label(rect, context.currentWorld != null ? context.currentWorld.Object.Name : "---");
+            rect.y += rect.height;
+            foreach (YetiWorldLoadContext subContext in context.subContexts)
+            {
+                if (GUI.Button(rect, subContext.currentWorld.Object.Name))
+                {
+                    context = subContext;
+                    return;
+                }
+                rect.y += rect.height;
+            }
         }
     }
 }

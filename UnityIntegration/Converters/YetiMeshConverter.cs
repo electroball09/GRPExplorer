@@ -14,8 +14,10 @@ namespace UnityIntegration.Converters
     {
         public override Type ArchetypeType => typeof(YetiMeshMetadata);
 
-        public override object Convert(YetiObject yetiObject, GameObject gameObject, YetiWorldLoadContext context)
+        public override void Convert(YetiObject yetiObject, GameObject gameObject, YetiWorldLoadContext context)
         {
+            context.worldObjects.Add(yetiObject);
+
             GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
             thisObj.transform.SetParent(gameObject.transform, false);
 
@@ -26,10 +28,10 @@ namespace UnityIntegration.Converters
                 if (subObj == null)
                     continue;
 
-                GetConverter(subObj).Convert(subObj, thisObj, context);
+                YetiObjectConverter conv = GetConverter(subObj);
+                conv.Convert(subObj, thisObj, context);
+                Components.Add(conv.Components[0]);
             }
-
-            return null;
         }
     }
 
@@ -37,8 +39,10 @@ namespace UnityIntegration.Converters
     {
         public override Type ArchetypeType => typeof(YetiMeshData);
 
-        public override object Convert(YetiObject yetiObject, GameObject gameObject, YetiWorldLoadContext context)
+        public override void Convert(YetiObject yetiObject, GameObject gameObject, YetiWorldLoadContext context)
         {
+            context.worldObjects.Add(yetiObject);
+
             YetiMeshData meshData = yetiObject.ArchetypeAs<YetiMeshData>();
 
             GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
@@ -49,7 +53,7 @@ namespace UnityIntegration.Converters
             cYetiMesh meshCmp = cYetiObjectReference.AddYetiComponent<cYetiMesh>(thisObj, yetiObject);
             meshCmp.LoadMesh(meshData);
 
-            return null;
+            Components.Add(meshCmp);
         }
     }
 }

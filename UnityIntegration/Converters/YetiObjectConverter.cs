@@ -12,11 +12,6 @@ using UnityIntegration.Components;
 
 namespace UnityIntegration.Converters
 {
-    public class YetiWorldLoadContext
-    {
-        public HashSet<YetiObject> loadedList = new HashSet<YetiObject>();
-        public HashSet<YetiWorld> loadedWorlds = new HashSet<YetiWorld>();
-    }
 
     public abstract class YetiObjectConverter
     {
@@ -36,7 +31,7 @@ namespace UnityIntegration.Converters
         public static YetiObjectConverter GetConverter(YetiObject obj)
         {
             if (typeList.ContainsKey(obj.Archetype.GetType()))
-                return typeList[obj.Archetype.GetType()];
+                return (YetiObjectConverter)Activator.CreateInstance(typeList[obj.Archetype.GetType()].GetType());
 
             return defaultConverter;
         }
@@ -50,22 +45,24 @@ namespace UnityIntegration.Converters
 
         public abstract Type ArchetypeType { get; }
 
-        public abstract object Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context);
+        public virtual List<cYetiObjectReference> Components { get; } = new List<cYetiObjectReference>();
+
+        public abstract void Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context);
     }
 
     public class DefaultObjectConverter : YetiObjectConverter
     {
         public override Type ArchetypeType => typeof(DefaultFileArchetype);
 
-        public override object Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
+        public override void Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
         {
+            context.worldObjects.Add(yetiObject);
+
             GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
             if (parentObject)
                 thisObj.transform.SetParent(parentObject.transform, false);
 
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(thisObj, yetiObject);
-
-            return null;
         }
     }
 }

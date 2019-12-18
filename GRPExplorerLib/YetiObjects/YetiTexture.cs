@@ -28,12 +28,28 @@ namespace GRPExplorerLib.YetiObjects
         public ushort Height { get; private set; }
         public YetiTextureFormat Format { get; private set; }
         public YetiTexturePayload Payload { get; private set; }
+        public YetiTextureMetadata Passthrough { get; private set; }
+
+        public YetiTextureMetadata ActualMetadata
+        {
+            get
+            {
+                YetiTextureMetadata mdata = this;
+                while (mdata.Passthrough != null)
+                    mdata = mdata.Passthrough;
+                return mdata;
+            }
+        }
 
         public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
-            if (size < 10)
+            if (objectReferences[0].Is<YetiTextureMetadata>())
+            {
+                Passthrough = objectReferences[0].ArchetypeAs<YetiTextureMetadata>();
                 return;
+            }
 
+            Payload = objectReferences[0].ArchetypeAs<YetiTexturePayload>();
             Width = BitConverter.ToUInt16(buffer, 4);
             Height = BitConverter.ToUInt16(buffer, 6);
             Format = (YetiTextureFormat)buffer[9];
@@ -43,8 +59,6 @@ namespace GRPExplorerLib.YetiObjects
                 LogManager.Error("WTF " + Object.Name);
                 return;
             }
-
-            Payload = objectReferences[0]?.ArchetypeAs<YetiTexturePayload>();
         }
 
         public override void Log(ILogProxy log)

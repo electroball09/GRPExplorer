@@ -23,14 +23,16 @@ namespace UnityIntegration.Components
             if (context == null)
                 context = new YetiWorldLoadContext();
 
-            context.loadedWorlds.Add(world);
+            YetiWorldLoadContext thisContext = context.GetSubContext(world);
+
+            thisContext.g_loadedWorlds.Add(world);
 
             log.Info("loading world {0}", world.Object.Name);
 
             int count = 0;
 
-            if (context.loadedList.Count == 0)
-                foreach (YetiObject obj in LibManager.BigFile.FileLoader.LoadObjectRecursive(world.Object, context.loadedList))
+            if (thisContext.g_loadedList.Count == 0)
+                foreach (YetiObject obj in LibManager.BigFile.FileLoader.LoadObjectRecursive(world.Object, thisContext.g_loadedList))
                 {
                     count++;
                     if (count >= 25)
@@ -43,19 +45,19 @@ namespace UnityIntegration.Components
             YetiGameObjectList gol = world.GameObjectList;
             YetiSubWorldList wil = world.SubWorldList;
 
-            //foreach (YetiObject obj in world.Object.ObjectReferences)
-            //{
-            //    if (obj != null &&
-            //        !obj.Is<YetiSubWorldList>() &&
-            //        !obj.Is<YetiWorld>())
-            //        YetiObjectConverter.GetConverter(obj).Convert(obj, gameObject, context);
-            //}
+            foreach (YetiObject obj in world.Object.ObjectReferences)
+            {
+                if (obj != null &&
+                    !obj.Is<YetiSubWorldList>() &&
+                    !obj.Is<YetiWorld>())
+                    YetiObjectConverter.GetConverter(obj).Convert(obj, gameObject, thisContext);
+            }
 
             foreach (YetiObject obj in gol.ObjectList)
             {
                 log.Info("Instantiating object {0}", obj.NameWithExtension);
 
-                YetiObjectConverter.GetConverter(obj).Convert(obj, null, context);
+                YetiObjectConverter.GetConverter(obj).Convert(obj, null, thisContext);
 
                 count++;
                 if (count >= 25)
@@ -68,7 +70,7 @@ namespace UnityIntegration.Components
             if (wil != null)
                 foreach (YetiWorld subWorld in wil.SubWorlds)
                 {
-                    YetiObjectConverter.GetConverter(subWorld.Object).Convert(subWorld.Object, null, context);
+                    YetiObjectConverter.GetConverter(subWorld.Object).Convert(subWorld.Object, null, thisContext);
                 }
 
             LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;

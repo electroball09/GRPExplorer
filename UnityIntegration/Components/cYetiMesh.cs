@@ -16,13 +16,18 @@ namespace UnityIntegration.Components
         public Vector3 calcBounds;
         public Vector3 yetiBounds;
 
+        public MeshFilter meshFilter;
+        public MeshRenderer meshRenderer;
+
         public void LoadMesh(YetiMeshData meshData)
         {
             if (!meshMat)
                 meshMat = (Material)Resources.Load("MeshTestMat");
 
-            MeshFilter meshFilter = gameObject.AddComponent<MeshFilter>();
-            MeshRenderer renderer = gameObject.AddComponent<MeshRenderer>();
+            gameObject.transform.localPosition = meshData.CenterOffset.ConvertToUnity().ConvertYetiToUnityCoords();
+
+            meshFilter = gameObject.AddComponent<MeshFilter>();
+            meshRenderer = gameObject.AddComponent<MeshRenderer>();
 
             Mesh mesh = new Mesh
             {
@@ -36,7 +41,7 @@ namespace UnityIntegration.Components
 
             meshFilter.mesh = mesh;
 
-            renderer.material = meshMat;
+            meshRenderer.material = meshMat;
 
             calcBounds = mesh.bounds.size;
             yetiBounds = meshData.CenterOffset.ConvertToUnity().ConvertYetiToUnityCoords();

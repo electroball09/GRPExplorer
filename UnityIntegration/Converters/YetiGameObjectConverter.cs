@@ -14,8 +14,10 @@ namespace UnityIntegration.Converters
     {
         public override Type ArchetypeType => typeof(YetiGameObject);
 
-        public override object Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
+        public override void Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
         {
+            context.worldObjects.Add(yetiObject);
+
             YetiGameObject obj = yetiObject.ArchetypeAs<YetiGameObject>();
 
             Matrix4x4 matrix = obj.Matrix.ConvertToUnity();
@@ -50,8 +52,6 @@ namespace UnityIntegration.Converters
                 if (subObj.Is<YetiGraphicObjectTable>())
                     GetConverter(subObj).Convert(subObj, gameObject, context);
             }
-
-            return null;
         }
     }
 
@@ -59,8 +59,10 @@ namespace UnityIntegration.Converters
     {
         public override Type ArchetypeType => typeof(YetiGraphicObjectTable);
 
-        public override object Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
+        public override void Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
         {
+            context.worldObjects.Add(yetiObject);
+
             YetiGraphicObjectTable got = yetiObject.ArchetypeAs<YetiGraphicObjectTable>();
 
             GameObject gameObject = new GameObject(yetiObject.NameWithExtension);
@@ -75,18 +77,40 @@ namespace UnityIntegration.Converters
 
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(gameObject, yetiObject);
 
+            cYetiMesh yetiMesh = null;
+            List<cYetiMaterial> mats = new List<cYetiMaterial>();
             foreach (YetiObject subObj in yetiObject.ObjectReferences)
             {
                 if (subObj == null)
                     continue;
 
-                //if (subObj.Is<YetiGameObject>())
-                //    continue;
-
-                GetConverter(subObj).Convert(subObj, gameObject, context);
+                if (subObj.Is<YetiMeshMetadata>())
+                {
+                    YetiObjectConverter conv = GetConverter(subObj);
+                    conv.Convert(subObj, gameObject, context);
+                    yetiMesh = conv.Components[0] as cYetiMesh;
+                }
+                else if (subObj.Is<YetiMaterial>())
+                {
+                    YetiObjectConverter conv = GetConverter(subObj);
+                    conv.Convert(subObj, gameObject, context);
+                    foreach (cYetiObjectReference objRef in conv.Components)
+                        mats.Add(objRef as cYetiMaterial);
+                }
+                else
+                {
+                    GetConverter(subObj).Convert(subObj, gameObject, context);
+                }
             }
 
-            return null;
+            if (yetiMesh != null && mats.Count > 0)
+            {
+                yetiMesh.meshRenderer.material = mats[0].Material;
+            }
+            else
+            {
+                throw new Exception(string.Format("mesh: {0}   mats count: {1}", yetiMesh, mats.Count));
+            }
         }
     }
 }

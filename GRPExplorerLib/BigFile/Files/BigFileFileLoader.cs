@@ -56,7 +56,7 @@ namespace GRPExplorerLib.BigFile.Files
 
                 loadedList.Add(toLoad);
 
-                log.Info("Loading object {0}", toLoad.NameWithExtension);
+                log.Debug("Loading object {0}", toLoad.NameWithExtension);
 
                 BigFileFileRead fileRead = bigFile.FileReader.ReadFile(toLoad, buffer, bigFile.FileReader.DefaultFlags);
                 if (fileRead.dataSize != -1)
