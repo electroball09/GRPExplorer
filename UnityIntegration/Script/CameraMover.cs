@@ -59,6 +59,14 @@ namespace UnityIntegration.Script
             Rect rect = new Rect(Screen.width / 2 - 125, Screen.height - 25, 250, 25);
             string str = string.Format("Speed: {0}   Slow: {1}", speeds[speedIndex], isSlow);
             GUI.Label(rect, str);
+            rect.y -= rect.height;
+            if (GUI.Button(rect, "Toggle UV Debug"))
+            {
+                if (Shader.IsKeywordEnabled("_UV_DEBUG"))
+                    Shader.DisableKeyword("_UV_DEBUG");
+                else
+                    Shader.EnableKeyword("_UV_DEBUG");
+            }
         }
     }
 }

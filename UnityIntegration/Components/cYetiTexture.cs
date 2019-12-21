@@ -36,7 +36,7 @@ namespace UnityIntegration.Components
 
             texture = new Texture2D(mdata.Width, mdata.Height, formatMap[mdata.Format], false)
             {
-                wrapMode = TextureWrapMode.Clamp
+                wrapMode = TextureWrapMode.Repeat
             };
             texture.LoadRawTextureData(payload.Data);
             texture.Apply();

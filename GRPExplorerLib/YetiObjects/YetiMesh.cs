@@ -76,7 +76,7 @@ namespace GRPExplorerLib.YetiObjects
                     float vertex_y = snorm16ToFloat(br.ReadInt16()); //  Yeti Z
                     float vertex_scale = snorm16ToFloat(br.ReadInt16());
                     float uv_u = br.ReadInt16() / 1024f;
-                    float uv_v = br.ReadInt16() / -1024f;
+                    float uv_v = br.ReadInt16() / 1024f;
 
                     Vertices[i] = (new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale);
                     UVs[i] = new Vector2(uv_u, uv_v);

@@ -15,6 +15,7 @@
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows
+		#pragma shader_feature _UV_DEBUG
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
@@ -42,6 +43,11 @@
             // Albedo comes from a texture tinted by color
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;
+
+#if _UV_DEBUG
+			o.Albedo = float4(frac(IN.uv_MainTex.x), frac(IN.uv_MainTex.y), 0, 0);
+#endif
+
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
