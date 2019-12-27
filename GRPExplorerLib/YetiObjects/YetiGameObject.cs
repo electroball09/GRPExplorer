@@ -15,13 +15,23 @@ namespace GRPExplorerLib.YetiObjects
         public override YetiObjectType Identifier => YetiObjectType.gao;
 
         public Matrix4x4 Matrix { get; private set; }
+        public int TestValue { get; private set; }
+        public int Flags { get; private set; }
+        public int Size { get; private set; }
 
         public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
+            Size = size;
+
             using (MemoryStream ms = new MemoryStream(buffer, 0, size))
             using (BinaryReader br = new BinaryReader(ms))
             {
-                ms.Seek(15, SeekOrigin.Current);
+                TestValue = br.ReadInt32();
+                Flags = br.ReadInt32();
+                br.ReadInt32();
+                br.ReadByte();
+                br.ReadByte();
+                br.ReadByte();
 
                 Matrix =
                     new Matrix4x4

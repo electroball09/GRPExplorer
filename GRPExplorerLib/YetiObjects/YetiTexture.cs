@@ -43,6 +43,13 @@ namespace GRPExplorerLib.YetiObjects
 
         public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
+            if (objectReferences.Length == 0)
+            {
+                LogManager.Error("WTF " + Object.Name);
+                throw new Exception(string.Format("num references is zero! {0:X8}", Object.FileInfo.Key));
+                return;
+            }
+
             if (objectReferences[0].Is<YetiTextureMetadata>())
             {
                 Passthrough = objectReferences[0].ArchetypeAs<YetiTextureMetadata>();
@@ -53,12 +60,6 @@ namespace GRPExplorerLib.YetiObjects
             Width = BitConverter.ToUInt16(buffer, 4);
             Height = BitConverter.ToUInt16(buffer, 6);
             Format = (YetiTextureFormat)buffer[9];
-
-            if (objectReferences.Length == 0)
-            {
-                LogManager.Error("WTF " + Object.Name);
-                return;
-            }
         }
 
         public override void Log(ILogProxy log)

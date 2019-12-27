@@ -139,6 +139,7 @@ namespace GRPExplorerTests
             DecryptOasis,
             LogDatatables,
             LoadFilesOfType,
+            TestGAOFlags,
         };
 
         static void Main(string[] args)
@@ -610,6 +611,53 @@ namespace GRPExplorerTests
             foreach (YetiObject obj in objects)
             {
                 obj.Archetype.Log(log);
+            }
+        }
+
+        static void TestGAOFlags()
+        {
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
+            if (!File.Exists(path))
+                Environment.Exit(69);
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
+            bigFile.LoadFromDisk();
+
+            List<YetiObject> gameObjects = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiGameObject>();
+
+            Dictionary<int, (int size, int count)> dict = new Dictionary<int, (int size, int count)>();
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info | LogFlags.Debug;
+            foreach (YetiObject obj in bigFile.FileLoader.LoadAllSimple(gameObjects))
+            {
+                YetiGameObject gao = obj.ArchetypeAs<YetiGameObject>();
+                //if (dict.ContainsKey(gao.Flags))
+                //{
+                //    if (gao.Size != dict[gao.Flags].size)
+                //    {
+                //        Out.WriteLine("Found flags {0:X8} with size {1} that differs from registered size {2}", gao.Flags, gao.Size, dict[gao.Flags]);
+                //        return;
+                //    }
+
+                //    dict[gao.Flags] = (gao.Size, dict[gao.Flags].count);
+                //}
+                //else
+                //{
+                //    dict.Add(gao.Flags, (gao.Size, 1));
+                //}
+                if (gao.TestValue != 0)
+                {
+                    Out.WriteLine("value is {0}", gao.TestValue);
+                    return;
+                }
+            }
+
+            foreach (var kvp in dict)
+            {
+                Out.WriteLine("{0:X8} - size: {1}   count: {2}", kvp.Key, kvp.Value.size, kvp.Value.count);
             }
         }
     }

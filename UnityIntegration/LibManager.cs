@@ -36,6 +36,8 @@ namespace UnityIntegration
                 Destroy(this);
 
             inst = this;
+
+            filePath = Settings.LastBigfileLoadPath;
         }
 
         void OnGUI()
@@ -58,6 +60,7 @@ namespace UnityIntegration
             rect.y += rect.height;
             if (GUI.Button(rect, "Load"))
             {
+                Settings.LastBigfileLoadPath = filePath;
                 IntegrationUtil.LoadBigFileInBackground(filePath,
                     (bigFile) =>
                     {
@@ -68,7 +71,7 @@ namespace UnityIntegration
 
         private void DoLoadedGUI()
         {
-            Rect rect = new Rect(0, 0, 150f, 35f);
+            Rect rect = new Rect(0, 0, 450f, 35f);
             GUI.Label(rect, BigFile.MetadataFileInfo.FullName);
         }
     }

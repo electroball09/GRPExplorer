@@ -9,38 +9,110 @@ using GRPExplorerLib.YetiObjects;
 using System.Collections;
 using UnityIntegration.Converters;
 using GRPExplorerLib.Logging;
+using UnityIntegration.Components;
 
 namespace UnityIntegration
 {
     public class WorldLoader : MonoBehaviour
     {
+        public enum BrowserMode
+        {
+            CurrentWorld,
+            Worlds,
+            Files
+        }
+
         public bool showMenu = true;
 
         ILogProxy log = LogManager.GetLogProxy("WorldLoader");
 
         public int NumObjectsLoadedPerFrame = 10;
+        public int ObjectsPerPage = 50;
+        public int CurrentPage = 1;
         public string fileKey = "0x";
+        public BrowserMode mode = BrowserMode.Worlds;
 
         List<YetiObject> worldObjects;
         bool didLoad = false;
         Vector2 scrollPos = Vector2.zero;
+        Vector2 scrollPos2 = Vector2.zero;
 
         YetiWorldLoadContext context;
 
-        void OnGUI()
+        void Update()
         {
-            DoLoadGUI();
-            DoWorldBrowserGUI();
+            if (Input.GetKeyDown(KeyCode.Tab))
+                showMenu = !showMenu;
         }
 
-        private void DoLoadGUI()
+        void OnGUI()
         {
-            if (didLoad)
+            DoBrowsingGUI();
+        }
+
+        private void UnloadWorld()
+        {
+
+        }
+
+        private void DoNoMenuGUI()
+        {
+            Rect rect = new Rect(Screen.width - 250f, 0, 250f, 25f);
+            GUI.Label(rect, "TAB for menu");
+        }
+
+        private void DoBrowsingGUI()
+        {
+            if (!showMenu)
+            {
+                DoNoMenuGUI();
                 return;
+            }
 
             if (LibManager.BigFile == null)
                 return;
 
+            Rect rect = new Rect(Screen.width - 350f - 100f, 0, 100f, 25f);
+            if (mode != BrowserMode.CurrentWorld)
+            {
+                if (GUI.Button(rect, "Current World"))
+                    mode = BrowserMode.CurrentWorld;
+            }
+            else
+                GUI.Label(rect, "Current World");
+            rect.y += rect.height;
+            if (mode != BrowserMode.Worlds)
+            {
+                if (GUI.Button(rect, "Worlds"))
+                    mode = BrowserMode.Worlds;
+            }
+            else
+                GUI.Label(rect, "Worlds");
+            rect.y += rect.height;
+            if (mode != BrowserMode.Files)
+            {
+                if (GUI.Button(rect, "Files"))
+                    mode = BrowserMode.Files;
+            }
+            else
+                GUI.Label(rect, "Files");
+
+            switch (mode)
+            {
+                case BrowserMode.Worlds:
+                default:
+                    DoLoadWorldGUI();
+                    break;
+                case BrowserMode.CurrentWorld:
+                    DoWorldBrowserGUI();
+                    break;
+                case BrowserMode.Files:
+                    break;
+            }
+        }
+
+        private void DoLoadWorldGUI()
+        {
             if (worldObjects == null)
                 worldObjects = LibManager.BigFile.RootFolder.GetAllObjectsOfArchetype<YetiWorld>();
 
@@ -71,10 +143,7 @@ namespace UnityIntegration
             if (Input.GetKeyDown(KeyCode.Tab))
                 showMenu = !showMenu;
 
-            if (!showMenu)
-                return;
-
-            Rect rect = new Rect(Screen.width - 250f, 0, 250f, 25f);
+            Rect rect = new Rect(Screen.width - 350f, 0, 350f, 25f);
             if (context.parentContext != null)
             {
                 if (GUI.Button(rect, " <- " + (context.parentContext.currentWorld != null ? context.parentContext.currentWorld.Object.Name : "---")))
@@ -95,6 +164,44 @@ namespace UnityIntegration
                 }
                 rect.y += rect.height;
             }
+            float w = rect.width;
+            rect.width = rect.width / 2;
+            int numPages = (context.worldObjects.Count / ObjectsPerPage) + 1;
+            if (CurrentPage != 1)
+            {
+                if (GUI.Button(rect, "<-- prev"))
+                {
+                    CurrentPage--;
+                }
+            }
+            rect.x += rect.width;
+            if (CurrentPage < numPages)
+            {
+                if (GUI.Button(rect, "next -->"))
+                {
+                    CurrentPage++;
+                }
+            }
+            rect.x -= rect.width;
+            rect.width = w;
+            rect.y += rect.height;
+            int numObjToDisplay = Mathf.Min(ObjectsPerPage, context.worldObjects.Count - (CurrentPage * ObjectsPerPage));
+            Rect scrollRect = new Rect(rect.x, rect.y, rect.width, Screen.height - rect.y);
+            Rect viewRect = new Rect(0, 0, rect.width, rect.height * numObjToDisplay);
+            scrollPos2 = GUI.BeginScrollView(scrollRect, scrollPos2, viewRect);
+            Rect btnRect = new Rect(0, 0, scrollRect.width, rect.height);
+            for (int i = 0; i < numObjToDisplay; i++)
+            {
+                int ind = ((CurrentPage - 1) * ObjectsPerPage) + i;
+                GameObject obj = context.worldObjects[ind];
+                cYetiObjectReference objRef = obj.GetComponent<cYetiObjectReference>();
+                if (GUI.Button(btnRect, objRef.yetiObject.NameWithExtension))
+                {
+
+                }
+                btnRect.y += btnRect.height;
+            }
+            GUI.EndScrollView();
         }
     }
 }

@@ -43,12 +43,12 @@ namespace UnityIntegration.Components
                 }
 
             YetiGameObjectList gol = world.GameObjectList;
-            YetiSubWorldList wil = world.SubWorldList;
+            YetiWorldIncludeList wil = world.SubWorldList;
 
             foreach (YetiObject obj in world.Object.ObjectReferences)
             {
                 if (obj != null &&
-                    !obj.Is<YetiSubWorldList>() &&
+                    !obj.Is<YetiWorldIncludeList>() &&
                     !obj.Is<YetiWorld>())
                     YetiObjectConverter.GetConverter(obj).Convert(obj, gameObject, thisContext);
             }
@@ -68,7 +68,7 @@ namespace UnityIntegration.Components
             }
 
             if (wil != null)
-                foreach (YetiWorld subWorld in wil.SubWorlds)
+                foreach (YetiWorld subWorld in wil.IncludeList)
                 {
                     YetiObjectConverter.GetConverter(subWorld.Object).Convert(subWorld.Object, null, thisContext);
                 }

@@ -16,8 +16,6 @@ namespace UnityIntegration.Converters
 
         public override void Convert(YetiObject yetiObject, GameObject gameObject, YetiWorldLoadContext context)
         {
-            context.worldObjects.Add(yetiObject);
-
             GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
             thisObj.transform.SetParent(gameObject.transform, false);
 
@@ -41,8 +39,6 @@ namespace UnityIntegration.Converters
 
         public override void Convert(YetiObject yetiObject, GameObject gameObject, YetiWorldLoadContext context)
         {
-            context.worldObjects.Add(yetiObject);
-
             YetiMeshData meshData = yetiObject.ArchetypeAs<YetiMeshData>();
 
             GameObject thisObj = new GameObject(yetiObject.NameWithExtension);

@@ -38,11 +38,11 @@ internal static class Settings
         registryKey.SetValue(key, value);
     }
 
-    public static string LastBigfilePath
+    public static string LastBigfileLoadPath
     {
         get
         {
-            return GetValue(defaultValue: Environment.CurrentDirectory) as string;
+            return GetValue(defaultValue: "C:\\") as string;
         }
         set
         {

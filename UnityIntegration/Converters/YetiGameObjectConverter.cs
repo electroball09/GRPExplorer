@@ -16,8 +16,6 @@ namespace UnityIntegration.Converters
 
         public override void Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
         {
-            context.worldObjects.Add(yetiObject);
-
             YetiGameObject obj = yetiObject.ArchetypeAs<YetiGameObject>();
 
             Matrix4x4 matrix = obj.Matrix.ConvertToUnity();
@@ -31,6 +29,7 @@ namespace UnityIntegration.Converters
             pos = pos.ConvertYetiToUnityCoords();
 
             GameObject gameObject = new GameObject(yetiObject.NameWithExtension);
+            context.worldObjects.Add(gameObject);
             if (parentObject)
             {
                 gameObject.transform.SetParent(parentObject.transform, false);
@@ -61,8 +60,6 @@ namespace UnityIntegration.Converters
 
         public override void Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
         {
-            context.worldObjects.Add(yetiObject);
-
             YetiGraphicObjectTable got = yetiObject.ArchetypeAs<YetiGraphicObjectTable>();
 
             GameObject gameObject = new GameObject(yetiObject.NameWithExtension);

@@ -17,7 +17,7 @@ namespace UnityIntegration.Converters
 
         public YetiWorld currentWorld;
         public YetiWorldLoadContext parentContext;
-        public List<YetiObject> worldObjects = new List<YetiObject>();
+        public List<GameObject> worldObjects = new List<GameObject>();
 
         public List<YetiWorldLoadContext> subContexts = new List<YetiWorldLoadContext>();
 
