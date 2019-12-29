@@ -45,7 +45,7 @@ namespace UnityIntegration.Components
             {
                 vertices = vertices,
                 uv = uvs,
-                triangles = meshData.Faces,
+                triangles = meshData.Triangles,
                 colors = vColors,
             };
             mesh.RecalculateBounds();

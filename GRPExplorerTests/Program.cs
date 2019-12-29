@@ -140,6 +140,7 @@ namespace GRPExplorerTests
             LogDatatables,
             LoadFilesOfType,
             TestGAOFlags,
+            DebugLoad,
         };
 
         static void Main(string[] args)
@@ -659,6 +660,32 @@ namespace GRPExplorerTests
             {
                 Out.WriteLine("{0:X8} - size: {1}   count: {2}", kvp.Key, kvp.Value.size, kvp.Value.count);
             }
+        }
+
+        static void DebugLoad()
+        {
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
+            if (!File.Exists(path))
+                Environment.Exit(69);
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
+            bigFile.LoadFromDisk();
+
+            Out.WriteLine("");
+            Out.Write("File key: ");
+            int key = 0;
+            key = Convert.ToInt32(Out.ReadLine(), 16);
+            if (key == 0)
+                Environment.Exit(420);
+
+            LogManager.GlobalLogFlags = LogFlags.All;
+
+            bigFile.FileLoader.LoadObjectSimple(bigFile.FileMap[key]);
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
         }
     }
 }

@@ -62,7 +62,7 @@ namespace UnityIntegration
             Vector2[] uvs = meshData.UVs.ConvertToUnity();
             mesh.vertices = verts;
             mesh.uv = uvs;
-            mesh.triangles = meshData.Faces;
+            mesh.triangles = meshData.Triangles;
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
 

@@ -21,7 +21,9 @@ namespace UnityIntegrationEditor.Inspectors
 
         public static void Draw(cYetiObjectReference cmp)
         {
+            EditorGUILayout.TextField("Name:", cmp.yetiObject.NameWithExtension);
             EditorGUILayout.TextField("Key:", string.Format("{0:X8}", cmp.yetiObject.FileInfo.Key));
+            EditorGUILayout.TextField("Archetype:", cmp.yetiObject.Archetype.GetType().Name);
         }
     }
 }
