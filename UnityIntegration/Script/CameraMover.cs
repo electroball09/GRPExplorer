@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace UnityIntegration.Script
 {
-    public class CameraMover : MonoBehaviour
+    public class CameraMover : SingletonBehaviour<CameraMover>
     {
         [Header("config")]
         public float slowPercent = 0.2f;
@@ -23,6 +24,10 @@ namespace UnityIntegration.Script
             100f
         };
         public bool isSlow = false;
+        public float InterpToSpeed = 25f;
+        public float InterpToDist = 2.5f;
+
+        Coroutine interpCoroutine;
 
         void Update()
         {
@@ -60,6 +65,7 @@ namespace UnityIntegration.Script
             string str = string.Format("Speed: {0}   Slow: {1}", speeds[speedIndex], isSlow);
             GUI.Label(rect, str);
             rect.y -= rect.height;
+            rect.width = rect.width / 2;
             if (GUI.Button(rect, "Toggle UV Debug"))
             {
                 if (Shader.IsKeywordEnabled("_UV_DEBUG"))
@@ -67,6 +73,36 @@ namespace UnityIntegration.Script
                 else
                     Shader.EnableKeyword("_UV_DEBUG");
             }
+            rect.x += rect.width;
+            if (GUI.Button(rect, "Toggle VColor Debug"))
+            {
+                if (Shader.IsKeywordEnabled("_VERTEX_COLOR_DEBUG"))
+                    Shader.DisableKeyword("_VERTEX_COLOR_DEBUG");
+                else
+                    Shader.EnableKeyword("_VERTEX_COLOR_DEBUG");
+            }
+        }
+
+        IEnumerator InterpCoroutine(GameObject obj)
+        {
+            float dist = (transform.position - obj.transform.position).magnitude;
+            Vector3 initialDir = -transform.forward;
+
+            Vector3 targetPos = obj.transform.position + initialDir * InterpToDist;
+
+            while ((transform.position - targetPos).magnitude > 0.01f)
+            {
+                transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * InterpToSpeed);
+                yield return null;
+            }
+
+            interpCoroutine = null;
+        }
+
+        public void InterpToObject(GameObject obj)
+        {
+            if (interpCoroutine == null)
+                interpCoroutine = StartCoroutine(InterpCoroutine(obj));
         }
     }
 }

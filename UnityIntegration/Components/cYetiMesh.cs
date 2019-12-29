@@ -24,16 +24,29 @@ namespace UnityIntegration.Components
             if (!meshMat)
                 meshMat = (Material)Resources.Load("MeshTestMat");
 
-            gameObject.transform.localPosition = meshData.CenterOffset.ConvertToUnity().ConvertYetiToUnityCoords();
+            //gameObject.transform.localPosition = meshData.CenterOffset.ConvertToUnity().ConvertYetiToUnityCoords();
 
             meshFilter = gameObject.AddComponent<MeshFilter>();
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
 
+            Vector3[] vertices = new Vector3[meshData.VertexCount];
+            Color[] vColors = new Color[meshData.VertexCount];
+            Vector2[] uvs = new Vector2[meshData.VertexCount];
+
+            for (int i = 0; i < meshData.VertexCount; i++)
+            {
+                YetiVertex v = meshData.Vertices[i];
+                vertices[i] = v.vertexData.pos.ConvertToUnity();
+                vColors[i] = new Color(v.vertexColor.X, v.vertexColor.Y, v.vertexColor.Z, v.vertexColor.W);
+                uvs[i] = meshData.Vertices[i].vertexData.uv.ConvertToUnity();
+            }
+
             Mesh mesh = new Mesh
             {
-                vertices = meshData.Vertices.ConvertToUnity(),
-                uv = meshData.UVs.ConvertToUnity(),
-                triangles = meshData.Faces
+                vertices = vertices,
+                uv = uvs,
+                triangles = meshData.Faces,
+                colors = vColors,
             };
             mesh.RecalculateBounds();
             mesh.RecalculateNormals();

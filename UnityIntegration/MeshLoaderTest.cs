@@ -58,7 +58,7 @@ namespace UnityIntegration
             LibManager.BigFile.FileLoader.LoadObjectSimple(obj);
 
             mesh.Clear();
-            Vector3[] verts = meshData.Vertices.ConvertToUnity();
+            Vector3[] verts = meshData.RawVertices.ConvertToUnity();
             Vector2[] uvs = meshData.UVs.ConvertToUnity();
             mesh.vertices = verts;
             mesh.uv = uvs;

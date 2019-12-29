@@ -10,6 +10,7 @@ using System.Collections;
 using UnityIntegration.Converters;
 using GRPExplorerLib.Logging;
 using UnityIntegration.Components;
+using UnityIntegration.Script;
 
 namespace UnityIntegration
 {
@@ -160,6 +161,7 @@ namespace UnityIntegration
                 if (GUI.Button(rect, subContext.currentWorld.Object.Name))
                 {
                     context = subContext;
+                    CurrentPage = 1;
                     return;
                 }
                 rect.y += rect.height;
@@ -197,7 +199,7 @@ namespace UnityIntegration
                 cYetiObjectReference objRef = obj.GetComponent<cYetiObjectReference>();
                 if (GUI.Button(btnRect, objRef.yetiObject.NameWithExtension))
                 {
-
+                    CameraMover.inst.InterpToObject(obj);
                 }
                 btnRect.y += btnRect.height;
             }

@@ -10,12 +10,52 @@ using System.IO;
 
 namespace GRPExplorerLib.YetiObjects
 {
+    public struct YetiVertex
+    {
+        public YetiVertexData vertexData;
+        public YetiBoneData boneData;
+        public Vector4 vertexColor;
+        public YetiOtherVertexData otherData;
+    }
+
+    public struct YetiVertexData
+    {
+        public Vector3 pos;
+        public Vector2 uv;
+    }
+
+    public struct YetiBoneData
+    {
+        public float Weight1;
+        public float Weight2;
+        public float Weight3;
+        public float Weight4;
+
+        public byte Bone1;
+        public byte Bone2;
+        public byte Bone3;
+        public byte Bone4;
+    }
+
+    public struct YetiOtherVertexData
+    {
+         public byte UNK_01;
+         public byte UNK_02;
+         public byte UNK_03;
+         public byte UNK_04;
+         public byte UNK_05;
+         public byte UNK_06;
+         public byte UNK_07;
+         public byte UNK_08;
+    }
+
     public class YetiMeshData : YetiObjectArchetype
     {
         public override YetiObjectType Identifier => YetiObjectType.msd;
 
         public int VertexCount { get; private set; }
-        public Vector3[] Vertices { get; private set; }
+        public YetiVertex[] Vertices { get; private set; }
+        public Vector3[] RawVertices { get; private set; }
         public Vector2[] UVs { get; private set; }
         public int FaceCount { get; private set; }
         public int[] Faces { get; private set; }
@@ -60,7 +100,8 @@ namespace GRPExplorerLib.YetiObjects
 
                 ms.Seek(dataOff, SeekOrigin.Current);
 
-                Vertices = new Vector3[VertexCount];
+                Vertices = new YetiVertex[VertexCount];
+                RawVertices = new Vector3[VertexCount];
                 UVs = new Vector2[VertexCount];
 
                 for (int i = 0; i < VertexCount; i++)
@@ -78,10 +119,57 @@ namespace GRPExplorerLib.YetiObjects
                     float uv_u = br.ReadInt16() / 1024f;
                     float uv_v = br.ReadInt16() / 1024f;
 
-                    Vertices[i] = (new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale);
+                    YetiVertexData vData = new YetiVertexData()
+                    {
+                        pos = new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale,
+                        uv = new Vector2(uv_u, uv_v)
+                    };
+
+                    RawVertices[i] = (new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale);
                     UVs[i] = new Vector2(uv_u, uv_v);
 
-                    ms.Seek(20, SeekOrigin.Current);
+                    YetiBoneData bData = new YetiBoneData()
+                    {
+                        Weight1 = br.ReadByte() / 255f,
+                        Weight2 = br.ReadByte() / 255f,
+                        Weight3 = br.ReadByte() / 255f,
+                        Weight4 = br.ReadByte() / 255f,
+
+                        Bone1 = br.ReadByte(),
+                        Bone2 = br.ReadByte(),
+                        Bone3 = br.ReadByte(),
+                        Bone4 = br.ReadByte(),
+                    };
+
+                    Vector4 vertexColor = new Vector4()
+                    {
+                        X = br.ReadByte() / 255f,
+                        Y = br.ReadByte() / 255f,
+                        Z = br.ReadByte() / 255f,
+                        W = br.ReadByte() / 255f
+                    };
+
+                    YetiOtherVertexData otherData = new YetiOtherVertexData()
+                    {
+                       UNK_01 = br.ReadByte(),
+                       UNK_02 = br.ReadByte(),
+                       UNK_03 = br.ReadByte(),
+                       UNK_04 = br.ReadByte(),
+                       UNK_05 = br.ReadByte(),
+                       UNK_06 = br.ReadByte(),
+                       UNK_07 = br.ReadByte(),
+                       UNK_08 = br.ReadByte()
+                    };
+
+                    Vertices[i] = new YetiVertex()
+                    {
+                        vertexData = vData,
+                        boneData = bData,
+                        vertexColor = vertexColor,
+                        otherData = otherData
+                    };
+
+                    //ms.Seek(12, SeekOrigin.Current);
                 }
 
                 log.Debug("> current pos: {0}", ms.Position); 
@@ -103,7 +191,7 @@ namespace GRPExplorerLib.YetiObjects
                         log.Error("Mesh {0} ({1:X8}) has invalid triangle indexes!", Object.NameWithExtension, Object.FileInfo.Key);
                         VertexCount = 0;
                         FaceCount = 0;
-                        Vertices = new Vector3[0];
+                        RawVertices = new Vector3[0];
                         Faces = new int[0];
                         UVs = new Vector2[0];
                     }

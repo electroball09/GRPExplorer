@@ -16,6 +16,7 @@
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows
 		#pragma shader_feature _UV_DEBUG
+		#pragma shader_feature _VERTEX_COLOR_DEBUG
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
@@ -25,6 +26,7 @@
         struct Input
         {
             float2 uv_MainTex;
+			float4 color : COLOR;
         };
 
         half _Glossiness;
@@ -46,6 +48,9 @@
 
 #if _UV_DEBUG
 			o.Albedo = float4(frac(IN.uv_MainTex.x), frac(IN.uv_MainTex.y), 0, 0);
+#endif
+#if _VERTEX_COLOR_DEBUG
+			o.Albedo = IN.color;
 #endif
 
             // Metallic and smoothness come from slider variables
