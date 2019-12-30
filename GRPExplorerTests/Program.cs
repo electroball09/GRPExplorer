@@ -141,11 +141,15 @@ namespace GRPExplorerTests
             LoadFilesOfType,
             TestGAOFlags,
             DebugLoad,
+            PrintAllFilesOfType,
         };
 
         static void Main(string[] args)
         {
             LogManager.LogInterface = new LogInterface();
+
+            start:
+            Out.Clear();
 
             for (int i = 0; i < funcs.Length; i++)
             {
@@ -158,6 +162,7 @@ namespace GRPExplorerTests
             Out.WriteLine("");
             Out.WriteLine("Routine ended");
             Out.ReadLine();
+            goto start;
         }
 
         static void CheckFiles()
@@ -674,6 +679,8 @@ namespace GRPExplorerTests
             PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
             bigFile.LoadFromDisk();
 
+            start:
+
             Out.WriteLine("");
             Out.Write("File key: ");
             int key = 0;
@@ -686,6 +693,80 @@ namespace GRPExplorerTests
             bigFile.FileLoader.LoadObjectSimple(bigFile.FileMap[key]);
 
             LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            YetiMeshData mdata = bigFile.FileMap[key].ArchetypeAs<YetiMeshData>();
+            if (mdata != null)
+            {
+                byte[][] valuesBone = new byte[8][];
+                byte[][] valuesOther = new byte[8][];
+
+                for (int i = 0; i < 8; i++)
+                {
+                    valuesBone[i] = new byte[2];
+                    valuesOther[i] = new byte[2];
+                }
+
+                for (int i = 0; i < mdata.VertexCount; i++)
+                {
+                    YetiVertex v = mdata.Vertices[i];
+                    for (int j = 0; j < 8; j++)
+                    {
+                        valuesBone[j][0] = Math.Min(valuesBone[j][0], v.boneData.datas[j]);
+                        valuesBone[j][1] = Math.Max(valuesBone[j][1], v.boneData.datas[j]);
+                        valuesOther[j][0] = Math.Min(valuesOther[j][0], v.otherData.datas[j]);
+                        valuesOther[j][1] = Math.Max(valuesOther[j][1], v.otherData.datas[j]);
+                    }
+
+                    //maxValuesOther[0] = Math.Max(maxValuesOther[0], mdata.Vertices[i].otherData.UNK_01);
+                    //maxValuesOther[1] = Math.Max(maxValuesOther[1], mdata.Vertices[i].otherData.UNK_02);
+                    //maxValuesOther[2] = Math.Max(maxValuesOther[2], mdata.Vertices[i].otherData.UNK_03);
+                    //maxValuesOther[3] = Math.Max(maxValuesOther[3], mdata.Vertices[i].otherData.UNK_04);
+                    //maxValuesOther[4] = Math.Max(maxValuesOther[4], mdata.Vertices[i].otherData.UNK_05);
+                    //maxValuesOther[5] = Math.Max(maxValuesOther[5], mdata.Vertices[i].otherData.UNK_06);
+                    //maxValuesOther[6] = Math.Max(maxValuesOther[6], mdata.Vertices[i].otherData.UNK_07);
+                    //maxValuesOther[7] = Math.Max(maxValuesOther[7], mdata.Vertices[i].otherData.UNK_08);
+                }
+
+                for (int i = 0; i < 8; i++)
+                {
+                    Out.WriteLine("BONE BYTE {0} - min:{1}  max:{2}", i, valuesBone[i][0], valuesBone[i][1]);
+                }
+
+                for (int i = 0; i < 8; i++)
+                {
+                    Out.WriteLine("OTHER BYTE {0} - min:{1}  max:{2}", i, valuesOther[i][0], valuesOther[i][1]);
+                }
+            }
+
+            goto start;
+        }
+
+        static void PrintAllFilesOfType()
+        {
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
+            if (!File.Exists(path))
+                Environment.Exit(69);
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            PackedBigFile bigFile = new PackedBigFile(new FileInfo(path));
+            bigFile.LoadFromDisk();
+
+            Out.Write("Type: ");
+            string type = Out.ReadLine();
+            YetiObjectType objectType = YetiObjectType.NONE;
+            if (!Enum.TryParse(type, out objectType))
+                return;
+
+            List<YetiObject> objects = bigFile.RootFolder.GetAllObjectsOfType(objectType);
+
+            Out.WriteLine("");
+
+            foreach (YetiObject obj in objects)
+            {
+                Out.WriteLine("{0:X8} - {1}", obj.FileInfo.Key, obj.NameWithExtension);
+            }
         }
     }
 }

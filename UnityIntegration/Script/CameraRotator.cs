@@ -18,14 +18,13 @@ namespace UnityIntegration.Script
         [Header("debug")]
         public float pitch;
         public float yaw;
-        public bool active = true;
+        public bool active = false;
 
         void Start()
         {
             Vector3 rot = transform.rotation.eulerAngles;
             pitch = rot.x;
             yaw = rot.y;
-            ToggleCursor();
         }
 
         private void ToggleCursor()

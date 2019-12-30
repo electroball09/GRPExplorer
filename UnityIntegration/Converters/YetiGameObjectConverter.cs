@@ -74,8 +74,9 @@ namespace UnityIntegration.Converters
 
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(gameObject, yetiObject);
 
-            cYetiMesh yetiMesh = null;
-            List<cYetiMaterial> mats = new List<cYetiMaterial>();
+            Dictionary<YetiObject, cYetiMaterial> mats = new Dictionary<YetiObject, cYetiMaterial>();
+            Dictionary<YetiObject, (cYetiMesh mesh, List<cYetiMaterial> materials)> meshes = new Dictionary<YetiObject, (cYetiMesh mesh, List<cYetiMaterial> materials)>();
+            YetiObject currMesh = null;
             foreach (YetiObject subObj in yetiObject.ObjectReferences)
             {
                 if (subObj == null)
@@ -83,16 +84,32 @@ namespace UnityIntegration.Converters
 
                 if (subObj.Is<YetiMeshMetadata>())
                 {
+                    currMesh = subObj;
+
                     YetiObjectConverter conv = GetConverter(subObj);
                     conv.Convert(subObj, gameObject, context);
-                    yetiMesh = conv.Components[0] as cYetiMesh;
+
+                    meshes.Add(currMesh, (conv.Components[0] as cYetiMesh, new List<cYetiMaterial>()));
                 }
                 else if (subObj.Is<YetiMaterial>())
                 {
-                    YetiObjectConverter conv = GetConverter(subObj);
-                    conv.Convert(subObj, gameObject, context);
-                    foreach (cYetiObjectReference objRef in conv.Components)
-                        mats.Add(objRef as cYetiMaterial);
+                    cYetiMaterial mat;
+                    if (!mats.ContainsKey(subObj))
+                    {
+                        YetiObjectConverter conv = GetConverter(subObj);
+                        conv.Convert(subObj, gameObject, context);
+                        mat = conv.Components[0] as cYetiMaterial;
+                        mats.Add(subObj, mat);
+                    }
+                    else
+                    {
+                        mat = mats[subObj];
+                    }
+
+                    if (currMesh != null)
+                    {
+                        meshes[currMesh].materials.Add(mat);
+                    }
                 }
                 else
                 {
@@ -100,13 +117,16 @@ namespace UnityIntegration.Converters
                 }
             }
 
-            if (yetiMesh != null && mats.Count > 0)
+            if (meshes.Count > 0 && mats.Count > 0)
             {
-                yetiMesh.meshRenderer.material = mats[0].Material;
+                foreach (KeyValuePair<YetiObject, (cYetiMesh mesh, List<cYetiMaterial> materials)> kvp in meshes)
+                {
+                    kvp.Value.mesh.SetMaterials(kvp.Value.materials);
+                }
             }
             else
             {
-                throw new Exception(string.Format("mesh: {0}   mats count: {1}", yetiMesh, mats.Count));
+                throw new Exception(string.Format("mesh count: {0}   mats count: {1}", meshes.Count, mats.Count));
             }
         }
     }

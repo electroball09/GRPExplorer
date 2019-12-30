@@ -16,6 +16,7 @@ namespace UnityIntegration.Converters
         public HashSet<YetiWorld> g_loadedWorlds = new HashSet<YetiWorld>();
 
         public YetiWorld currentWorld;
+        public cYetiWorld worldComponent;
         public YetiWorldLoadContext parentContext;
         public List<GameObject> worldObjects = new List<GameObject>();
 
@@ -52,7 +53,9 @@ namespace UnityIntegration.Converters
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(gameObject, yetiObject);
             cYetiWorld world = cYetiObjectReference.AddYetiComponent<cYetiWorld>(gameObject, yetiObject);
 
-            world.StartCoroutine(world.LoadWorld(yetiObject.ArchetypeAs<YetiWorld>(), context));
+            world.LoadWorld(yetiObject.ArchetypeAs<YetiWorld>(), context);
+
+            Components.Add(world);
         }
     }
 }

@@ -34,7 +34,7 @@ namespace UnityIntegration
         public BrowserMode mode = BrowserMode.Worlds;
 
         List<YetiObject> worldObjects;
-        bool didLoad = false;
+        bool isLoading = false;
         Vector2 scrollPos = Vector2.zero;
         Vector2 scrollPos2 = Vector2.zero;
 
@@ -125,9 +125,26 @@ namespace UnityIntegration
             {
                 if (GUI.Button(btnRect, obj.Name))
                 {
-                    context = new YetiWorldLoadContext();
-                    YetiObjectConverter.GetConverter(obj).Convert(obj, null, context);
-                    didLoad = true;
+                    if (isLoading)
+                        continue;
+
+                    void LoadWorld()
+                    {
+                        isLoading = true;
+                        context = new YetiWorldLoadContext();
+                        YetiObjectConverter conv = YetiObjectConverter.GetConverter(obj);
+                        conv.Convert(obj, null, context);
+                        (conv.Components[0] as cYetiWorld).afterLoadedCallback = () => isLoading = false;
+                    }
+
+                    if (context != null)
+                    {
+                        isLoading = true;
+                        context.subContexts[0].worldComponent.UnloadWorld(LoadWorld);
+                        break;
+                    }
+
+                    LoadWorld();
                     break;
                 }
 

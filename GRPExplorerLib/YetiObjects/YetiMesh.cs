@@ -36,36 +36,58 @@ namespace GRPExplorerLib.YetiObjects
 
     public struct YetiBoneData
     {
-        public float Weight1;
-        public float Weight2;
-        public float Weight3;
-        public float Weight4;
+        //public float Weight1;
+        //public float Weight2;
+        //public float Weight3;
+        //public float Weight4;
 
-        public byte Bone1;
-        public byte Bone2;
-        public byte Bone3;
-        public byte Bone4;
+        //public byte Bone1;
+        //public byte Bone2;
+        //public byte Bone3;
+        //public byte Bone4;
+
+        public byte[] datas;
 
         public override string ToString()
         {
-            return string.Format("[BoneData bone|weight: {0}|{1} {2}|{3} {4}|{5} {6}|{7}]", Bone1, Weight1, Bone2, Weight2, Bone3, Weight3, Bone4, Weight4);
+            //return string.Format("[BoneData bone|weight: {0}|{1} {2}|{3} {4}|{5} {6}|{7}]", Bone1, Weight1, Bone2, Weight2, Bone3, Weight3, Bone4, Weight4);
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[BoneData");
+            for (int i = 0; i < datas.Length; i++)
+            {
+                sb.Append(" " + datas[i].ToString());
+            }
+            sb.Append("]");
+            return sb.ToString();
         }
     }
 
     public struct YetiOtherVertexData
     {
-         public byte UNK_01;
-         public byte UNK_02;
-         public byte UNK_03;
-         public byte UNK_04;
-         public byte UNK_05;
-         public byte UNK_06;
-         public byte UNK_07;
-         public byte UNK_08;
+         //public byte UNK_01;
+         //public byte UNK_02;
+         //public byte UNK_03;
+         //public byte UNK_04;
+         //public byte UNK_05;
+         //public byte UNK_06;
+         //public byte UNK_07;
+         //public byte UNK_08;
+
+        public byte[] datas;
 
         public override string ToString()
         {
-            return string.Format("[Other Data UNK_01:{0} UNK_02:{1} UNK_03:{2} UNK_04:{3} UNK_05:{4} UNK_06:{5} UNK_07:{6} UNK_08:{7}]", UNK_01, UNK_02, UNK_03, UNK_04, UNK_05, UNK_06, UNK_07, UNK_08);
+            //return string.Format("[Other Data UNK_01:{0} UNK_02:{1} UNK_03:{2} UNK_04:{3} UNK_05:{4} UNK_06:{5} UNK_07:{6} UNK_08:{7}]", UNK_01, UNK_02, UNK_03, UNK_04, UNK_05, UNK_06, UNK_07, UNK_08);
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[OtherData");
+            for (int i = 0; i < datas.Length; i++)
+            {
+                sb.Append(" " + datas[i].ToString());
+            }
+            sb.Append("]");
+            return sb.ToString();
         }
     }
 
@@ -153,18 +175,27 @@ namespace GRPExplorerLib.YetiObjects
                     RawVertices[i] = (new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale);
                     UVs[i] = new Vector2(uv_u, uv_v);
 
+                    //YetiBoneData bData = new YetiBoneData()
+                    //{
+                    //    Weight1 = br.ReadByte() / 255f,
+                    //    Weight2 = br.ReadByte() / 255f,
+                    //    Weight3 = br.ReadByte() / 255f,
+                    //    Weight4 = br.ReadByte() / 255f,
+
+                    //    Bone1 = br.ReadByte(),
+                    //    Bone2 = br.ReadByte(),
+                    //    Bone3 = br.ReadByte(),
+                    //    Bone4 = br.ReadByte(),
+                    //};
+
                     YetiBoneData bData = new YetiBoneData()
                     {
-                        Weight1 = br.ReadByte() / 255f,
-                        Weight2 = br.ReadByte() / 255f,
-                        Weight3 = br.ReadByte() / 255f,
-                        Weight4 = br.ReadByte() / 255f,
-
-                        Bone1 = br.ReadByte(),
-                        Bone2 = br.ReadByte(),
-                        Bone3 = br.ReadByte(),
-                        Bone4 = br.ReadByte(),
+                        datas = new byte[8],
                     };
+                    for (int j = 0; j < 8; j++)
+                    {
+                        bData.datas[j] = br.ReadByte();
+                    }
 
                     Vector4 vertexColor = new Vector4()
                     {
@@ -174,17 +205,25 @@ namespace GRPExplorerLib.YetiObjects
                         W = br.ReadByte() / 255f
                     };
 
+                    //YetiOtherVertexData otherData = new YetiOtherVertexData()
+                    //{
+                    //   UNK_01 = br.ReadByte(),
+                    //   UNK_02 = br.ReadByte(),
+                    //   UNK_03 = br.ReadByte(),
+                    //   UNK_04 = br.ReadByte(),
+                    //   UNK_05 = br.ReadByte(),
+                    //   UNK_06 = br.ReadByte(),
+                    //   UNK_07 = br.ReadByte(),
+                    //   UNK_08 = br.ReadByte()
+                    //};
                     YetiOtherVertexData otherData = new YetiOtherVertexData()
                     {
-                       UNK_01 = br.ReadByte(),
-                       UNK_02 = br.ReadByte(),
-                       UNK_03 = br.ReadByte(),
-                       UNK_04 = br.ReadByte(),
-                       UNK_05 = br.ReadByte(),
-                       UNK_06 = br.ReadByte(),
-                       UNK_07 = br.ReadByte(),
-                       UNK_08 = br.ReadByte()
+                        datas = new byte[8]
                     };
+                    for (int j = 0; j < 8; j++)
+                    {
+                        otherData.datas[j] = br.ReadByte();
+                    }
 
                     Vertices[i] = new YetiVertex()
                     {

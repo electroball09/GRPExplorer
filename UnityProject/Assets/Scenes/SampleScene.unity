@@ -198,7 +198,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 18057036}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -375,7 +375,7 @@ MonoBehaviour:
   sensMultPitch: 1
   pitch: 0
   yaw: 0
-  active: 1
+  active: 0
 --- !u!114 &534669907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -399,6 +399,8 @@ MonoBehaviour:
   - 50
   - 100
   isSlow: 0
+  InterpToSpeed: 25
+  InterpToDist: 2.5
 --- !u!1 &964646180
 GameObject:
   m_ObjectHideFlags: 0
@@ -480,8 +482,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   showMenu: 1
-  NumObjectsLoadedPerFrame: 25
+  NumObjectsLoadedPerFrame: 10
+  ObjectsPerPage: 50
+  CurrentPage: 1
   fileKey: 0x
+  mode: 1
 --- !u!4 &1669517168
 Transform:
   m_ObjectHideFlags: 0

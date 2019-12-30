@@ -19,6 +19,8 @@ namespace UnityIntegration.Components
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
 
+        public List<cYetiMaterial> materials;
+
         public void LoadMesh(YetiMeshData meshData)
         {
             if (!meshMat)
@@ -58,6 +60,12 @@ namespace UnityIntegration.Components
 
             calcBounds = mesh.bounds.size;
             yetiBounds = meshData.CenterOffset.ConvertToUnity().ConvertYetiToUnityCoords();
+        }
+
+        public void SetMaterials(List<cYetiMaterial> mats)
+        {
+            materials = mats;
+            meshRenderer.material = mats[0].Material;
         }
     }
 }

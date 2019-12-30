@@ -56,6 +56,9 @@ namespace GRPExplorerLib.BigFile.Files
 
             if (file.FileInfo.Offset < 0)
             {
+                if (file.FileInfo.FileType == YetiObjects.YetiObjectType.vxt) //all files of this type have offset of -1
+                    return BigFileFileRead.Error;
+
                 log.Error(string.Format("Can't seek to file: {0} (key:{1:X8}) because offset is {2}!", file.Name, file.FileInfo.Key, file.FileInfo.Offset));
                 return BigFileFileRead.Error;
             }

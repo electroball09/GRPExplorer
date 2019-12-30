@@ -28,7 +28,8 @@ namespace UnityIntegration.Converters
 
                 YetiObjectConverter conv = GetConverter(subObj);
                 conv.Convert(subObj, thisObj, context);
-                Components.Add(conv.Components[0]);
+                if (subObj.Is<YetiMeshData>())
+                    Components.Add(conv.Components[0]);
             }
         }
     }

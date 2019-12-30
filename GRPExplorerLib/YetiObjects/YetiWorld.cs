@@ -88,7 +88,8 @@ namespace GRPExplorerLib.YetiObjects
         {
             IncludeList = new YetiWorld[objectReferences.Length];
             for (int i = 0; i < objectReferences.Length; i++)
-                IncludeList[i] = objectReferences[i].ArchetypeAs<YetiWorld>();
+                if (objectReferences[i] != null)
+                    IncludeList[i] = objectReferences[i].ArchetypeAs<YetiWorld>();
         }
 
         public override void Log(ILogProxy log)
