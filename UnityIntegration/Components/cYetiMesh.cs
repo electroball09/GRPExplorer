@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityIntegration.Converters;
 
 namespace UnityIntegration.Components
 {
@@ -21,7 +22,7 @@ namespace UnityIntegration.Components
 
         public List<cYetiMaterial> materials;
 
-        public void LoadMesh(YetiMeshData meshData)
+        public void LoadMesh(YetiMeshData meshData, YetiObjectRepository objectRepository)
         {
             if (!meshMat)
                 meshMat = (Material)Resources.Load("MeshTestMat");
@@ -43,16 +44,26 @@ namespace UnityIntegration.Components
                 uvs[i] = meshData.Vertices[i].vertexData.uv.ConvertToUnity();
             }
 
-            Mesh mesh = new Mesh
+            Mesh mesh = null;
+            if (objectRepository.GetRepository<Mesh>().ContainsKey(yetiObject))
             {
-                vertices = vertices,
-                uv = uvs,
-                triangles = meshData.Triangles,
-                colors = vColors,
-            };
-            mesh.RecalculateBounds();
-            mesh.RecalculateNormals();
-            mesh.RecalculateTangents();
+                mesh = objectRepository.GetRepository<Mesh>()[yetiObject];
+            }
+            else
+            {
+                mesh = new Mesh
+                {
+                    vertices = vertices,
+                    uv = uvs,
+                    triangles = meshData.Triangles,
+                    colors = vColors,
+                };
+                mesh.RecalculateBounds();
+                mesh.RecalculateNormals();
+                mesh.RecalculateTangents();
+
+                objectRepository.GetRepository<Mesh>().Add(yetiObject, mesh);
+            }
 
             meshFilter.mesh = mesh;
 

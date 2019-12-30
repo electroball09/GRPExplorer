@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ namespace UnityIntegration.Converters
 {
     public class YetiWorldLoadContext
     {
+        public YetiObjectRepository g_ObjectRepository = new YetiObjectRepository();
         public HashSet<YetiObject> g_loadedList = new HashSet<YetiObject>();
         public HashSet<YetiWorld> g_loadedWorlds = new HashSet<YetiWorld>();
 
@@ -36,6 +38,19 @@ namespace UnityIntegration.Converters
             subContexts.Add(context);
 
             return context;
+        }
+    }
+
+    public class YetiObjectRepository
+    {
+        Dictionary<Type, IDictionary> repository = new Dictionary<Type, IDictionary>();
+
+        public Dictionary<YetiObject, T> GetRepository<T>()
+        {
+            if (!repository.ContainsKey(typeof(T)))
+                repository.Add(typeof(T), new Dictionary<YetiObject, T>());
+
+            return repository[typeof(T)] as Dictionary<YetiObject, T>;
         }
     }
 

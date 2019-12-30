@@ -48,7 +48,7 @@ namespace UnityIntegration.Converters
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(thisObj, yetiObject);
 
             cYetiMesh meshCmp = cYetiObjectReference.AddYetiComponent<cYetiMesh>(thisObj, yetiObject);
-            meshCmp.LoadMesh(meshData);
+            meshCmp.LoadMesh(meshData, context.g_ObjectRepository);
 
             Components.Add(meshCmp);
         }

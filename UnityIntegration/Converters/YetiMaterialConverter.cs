@@ -32,14 +32,13 @@ namespace UnityIntegration.Converters
             }
 
             cYetiMaterial matComponent = cYetiObjectReference.AddYetiComponent<cYetiMaterial>(obj, yetiObject);
-            matComponent.LoadMaterial(mat);
 
             if (conv != null)
             {
                 List<cYetiTexture> textures = new List<cYetiTexture>();
                 foreach (cYetiObjectReference objRef in conv.Components)
                     textures.Add(objRef as cYetiTexture);
-                matComponent.SetTextures(textures);
+                matComponent.LoadMaterial(mat, textures, context.g_ObjectRepository);
             }
 
             Components.Add(matComponent);

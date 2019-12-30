@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GRPExplorerLib.YetiObjects;
 using UnityEngine;
+using UnityIntegration.Converters;
 
 namespace UnityIntegration.Components
 {
@@ -23,7 +24,7 @@ namespace UnityIntegration.Components
             { YetiTextureFormat.RGBA32, TextureFormat.RGBA32 }
         };
 
-        public void LoadTexture()
+        public void LoadTexture(YetiObjectRepository objectRepository)
         {
             YetiTextureMetadata mdata = yetiObject.ArchetypeAs<YetiTextureMetadata>();
             YetiTexturePayload payload = mdata.Payload;
@@ -34,12 +35,21 @@ namespace UnityIntegration.Components
                 throw new Exception(mdata.Format.ToString() + "\n" + mdata.Object.Name + "\n" + string.Format("{0:X8}", mdata.Object.FileInfo.Key));
             }
 
-            texture = new Texture2D(mdata.Width, mdata.Height, formatMap[mdata.Format], false)
+            if (objectRepository.GetRepository<Texture2D>().ContainsKey(yetiObject))
             {
-                wrapMode = TextureWrapMode.Repeat
-            };
-            texture.LoadRawTextureData(payload.Data);
-            texture.Apply();
+                texture = objectRepository.GetRepository<Texture2D>()[yetiObject];
+            }
+            else
+            {
+                texture = new Texture2D(mdata.Width, mdata.Height, formatMap[mdata.Format], false)
+                {
+                    wrapMode = TextureWrapMode.Repeat
+                };
+                texture.LoadRawTextureData(payload.Data);
+                texture.Apply();
+
+                objectRepository.GetRepository<Texture2D>().Add(yetiObject, texture);
+            }
         }
     }
 }

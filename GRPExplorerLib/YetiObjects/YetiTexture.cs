@@ -43,10 +43,9 @@ namespace GRPExplorerLib.YetiObjects
 
         public override void Load(byte[] buffer, int size, YetiObject[] objectReferences)
         {
-            if (objectReferences.Length == 0)
+            if (objectReferences[0] == null)
             {
-                LogManager.Error("WTF " + Object.Name);
-                throw new Exception(string.Format("num references is zero! {0:X8}", Object.FileInfo.Key));
+                log.Error("Object reference is null! {0}  (key:{1:X8})", Object.NameWithExtension, Object.FileInfo.Key);
                 return;
             }
 

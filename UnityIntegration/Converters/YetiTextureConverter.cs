@@ -31,7 +31,7 @@ namespace UnityIntegration.Converters
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(thisObj, yetiObject);
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(thisObj, mdata.Payload.Object);
             cYetiTexture tex = cYetiObjectReference.AddYetiComponent<cYetiTexture>(thisObj, mdata.Object);
-            tex.LoadTexture();
+            tex.LoadTexture(context.g_ObjectRepository);
 
             Components.Add(tex);
         }

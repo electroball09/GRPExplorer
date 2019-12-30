@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityIntegration.Converters;
 
 namespace UnityIntegration.Components
 {
@@ -14,18 +15,24 @@ namespace UnityIntegration.Components
 
         public Material Material;
 
-        public void LoadMaterial(YetiMaterial yetiMaterial)
+        public void LoadMaterial(YetiMaterial yetiMaterial, List<cYetiTexture> textures, YetiObjectRepository objectRepository)
         {
             if (!matReference)
                 matReference = (Material)Resources.Load("BasicMaterial");
 
-            Material = Instantiate(matReference);
-        }
+            if (objectRepository.GetRepository<Material>().ContainsKey(yetiObject))
+            {
+                Material = objectRepository.GetRepository<Material>()[yetiObject];
+            }
+            else
+            {
+                Material = Instantiate(matReference);
 
-        public void SetTextures(List<cYetiTexture> textures)
-        {
-            if (textures.Count > 0)
-                Material.SetTexture("_MainTex", textures[0].texture);
+                if (textures.Count > 0)
+                    Material.SetTexture("_MainTex", textures[0].texture);
+
+                objectRepository.GetRepository<Material>().Add(yetiObject, Material);
+            }
         }
     }
 }
