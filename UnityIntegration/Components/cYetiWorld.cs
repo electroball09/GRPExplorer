@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using GRPExplorerLib.Logging;
 using UnityIntegration.Converters;
+using System.Threading;
 
 namespace UnityIntegration.Components
 {
@@ -22,32 +23,74 @@ namespace UnityIntegration.Components
 
         public Action afterLoadedCallback;
 
+        Thread bgLoadThread;
+
+        public string msgToDisplay = "";
+
+        void OnGUI()
+        {
+            Rect rect = new Rect((Screen.width / 2) - 275, (Screen.height / 2) + 25, 550f, 25f);
+            GUI.Label(rect, msgToDisplay);
+        }
+
+        void OnApplicationQuit()
+        {
+            if (bgLoadThread == null) return;
+            bgLoadThread.Abort();
+            bgLoadThread = null;
+        }
+
         IEnumerator eLoadWorld(YetiWorld world, YetiWorldLoadContext context)
         {
-            //LogManager.GlobalLogFlags = LogFlags.All;
-            if (context == null)
-                context = new YetiWorldLoadContext();
+            if (bgLoadThread != null)
+            {
+                log.Error("Load thread exists!");
+                yield break;
+            }
 
-            thisWorld = world;
-
-            loadContext = context.GetSubContext(world);
-            loadContext.worldComponent = this;
-            loadContext.g_loadedWorlds.Add(world);
-
-            log.Info("loading world {0}", world.Object.Name);
+            for (int i = 0; i < 3; i++)
+                yield return null;
 
             int count = 0;
 
-            if (loadContext.g_loadedList.Count == 0)
-                foreach (YetiObject obj in LibManager.BigFile.FileLoader.LoadObjectRecursive(world.Object, loadContext.g_loadedList))
-                {
-                    count++;
-                    if (count >= 25)
+            void tLoadWorld()
+            {
+                if (context == null)
+                    context = new YetiWorldLoadContext();
+
+                thisWorld = world;
+
+                loadContext = context.GetSubContext(world);
+                loadContext.worldComponent = this;
+                loadContext.g_loadedWorlds.Add(world);
+
+                log.Info("loading world {0}", world.Object.Name);
+
+                msgToDisplay = "Loading world " + yetiObject.NameWithExtension;
+
+                if (loadContext.g_loadedList.Count == 0)
+                    foreach (YetiObject obj in LibManager.BigFile.FileLoader.LoadObjectRecursive(world.Object, loadContext.g_loadedList))
                     {
-                        count = 0;
-                        yield return null;
+                        count++;
                     }
-                }
+
+                bgLoadThread = null;
+
+                log.Info("Background loading thread ended");
+            }
+
+            bgLoadThread = new Thread(new ThreadStart(tLoadWorld))
+            {
+                Name = yetiObject.NameWithExtension + " - LOAD"
+            };
+            bgLoadThread.Start();
+
+            while (bgLoadThread != null)
+            {
+                yield return null;
+            }
+
+            //LogManager.GlobalLogFlags = LogFlags.All;
 
             YetiGameObjectList gol = world.GameObjectList;
             YetiWorldIncludeList wil = world.SubWorldList;
@@ -59,6 +102,8 @@ namespace UnityIntegration.Components
                     !obj.Is<YetiWorld>())
                     YetiObjectConverter.GetConverter(obj).Convert(obj, gameObject, loadContext);
             }
+
+            msgToDisplay = "Instantiating world " + yetiObject.NameWithExtension;
 
             foreach (YetiObject obj in gol.ObjectList)
             {
@@ -74,6 +119,8 @@ namespace UnityIntegration.Components
                 }
             }
 
+            msgToDisplay = "";
+
             if (wil != null)
                 foreach (YetiWorld subWorld in wil.IncludeList)
                 {
@@ -82,14 +129,23 @@ namespace UnityIntegration.Components
 
             LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
 
+            log.Info("World {0} loaded!", yetiObject.NameWithExtension);
+
+            GC.Collect();
+
             afterLoadedCallback?.Invoke();
         }
 
         IEnumerator eUnloadWorld(Action afterUnloadedCallback)
         {
+            for (int i = 0; i < 3; i++)
+                yield return null;
+
             log.Info("Unloading world {0}", yetiObject.NameWithExtension);
 
             int count = 0;
+
+            msgToDisplay = "Destroying world " + yetiObject.NameWithExtension;
 
             foreach (GameObject obj in loadContext.worldObjects)
             {
@@ -105,10 +161,7 @@ namespace UnityIntegration.Components
                 }
             }
 
-            foreach (YetiWorldLoadContext subContext in loadContext.subContexts)
-            {
-                subContext.worldComponent.UnloadWorld(null);
-            }
+            msgToDisplay = "Unloading world " + yetiObject.NameWithExtension;
 
             if (loadContext.parentContext.currentWorld == null)
             {
@@ -127,9 +180,20 @@ namespace UnityIntegration.Components
                 }
             }
 
-            Destroy(gameObject);
+            msgToDisplay = "";
+
+            foreach (YetiWorldLoadContext subContext in loadContext.subContexts)
+            {
+                subContext.worldComponent.UnloadWorld(null);
+            }
+
+            log.Info("World {0} unloaded!", yetiObject.NameWithExtension);
+
+            GC.Collect();
 
             afterUnloadedCallback?.Invoke();
+
+            Destroy(gameObject);
         }
 
         public void LoadWorld(YetiWorld world, YetiWorldLoadContext context)

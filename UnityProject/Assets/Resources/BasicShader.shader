@@ -15,8 +15,8 @@
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf Standard fullforwardshadows
-		#pragma shader_feature _UV_DEBUG
-		#pragma shader_feature _VERTEX_COLOR_DEBUG
+		#pragma multi_compile __ _UV_DEBUG
+		#pragma multi_compile __ _VERTEX_COLOR_DEBUG
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0

@@ -140,6 +140,9 @@ namespace UnityIntegration
                     if (context != null)
                     {
                         isLoading = true;
+                        YetiWorldLoadContext c = context;
+                        while (c.parentContext != null)
+                            c = c.parentContext;
                         context.subContexts[0].worldComponent.UnloadWorld(LoadWorld);
                         break;
                     }
