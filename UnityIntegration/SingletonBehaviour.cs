@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace UnityIntegration.Script
+namespace UnityIntegration
 {
     public class SingletonBehaviour<T> : MonoBehaviour where T : SingletonBehaviour<T>
     {
-        public static T inst { get; private set; }
+        public static T inst { get; protected set; }
 
         void Start()
         {

@@ -10,7 +10,7 @@ using System.IO;
 
 namespace UnityIntegration
 {
-    public class LibManager : MonoBehaviour
+    public class LibManager : SingletonBehaviour<LibManager>
     {
         public string filePath = "C:\\";
         private BigFile m_bigFile;
@@ -19,24 +19,17 @@ namespace UnityIntegration
             get { return inst.m_bigFile; }
         }
 
-        static LibManager inst { get; set; }
-
         [RuntimeInitializeOnLoadMethod]
         static void Load()
         {
             LogManager.LogInterface = new UnityLogInterface();
             LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
 
-            inst = new GameObject("LIB_MANAGER").AddComponent<LibManager>();
+            new GameObject("LIB_MANAGER").AddComponent<LibManager>();
         }
 
-        void Start()
+        void Awake()
         {
-            if (inst != this)
-                Destroy(this);
-
-            inst = this;
-
             filePath = Settings.LastBigfileLoadPath;
         }
 

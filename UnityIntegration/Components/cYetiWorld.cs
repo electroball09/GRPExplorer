@@ -25,14 +25,6 @@ namespace UnityIntegration.Components
 
         Thread bgLoadThread;
 
-        public string msgToDisplay = "";
-
-        void OnGUI()
-        {
-            Rect rect = new Rect((Screen.width / 2) - 275, (Screen.height / 2) + 25, 550f, 25f);
-            GUI.Label(rect, msgToDisplay);
-        }
-
         void OnApplicationQuit()
         {
             if (bgLoadThread == null) return;
@@ -53,20 +45,20 @@ namespace UnityIntegration.Components
 
             int count = 0;
 
+            if (context == null)
+                context = new YetiWorldLoadContext();
+
+            thisWorld = world;
+
+            loadContext = context.GetSubContext(world);
+            loadContext.worldComponent = this;
+            loadContext.g_loadedWorlds.Add(world);
+
+            DebugMsg dMsg = DebugMsgMgr.inst.NewPermMessage("Loading world " + yetiObject.NameWithExtension);
+
             void tLoadWorld()
             {
-                if (context == null)
-                    context = new YetiWorldLoadContext();
-
-                thisWorld = world;
-
-                loadContext = context.GetSubContext(world);
-                loadContext.worldComponent = this;
-                loadContext.g_loadedWorlds.Add(world);
-
                 log.Info("loading world {0}", world.Object.Name);
-
-                msgToDisplay = "Loading world " + yetiObject.NameWithExtension;
 
                 if (loadContext.g_loadedList.Count == 0)
                     foreach (YetiObject obj in LibManager.BigFile.FileLoader.LoadObjectRecursive(world.Object, loadContext.g_loadedList))
@@ -103,7 +95,7 @@ namespace UnityIntegration.Components
                     YetiObjectConverter.GetConverter(obj).Convert(obj, gameObject, loadContext);
             }
 
-            msgToDisplay = "Instantiating world " + yetiObject.NameWithExtension;
+            dMsg.Text = "Instantiating world " + yetiObject.NameWithExtension;
 
             foreach (YetiObject obj in gol.ObjectList)
             {
@@ -119,7 +111,7 @@ namespace UnityIntegration.Components
                 }
             }
 
-            msgToDisplay = "";
+            DebugMsgMgr.inst.RemoveMsg(dMsg);
 
             if (wil != null)
                 foreach (YetiWorld subWorld in wil.IncludeList)
@@ -145,7 +137,7 @@ namespace UnityIntegration.Components
 
             int count = 0;
 
-            msgToDisplay = "Destroying world " + yetiObject.NameWithExtension;
+            DebugMsg dMsg = DebugMsgMgr.inst.NewPermMessage("Destroying world " + yetiObject.NameWithExtension);
 
             foreach (GameObject obj in loadContext.worldObjects)
             {
@@ -161,7 +153,7 @@ namespace UnityIntegration.Components
                 }
             }
 
-            msgToDisplay = "Unloading world " + yetiObject.NameWithExtension;
+            dMsg.Text = "Unloading world " + yetiObject.NameWithExtension;
 
             if (loadContext.parentContext.currentWorld == null)
             {
@@ -180,7 +172,7 @@ namespace UnityIntegration.Components
                 }
             }
 
-            msgToDisplay = "";
+            DebugMsgMgr.inst.RemoveMsg(dMsg);
 
             foreach (YetiWorldLoadContext subContext in loadContext.subContexts)
             {

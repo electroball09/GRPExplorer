@@ -12,25 +12,15 @@ namespace GRPExplorerLib.YetiObjects
 {
     public struct YetiVertex
     {
-        public YetiVertexData vertexData;
+        public Vector3 vertexPos;
+        public Vector2 uv0;
         public YetiBoneData boneData;
         public Vector4 vertexColor;
         public YetiOtherVertexData otherData;
 
         public override string ToString()
         {
-            return string.Format("VERTEX: {0}   {1}   [Color:{2}]   {3}", vertexData.ToString(), boneData.ToString(), vertexColor.ToString(), otherData.ToString());
-        }
-    }
-
-    public struct YetiVertexData
-    {
-        public Vector3 pos;
-        public Vector2 uv;
-
-        public override string ToString()
-        {
-            return string.Format("[VertexData pos:{0}  uv:{1}]", pos.ToString(), uv.ToString());
+            return string.Format("VERTEX: pos:{0}  uv1{4}   {1}   [Color:{2}]   {3}", vertexPos.ToString(), boneData.ToString(), vertexColor.ToString(), otherData.ToString(), uv0,ToString());
         }
     }
 
@@ -145,7 +135,7 @@ namespace GRPExplorerLib.YetiObjects
                 log.Debug("> VertexCount: {0}  FaceCount: {1}", VertexCount, TriangleCount);
                 log.Debug("> BoneCount: {0}  BoneCount2: {1}", boneCount, boneCount2);
 
-                ms.Seek(dataOff, SeekOrigin.Current);
+                ms.Seek(dataOff, SeekOrigin.Current); //current is 0x4F
 
                 Vertices = new YetiVertex[VertexCount];
                 RawVertices = new Vector3[VertexCount];
@@ -166,14 +156,11 @@ namespace GRPExplorerLib.YetiObjects
                     float uv_u = br.ReadInt16() / 1024f;
                     float uv_v = br.ReadInt16() / 1024f;
 
-                    YetiVertexData vData = new YetiVertexData()
-                    {
-                        pos = new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale,
-                        uv = new Vector2(uv_u, uv_v)
-                    };
+                    Vector3 pos = new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale;
+                    Vector2 uv = new Vector2(uv_u, uv_v);
 
-                    RawVertices[i] = (new Vector3(vertex_x, vertex_y, vertex_z) * vertex_scale);
-                    UVs[i] = new Vector2(uv_u, uv_v);
+                    RawVertices[i] = pos;
+                    UVs[i] = uv;
 
                     //YetiBoneData bData = new YetiBoneData()
                     //{
@@ -194,13 +181,21 @@ namespace GRPExplorerLib.YetiObjects
                     };
                     for (int j = 0; j < 8; j++)
                     {
-                        bData.datas[j] = br.ReadByte();
+                        byte b = br.ReadByte();
+                        bData.datas[j] = (byte)(b == 255 ? 0 : b);
                     }
 
-                    Vector4 vertexColor = new Vector4()
+                    //Vector4 vertexColor = new Vector4()//;
+                    //{
+                    //    Y = snorm16ToFloat(br.ReadInt16()),
+                    //    X = snorm16ToFloat(br.ReadInt16()),
+                    //    Z = 0,
+                    //    W = 0
+                    //};
+                    Vector4 vertexColor = new Vector4()//;
                     {
-                        X = br.ReadByte() / 255f,
                         Y = br.ReadByte() / 255f,
+                        X = br.ReadByte() / 255f,
                         Z = br.ReadByte() / 255f,
                         W = br.ReadByte() / 255f
                     };
@@ -227,13 +222,14 @@ namespace GRPExplorerLib.YetiObjects
 
                     Vertices[i] = new YetiVertex()
                     {
-                        vertexData = vData,
+                        vertexPos = pos,
+                        uv0 = uv,
                         boneData = bData,
                         vertexColor = vertexColor,
                         otherData = otherData
                     };
 
-                    log.Debug(Vertices[i].ToString());
+                    //log.Debug(Vertices[i].ToString());
                 }
 
                 log.Debug("> current pos: {0}", ms.Position); 
