@@ -13,7 +13,7 @@ namespace GRPExplorerLib.YetiObjects
     public enum DataTableColumnType
     {
         Int = 0x01,
-        UNK01 = 0x02,
+        Float = 0x02,
         String = 0x03,
         AssetKey = 0x04,
     }
@@ -33,6 +33,27 @@ namespace GRPExplorerLib.YetiObjects
             public override DataTableRow Copy()
             {
                 return new IntRow { value = this.value };
+            }
+
+            public override string ToString()
+            {
+                return value.ToString();
+            }
+        }
+
+        public class FloatRow : DataTableRow
+        {
+            private float value;
+
+            public override void ReadValue(Stream stream)
+            {
+                BinaryReader r = new BinaryReader(stream);
+                value = r.ReadSingle();
+            }
+
+            public override DataTableRow Copy()
+            {
+                return new FloatRow { value = this.value };
             }
 
             public override string ToString()
@@ -109,11 +130,13 @@ namespace GRPExplorerLib.YetiObjects
                 case DataTableColumnType.Int:
                     DefaultRow = new DataTableRow.IntRow();
                     break;
+                case DataTableColumnType.Float:
+                    DefaultRow = new DataTableRow.FloatRow();
+                    break;
                 case DataTableColumnType.String:
                     DefaultRow = new DataTableRow.StringRow();
                     break;
                 case DataTableColumnType.AssetKey:
-                case DataTableColumnType.UNK01: //use assetkeyrow to display the value for this kind of parameter in hexadecimal
                     DefaultRow = new DataTableRow.AssetKeyRow();
                     break;
                 default:

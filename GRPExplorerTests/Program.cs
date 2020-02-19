@@ -565,7 +565,7 @@ namespace GRPExplorerTests
 
             List<YetiObject> files = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiDataTable>();
 
-            bigFile.FileLoader.LoadAllSimple(files);
+            bigFile.FileLoader.LoadAllSimpleNoYield(files);
 
             foreach (YetiObject f in files)
             {

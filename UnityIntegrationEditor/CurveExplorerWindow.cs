@@ -40,7 +40,7 @@ namespace UnityIntegrationEditor
                 (bigFile) =>
                 {
                     List<YetiObject> files = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiCurve>();
-                    bigFile.FileLoader.LoadAllSimple(files);
+                    bigFile.FileLoader.LoadAllSimpleNoYield(files);
 
                     archetypes = new List<YetiCurve>();
                     foreach (YetiObject file in files)
@@ -102,10 +102,14 @@ namespace UnityIntegrationEditor
             if (oldSelected != selected)
                 RefreshKeyframes();
 
+            if (arch == null)
+                return;
+
             EditorGUILayout.CurveField(curve);
 
             EditorGUILayout.Space();
 
+            EditorGUILayout.TextField(string.Format("Key: {0:X8}", arch.Object.FileInfo.Key));
             EditorGUILayout.TextField("Curve keyframe count: " + arch.KeyframeCount);
             for (int i = 0; i < arch.KeyframeCount; i++)
             {
