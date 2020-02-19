@@ -44,6 +44,8 @@ namespace GRPExplorerLib.YetiObjects
                     log.Error("Bad version! {1} ({0})", Version, Object.Name);
                     return;
                 }
+
+                Array.Sort(Keyframes, (a, b) => { return a.x >= b.x ? 1 : -1; });
             }
         }
 
@@ -77,11 +79,11 @@ namespace GRPExplorerLib.YetiObjects
             Flags = br.ReadByte();
 
             int keyframeOffset = 0;
-            if (Flags == 0x0F) 
-            {
-                keyframeOffset = 1;
-                KeyframeCount++;
-            }
+            //if (Flags == 0x0F) 
+            //{
+            //    keyframeOffset = 1;
+            //    KeyframeCount++;
+            //}
 
             Keyframes = new CurveKeyframe[KeyframeCount];
 

@@ -62,9 +62,9 @@ namespace UnityIntegrationEditor
                 return;
             }
 
-            Keyframe[] keyframes = new Keyframe[arch.Keyframes.Length];
+            Keyframe[] keyframes = new Keyframe[arch.KeyframeCount];
 
-            for (int i = 0; i < arch.Keyframes.Length - 1; i++)
+            for (int i = 0; i < arch.KeyframeCount; i++)
             {
                 keyframes[i].time = arch.Keyframes[i].x;
                 keyframes[i].value = arch.Keyframes[i].y;
@@ -113,7 +113,16 @@ namespace UnityIntegrationEditor
             EditorGUILayout.TextField("Curve keyframe count: " + arch.KeyframeCount);
             for (int i = 0; i < arch.KeyframeCount; i++)
             {
+                EditorGUILayout.BeginVertical();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.TextField(arch.Keyframes[i].x.ToString());
+                EditorGUILayout.TextField(arch.Keyframes[i].y.ToString());
+                EditorGUILayout.TextField(arch.Keyframes[i].@in.ToString());
+                EditorGUILayout.TextField(arch.Keyframes[i].@out.ToString());
+                EditorGUILayout.EndHorizontal();
                 EditorGUILayout.TextField(i + " - " + System.Convert.ToString(arch.Keyframes[i].flags, 2).PadLeft(8, '0'));
+                EditorGUILayout.Space();
+                EditorGUILayout.EndVertical();
             }
 
             EditorGUILayout.EndVertical();
