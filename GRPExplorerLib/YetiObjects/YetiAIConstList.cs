@@ -8,6 +8,7 @@ using GRPExplorerLib.BigFile;
 using GRPExplorerLib.Util;
 using System.IO;
 using System.Numerics;
+using System.Xml;
 
 namespace GRPExplorerLib.YetiObjects
 {
@@ -22,7 +23,7 @@ namespace GRPExplorerLib.YetiObjects
             using (MemoryStream ms = new MemoryStream(buffer))
             using (BinaryReader br = new BinaryReader(ms))
             {
-                if (br.ReadInt64() == 2308726424576683631)
+                if (br.ReadInt64() == 8391171954870665532)
                     LoadNewConstList(ms, br);
                 else
                     LoadOldConstList(ms, br);
@@ -63,7 +64,40 @@ namespace GRPExplorerLib.YetiObjects
 
         private void LoadNewConstList(MemoryStream ms, BinaryReader br)
         {
+            ms.Seek(0, SeekOrigin.Begin);
+            using (XmlReader xr = XmlReader.Create(ms))
+            {
+                try
+                {
+                    while (xr.Read())
+                    {
+                        if (xr.IsStartElement("Const"))
+                        {
+                            string name = xr.GetAttribute("Name");
+                            string type = xr.GetAttribute("Type");
 
+                            AIConstValueBase val = null;
+                            switch (type)
+                            {
+                                case "INT":
+                                    val = new AIConstValueInt();
+                                    break;
+                                case "FLT":
+                                    val = new AIConstValueFloat();
+                                    break;
+                                case "VEC":
+                                    val = new AIConstValueVector();
+                                    break;
+                            }
+
+                            val.ReadValue(xr);
+
+                            ConstList.Add(name, val);
+                        }
+                    }
+                }
+                catch (XmlException ex) { } //for some reason an exception is thrown on the </AIConst> node
+            }
         }
 
         public override void Log(ILogProxy log)
@@ -79,7 +113,7 @@ namespace GRPExplorerLib.YetiObjects
     public abstract class AIConstValueBase
     {
         public abstract void ReadValue(BinaryReader br);
-        public abstract void SetValue(object obj);
+        public abstract void ReadValue(XmlReader xr);
     }
 
     public class AIConstValueInt : AIConstValueBase
@@ -91,9 +125,9 @@ namespace GRPExplorerLib.YetiObjects
             value = br.ReadInt32();
         }
 
-        public override void SetValue(object obj)
+        public override void ReadValue(XmlReader xr)
         {
-            throw new NotImplementedException();
+            value = xr.ReadElementContentAsInt();
         }
 
         public override string ToString()
@@ -111,9 +145,9 @@ namespace GRPExplorerLib.YetiObjects
             value = br.ReadSingle();
         }
 
-        public override void SetValue(object obj)
+        public override void ReadValue(XmlReader xr)
         {
-            throw new NotImplementedException();
+            value = xr.ReadElementContentAsFloat();
         }
 
         public override string ToString()
@@ -136,9 +170,17 @@ namespace GRPExplorerLib.YetiObjects
             };
         }
 
-        public override void SetValue(object obj)
+        public override void ReadValue(XmlReader xr)
         {
-            throw new NotImplementedException();
+            value = new Vector3();
+
+            xr.Read(); 
+            xr.Read(); // dunno why i need this twice
+            value.X = xr.ReadElementContentAsFloat();
+            xr.Read();
+            value.Y = xr.ReadElementContentAsFloat();
+            xr.Read();
+            value.Z = xr.ReadElementContentAsFloat();
         }
 
         public override string ToString()
