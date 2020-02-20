@@ -68,8 +68,8 @@ namespace UnityIntegrationEditor
             {
                 keyframes[i].time = arch.Keyframes[i].x;
                 keyframes[i].value = arch.Keyframes[i].y;
-                keyframes[i].inTangent = arch.Keyframes[i].@in;
-                keyframes[i].outTangent = arch.Keyframes[i].@out;
+                keyframes[i].inTangent = arch.Keyframes[i].inTangent;
+                keyframes[i].outTangent = arch.Keyframes[i].outTangent;
             }
 
             curve.keys = keyframes;
@@ -117,8 +117,8 @@ namespace UnityIntegrationEditor
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.TextField(arch.Keyframes[i].x.ToString());
                 EditorGUILayout.TextField(arch.Keyframes[i].y.ToString());
-                EditorGUILayout.TextField(arch.Keyframes[i].@in.ToString());
-                EditorGUILayout.TextField(arch.Keyframes[i].@out.ToString());
+                EditorGUILayout.TextField(arch.Keyframes[i].inTangent.ToString());
+                EditorGUILayout.TextField(arch.Keyframes[i].outTangent.ToString());
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.TextField(i + " - " + System.Convert.ToString(arch.Keyframes[i].flags, 2).PadLeft(8, '0'));
                 EditorGUILayout.Space();

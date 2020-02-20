@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="BigFile\BigFile.cs" />
     <Compile Include="BigFile\BigFileExtension.cs" />
+    <Compile Include="YetiObjects\YetiAIConstList.cs" />
     <Compile Include="YetiObjects\YetiDataTable.cs" />
     <Compile Include="BigFile\YetiFileType.cs" />
     <Compile Include="BigFile\Extra\FEUtoSWF.cs" />

@@ -415,7 +415,7 @@ namespace GRPExplorerTests
             bigFile.LoadFromDisk();
 
             List<YetiObject> textureFiles = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiTextureMetadata>();
-            bigFile.FileLoader.LoadAllSimple(textureFiles);
+            bigFile.FileLoader.LoadAllSimpleNoYield(textureFiles);
             foreach (YetiObject file in textureFiles)
             {
                 YetiTextureMetadata archetype = file.ArchetypeAs<YetiTextureMetadata>();
@@ -437,7 +437,7 @@ namespace GRPExplorerTests
             bigFile.LoadFromDisk();
 
             List<YetiObject> files = bigFile.RootFolder.GetAllObjectsOfArchetype<YetiCurve>();
-            bigFile.FileLoader.LoadAllSimple(files);
+            bigFile.FileLoader.LoadAllSimpleNoYield(files);
             foreach (YetiObject file in files)
             {
                 YetiCurve archetype = file.ArchetypeAs<YetiCurve>();
@@ -612,7 +612,7 @@ namespace GRPExplorerTests
 
             List<YetiObject> objects = bigFile.RootFolder.GetAllObjectsOfType(type);
             bigFile.FileLoader.LoadReferences(objects);
-            bigFile.FileLoader.LoadAllSimple(objects);
+            bigFile.FileLoader.LoadAllSimpleNoYield(objects);
 
             foreach (YetiObject obj in objects)
             {

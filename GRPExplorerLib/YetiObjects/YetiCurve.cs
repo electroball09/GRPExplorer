@@ -10,18 +10,25 @@ namespace GRPExplorerLib.YetiObjects
 {
     public struct CurveKeyframe
     {
+        public byte flags;
         public float x;
         public float y;
-        public float @in;
-        public float @out;
-        public byte flags; // maybe?
+        public float inTangent;
+        public float outTangent;
+    }
+
+    public enum CurveFormat : int
+    {
+        Constant = 0,
+        Simple = 2,
+        Full = 4
     }
 
     public class YetiCurve : YetiObjectArchetype
     {
         public override YetiObjectType Identifier => YetiObjectType.cur;
 
-        public int Version { get; private set; }
+        public CurveFormat Format { get; private set; }
         public byte Flags { get; private set; }
         public int KeyframeCount { get; private set; }
         public CurveKeyframe[] Keyframes { get; private set; }
@@ -31,17 +38,17 @@ namespace GRPExplorerLib.YetiObjects
             using (MemoryStream ms = new MemoryStream(buffer))
             using (BinaryReader br = new BinaryReader(ms))
             {
-                Version = br.ReadInt32();
+                Format = (CurveFormat)br.ReadInt32();
 
-                if (Version == 0)
-                    LoadVersion0(ms, br);
-                else if (Version == 2)
-                    LoadVersion2(ms, br);
-                else if (Version == 4)
-                    LoadVersion4(ms, br);
+                if (Format == CurveFormat.Constant)
+                    LoadConstantCurve(ms, br);
+                else if (Format == CurveFormat.Simple)
+                    LoadSimpleCurve(ms, br);
+                else if (Format == CurveFormat.Full)
+                    LoadFullCurve(ms, br);
                 else
                 {
-                    log.Error("Bad version! {1} ({0})", Version, Object.Name);
+                    log.Error("Bad format! {1} ({0})", (int)Format, Object.Name);
                     return;
                 }
 
@@ -49,7 +56,7 @@ namespace GRPExplorerLib.YetiObjects
             }
         }
 
-        private void LoadVersion0(MemoryStream ms, BinaryReader br)
+        private void LoadConstantCurve(MemoryStream ms, BinaryReader br)
         {
             KeyframeCount = 1;
 
@@ -60,7 +67,7 @@ namespace GRPExplorerLib.YetiObjects
             Keyframes[0].y = val;
         }
 
-        private void LoadVersion2(MemoryStream ms, BinaryReader br)
+        private void LoadSimpleCurve(MemoryStream ms, BinaryReader br)
         {
             KeyframeCount = br.ReadInt16();
 
@@ -73,7 +80,7 @@ namespace GRPExplorerLib.YetiObjects
             }
         }
 
-        private void LoadVersion4(MemoryStream ms, BinaryReader br)
+        private void LoadFullCurve(MemoryStream ms, BinaryReader br)
         {
             KeyframeCount = br.ReadInt16();
             Flags = br.ReadByte();
@@ -94,11 +101,17 @@ namespace GRPExplorerLib.YetiObjects
                     flags = br.ReadByte(),
                     x = br.ReadSingle(),
                     y = br.ReadSingle(),
-                    @in = br.ReadSingle(),
-                    @out = br.ReadSingle()
+                    inTangent = br.ReadSingle(),
+                    outTangent = br.ReadSingle()
                 };
 
                 Keyframes[i] = kf;
+            }
+
+            ushort magic = br.ReadUInt16();
+            if (magic != 0x7879)
+            {
+                log.Error("Magic number is not 0x7879! ({0:X4})", magic);
             }
         }
 
@@ -107,7 +120,7 @@ namespace GRPExplorerLib.YetiObjects
             log.Info("CURVE keyframes:{0}", KeyframeCount);
             for (int i = 0; i < Keyframes.Length; i++)
             {
-                log.Info("{0} {1} {2} {3}", Keyframes[i].x, Keyframes[i].y, Keyframes[i].@in, Keyframes[i].@out);
+                log.Info("{0} {1} {2} {3}", Keyframes[i].x, Keyframes[i].y, Keyframes[i].inTangent, Keyframes[i].outTangent);
             }
         }
     }
