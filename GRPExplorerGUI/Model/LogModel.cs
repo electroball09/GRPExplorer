@@ -51,7 +51,7 @@ namespace GRPExplorerGUI.Model
             };
         protected void NotifyPropertyChanged([CallerMemberName] string prop = "")
         {
-            Application.Current.Dispatcher.Invoke(propChangedAction, PropertyChanged, this, prop);
+            Application.Current?.Dispatcher.Invoke(propChangedAction, PropertyChanged, this, prop);
         }
 
         public string Message { get; }

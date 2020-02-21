@@ -20,6 +20,7 @@
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="Key: "/>
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="Offset: "/>
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="FileType: "/>
+                            <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,1" Text="TIMESTAMP: "/>
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="ZIP: "/>
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="UNKNOWN_01: "/>
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="Flags: "/>
@@ -30,6 +31,7 @@
                             <TextBox IsReadOnly="True" TextAlignment="Left" BorderThickness="1,1,1,0" Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.FileInfo.Key, StringFormat='0x{0:X8}'}"/>
                             <TextBox IsReadOnly="True" TextAlignment="Left" BorderThickness="1,1,1,0" Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.FileInfo.Offset, StringFormat='0x{0:X8}'}"/>
                             <TextBox IsReadOnly="True" TextAlignment="Left" BorderThickness="1,1,1,0" Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.FileInfo.FileType}"/>
+                            <TextBox IsReadOnly="True" TextAlignment="Left" BorderThickness="1,1,1,0" Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.Timestamp}"/>
                             <TextBox IsReadOnly="True" TextAlignment="Left" BorderThickness="1,1,1,0" Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.FileInfo.ZIP}"/>
                             <TextBox IsReadOnly="True" TextAlignment="Left" BorderThickness="1,1,1,0" Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.FileInfo.Unknown_01, StringFormat='0x{0:X8}'}"/>
                             <TextBox IsReadOnly="True" TextAlignment="Left" BorderThickness="1,1,1,0" Text="{Binding Mode=OneWay, Path=ViewModel.SelectedFile.FileInfo.Flags, StringFormat='0x{0:X8}'}"/>

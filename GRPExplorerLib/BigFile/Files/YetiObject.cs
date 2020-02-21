@@ -32,6 +32,14 @@ namespace GRPExplorerLib.BigFile
         public BigFileFolder ParentFolder { get; }
         public YetiObject[] ObjectReferences { get; set; }
 
+        public DateTime Timestamp
+        {
+            get
+            {
+                return new DateTime(1970, 1, 1).AddSeconds(FileInfo.TimeStamp);
+            }
+        }
+
         public List<YetiObject> ReferencedBy { get; } = new List<YetiObject>();
 
         public FileMappingData MappingData { get; set; }
