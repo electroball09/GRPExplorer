@@ -98,16 +98,12 @@ namespace GRPExplorerLib.BigFile.Files
 
         public void LoadReferences(List<YetiObject> files)
         {
-            int count = 0;
-
-
             foreach (BigFileFileRead fileRead in bigFile.FileReader.ReadAllFiles(files, bigFile.FileUtil.IOBuffers, bigFile.FileReader.DefaultFlags))
             {
-                if (fileRead.dataSize == -1)
+                if (fileRead.IsError())
                     continue;
 
-                bigFile.FileUtil.AddReferencesToObject(files[count], fileRead.header);
-                count++;
+                bigFile.FileUtil.AddReferencesToObject(fileRead.file, fileRead.header);
             }
         }
 

@@ -20,7 +20,7 @@
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="Key: "/>
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="Offset: "/>
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="FileType: "/>
-                            <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,1" Text="TIMESTAMP: "/>
+                            <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="TIMESTAMP: "/>
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="ZIP: "/>
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="UNKNOWN_01: "/>
                             <TextBox IsReadOnly="True" TextAlignment="Right" BorderThickness="1,1,1,0" Text="Flags: "/>

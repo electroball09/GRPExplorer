@@ -221,28 +221,21 @@ namespace GRPExplorerLib.BigFile
             using (FileStream chunkFS = new FileStream(chunkFileName, FileMode.Create, FileAccess.Write))
             using (FileStream metaFS = new FileStream(metadataFilename, FileMode.Create, FileAccess.Write))
             using (BinaryWriter chunkBW = new BinaryWriter(chunkFS))
+            using (BinaryWriter metaBW = new BinaryWriter(metaFS))
             {
                 //fill 8 bytes to be filled with number of files chunked and final size later
-                metaFS.Write(BitConverter.GetBytes((long)0), 0, 8);
+                metaBW.Write(-1);
+                metaBW.Write(-1L);
 
                 YetiObject[] filesToWrite = new YetiObject[info.count];
                 Array.Copy(info.filesList, info.startIndex, filesToWrite, 0, info.count);
 
                 log.Info("Thread ID {0} - First file is {1}", info.ThreadID, filesToWrite[0].Name);
                 log.Info("Thread ID {0} - Last file is {1}", info.ThreadID, filesToWrite[filesToWrite.Length - 1].Name);
-
-                YetiObject currFile = null;
-
-                int index = -1;
+                
                 //foreach (int size in bigFile.FileReader.ReadAllRaw(filesToWrite, info.IOBuffers, info.Options.Flags))
                 foreach (BigFileFileRead read in bigFile.FileReader.ReadAllFiles(filesToWrite.ToList(), info.IOBuffers, info.Options.Flags))
                 {
-                    index++;
-
-                    currFile = filesToWrite[index];
-
-                    int totalSize = read.dataSize + (read.header.Length * 4 + 4);
-
                     //if (currFile.FileInfo.FileType == 0x3c)
                     //{
                     //    log.Error("Skipped file {0}", currFile.Name);
@@ -250,22 +243,34 @@ namespace GRPExplorerLib.BigFile
                     //    continue;
                     //}
 
-                    log.Debug("Packing file {0}, size: {1}, ZIP: {2}", currFile.Name, read.dataSize, currFile.FileInfo.ZIP);
-
-                    if (read.dataSize < 0)
+                    if (read.IsError())
                     {
-                        metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.FileNumber), 0, 4);
-                        metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.Key), 0, 4);
-                        metaFS.Write(BitConverter.GetBytes(-1), 0, 4);
+                        metaBW.Write("ERR0");
+                        metaBW.Write(read.file.FileInfo.FileNumber);
+                        metaBW.Write(read.file.FileInfo.Key);
+                        metaBW.Write(-1L);
                     }
                     else
                     {
-                        //write the file number, key, and offset to metadata file
-                        metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.FileNumber), 0, 4);
-                        metaFS.Write(BitConverter.GetBytes(currFile.FileInfo.Key), 0, 4);
-                        metaFS.Write(BitConverter.GetBytes((int)chunkFS.Position), 0, 4);
+                        log.Debug("Packing file {0}, size: {1}, ZIP: {2}", read.file.Name, read.dataSize, read.file.FileInfo.ZIP);
 
-                        if (currFile.FileInfo.ZIP == 1 && (info.Options.Flags & BigFileFlags.Compress) != 0)
+                        //write the file number, key, and offset to metadata file
+                        metaBW.Write("FILE");
+                        metaBW.Write(read.file.FileInfo.FileNumber);
+                        metaBW.Write(read.file.FileInfo.Key);
+                        metaBW.Write(chunkFS.Position);
+
+                        int totalSize = read.dataSize + (read.header.Length * 4 + 4);
+
+                        if (read.file.FileInfo.FileType == YetiObjects.YetiObjectType.ini)
+                        {
+                            for (int i = 0; i < read.header.Length; i++)
+                            {
+                                log.Info("Universe.ini ref {0:X8}", read.header[i]);
+                            }
+                        }
+
+                        if (read.file.FileInfo.ZIP == 1 && (info.Options.Flags & BigFileFlags.Compress) != 0)
                         {
                             int sizePos = (int)chunkFS.Position;
                             chunkFS.Write(info.IOBuffers[8], 0, 8); //write 8 bytes of garbage to fill the space for decompressed and compressed size
@@ -287,8 +292,7 @@ namespace GRPExplorerLib.BigFile
                             newPos = (int)chunkFS.Position;
 
                             int compressedSize = newPos - sizePos - 4;
-
-
+                            
                             //go back to the file offset and write the compressed and decompressed sizes
                             chunkFS.Seek(sizePos, SeekOrigin.Begin);
                             chunkBW.Write(compressedSize);
@@ -314,8 +318,8 @@ namespace GRPExplorerLib.BigFile
 
                 //write number of files chunked and final file size
                 metaFS.Seek(0, SeekOrigin.Begin);
-                metaFS.Write(BitConverter.GetBytes(info.filesChunked), 0, 4);
-                metaFS.Write(BitConverter.GetBytes(chunkFS.Length), 0, 4);
+                metaBW.Write(info.filesChunked);
+                metaBW.Write(chunkFS.Length);
 
                 if (chunkFS.Length % 8 != 0)
                     throw new Exception("oh shit what happened");
@@ -347,7 +351,7 @@ namespace GRPExplorerLib.BigFile
             FileInfo targetFileInfo = new FileInfo(targetFileName);
             if (targetFileInfo.Exists)
             {
-                WinMessageBoxResult overwriteResult = WinMessageBox.Show("The file\n" + targetFileName + "\n already exists.\n\nOverwrite?", "File already exists", WinMessageBoxFlags.btnYesNo);
+                WinMessageBoxResult overwriteResult = WinMessageBox.Show("The file\n" + targetFileName + "\n already exists.\n\nOverwrite?", "File already exists", WinMessageBoxFlags.btnYesNo | WinMessageBoxFlags.iconQuestion);
                 if (overwriteResult != WinMessageBoxResult.Yes)
                 {
                     log.Error("Target file already exists and the user chose not to overwrite!");
@@ -382,32 +386,39 @@ namespace GRPExplorerLib.BigFile
                     string metadataFilename = Environment.CurrentDirectory + BigFileConst.PACK_STAGING_DIR + info.Options.BigFileName + ".meta" + packInfos[threadID].ThreadID.ToString();
 
                     log.Info("Collating metadata from file " + metadataFilename);
-                    
+
                     //extract the metadata from the metadata files
                     using (FileStream metaFS = new FileStream(metadataFilename, FileMode.Open, FileAccess.Read))
+                    using (BinaryReader metaBR = new BinaryReader(metaFS))
                     {
-                        byte[] tmpBuffer = info.IOBuffers[8];
-                        metaFS.Read(tmpBuffer, 0, 8);
-                        int fileCount = BitConverter.ToInt32(tmpBuffer, 0);
-                        int chunkFileSize = BitConverter.ToInt32(tmpBuffer, 4);
-
-                        tmpBuffer = info.IOBuffers[12];
+                        int fileCount = metaBR.ReadInt32();
+                        long chunkFileSize = metaBR.ReadInt64();
+                        
                         for (int j = 0; j < fileCount; j++)
                         {
-                            metaFS.Read(tmpBuffer, 0, 12);
-                            int offset = BitConverter.ToInt32(tmpBuffer, 8);
-                            if (offset != -1)
-                                offset += chunkedFileOffsetInTargetFile;
+                            string type = metaBR.ReadString();
+                            if (type != "ERR0" && type != "FILE")
+                                throw new Exception("omg wtf");
+
                             ChunkedFileMetadata mdata = new ChunkedFileMetadata()
                             {
-                                Number = BitConverter.ToInt32(tmpBuffer, 0),
-                                Key = BitConverter.ToInt32(tmpBuffer, 4),
-                                Offset = offset
+                                Number = metaBR.ReadInt32(),
+                                Key = metaBR.ReadInt32(),
                             };
+
+                            long offset = metaBR.ReadInt64();
+                            if (offset != -1)
+                            {
+                                offset = offset / 8;
+                                offset += chunkedFileOffsetInTargetFile;
+                            }
+
+                            mdata.Offset = (int)offset;
+
                             metadataList.Add(mdata);
                         }
 
-                        chunkedFileOffsetInTargetFile += chunkFileSize;
+                        chunkedFileOffsetInTargetFile += (int)(chunkFileSize / 8);
                     }
 
                     if (info.Options.DeleteChunks)
@@ -454,9 +465,9 @@ namespace GRPExplorerLib.BigFile
                     }
                     else
                     {
-                        if (metadataList[i].Offset % 8 != 0)
-                            log.Error("WAIT WHAT: {0} {1:X4}", metadataList[i].Offset, metadataList[i].Key);
-                        newFileInfos[i].Offset = metadataList[i].Offset / 8;
+                        //if (metadataList[i].Offset % 8 != 0)
+                        //    log.Error("WAIT WHAT: {0} {1:X4}", metadataList[i].Offset, metadataList[i].Key);
+                        newFileInfos[i].Offset = metadataList[i].Offset;
                     }
                     newFileInfos[i].FileNumber = metadataList[i].Number;
                     newFileInfos[i].ZIP = (info.Options.Flags & BigFileFlags.Compress) != 0 ? newFileInfos[i].ZIP : 0;

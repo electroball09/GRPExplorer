@@ -57,10 +57,10 @@ namespace GRPExplorerLib.BigFile.Files
             if (file.FileInfo.Offset < 0)
             {
                 if (file.FileInfo.FileType == YetiObjects.YetiObjectType.vxt) //all files of this type have offset of -1
-                    return BigFileFileRead.Error;
+                    return BigFileFileRead.MakeError(file);
 
                 log.Error(string.Format("Can't seek to file: {0} (key:{1:X8}) because offset is {2}!", file.Name, file.FileInfo.Key, file.FileInfo.Offset));
-                return BigFileFileRead.Error;
+                return BigFileFileRead.MakeError(file);
             }
 
             int dataOffset = packedBigFile.FileUtil.CalculateDataOffset(ref packedBigFile.SegmentHeader, ref packedBigFile.FileHeader);
@@ -97,12 +97,17 @@ namespace GRPExplorerLib.BigFile.Files
             using (MemoryStream ms = new MemoryStream(buffers[dataSize]))
             using (BinaryReader brms = new BinaryReader(ms))
             {
-                int referenceNum = brms.ReadInt32();
+                int referenceNum = 0;
 
-                if (referenceNum * 4 >= dataSize)
+                if (dataSize > 0)
+                {
+                    referenceNum = brms.ReadInt32();
+                }
+
+                if (referenceNum * 4 >= dataSize && dataSize != 0)
                 {
                     log.Error("{2} {3} referenceNum * 4 > fileSize [ {0} * 4 > {1} ]", referenceNum, dataSize, file.FullFolderPath, file.NameWithExtension);
-                    return BigFileFileRead.Error;
+                    return BigFileFileRead.MakeError(file);
                 }
 
                 header = new int[referenceNum];
@@ -111,7 +116,8 @@ namespace GRPExplorerLib.BigFile.Files
                     header[i] = brms.ReadInt32();
 
                 int origDataSize = dataSize;
-                dataSize -= referenceNum * 4 + 4;
+                if (dataSize > 0)
+                    dataSize -= referenceNum * 4 + 4;
 
                 if (dataSize > 0)
                     Array.Copy(buffers[origDataSize], referenceNum * 4 + 4, buffers[dataSize], 0, dataSize);
@@ -136,20 +142,22 @@ namespace GRPExplorerLib.BigFile.Files
         public override IEnumerable<BigFileFileRead> ReadAllFiles(List<YetiObject> files, IOBuffers buffers, BigFileFlags flags)
         {
             //sort the files by location in the bigfile to avoid unnecessary seeks
-            files.Sort(
-                (a, b) =>
-                {
-                    if (a.FileInfo.Offset == -1)
-                        return 1;
-                    if (b.FileInfo.Offset == -1)
-                        return -1;
+            //files.Sort(
+            //    (a, b) =>
+            //    {
+            //        if (a.FileInfo.Offset == -1)
+            //            return 1;
+            //        if (b.FileInfo.Offset == -1)
+            //            return -1;
 
-                    return a.FileInfo.Offset - b.FileInfo.Offset;
-                });
+            //        return a.FileInfo.Offset - b.FileInfo.Offset;
+            //    });
+
+            FileStream fs = File.OpenRead(packedBigFile.MetadataFileInfo.FullName);
 
             foreach (YetiObject file in files)
             {
-                yield return internal_ReadFile(FileStream, file, buffers, flags);
+                yield return internal_ReadFile(fs, file, buffers, flags);
             }
         }
     }
