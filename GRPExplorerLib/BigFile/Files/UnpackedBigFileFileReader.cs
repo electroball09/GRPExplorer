@@ -29,12 +29,59 @@ namespace GRPExplorerLib.BigFile.Files
 
         public override BigFileFileRead ReadFile(YetiObject file, IOBuffers buffers, BigFileFlags flags)
         {
-            throw new NotImplementedException();
+            string headerFileName = unpackedBigFile.Directory.FullName + "\\"
+                                    + BigFileConst.UNPACK_DIR
+                                    + unpackedBigFile.RenamedMapping[file.FileInfo.Key].FileName
+                                    + BigFileConst.UNPACKED_HEADER_FILE_EXTENSION;
+            string dataFileName = unpackedBigFile.Directory.FullName
+                                    + "\\" + BigFileConst.UNPACK_DIR
+                                    + unpackedBigFile.RenamedMapping[file.FileInfo.Key].FileName;
+
+            if (!File.Exists(headerFileName))
+            {
+                log.Error("Header file for file {0} (0x{1:X8}) is missing!");
+                return BigFileFileRead.MakeError(file);
+            }
+            if (!File.Exists(dataFileName))
+            {
+                log.Error("Data file for file {0} (0x{1:X8}) is missing!");
+                return BigFileFileRead.MakeError(file);
+            }
+
+            byte[] buf = null;
+            int size = -1;
+            int[] header = null;
+            using (FileStream headerFS = File.OpenRead(headerFileName))
+            using (BinaryReader headerBR = new BinaryReader(headerFS))
+            using (FileStream dataFS = File.OpenRead(dataFileName))
+            {
+                int headerLength = 0;
+                if (headerFS.Length != 0)
+                    headerLength = headerBR.ReadInt32();
+                header = new int[headerLength];
+                for (int i = 0; i < headerLength; i++)
+                    header[i] = headerBR.ReadInt32();
+
+                size = (int)dataFS.Length;
+                buf = buffers[size];
+                dataFS.Read(buf, 0, size);
+            }
+
+            return new BigFileFileRead()
+            {
+                file = file,
+                header = header,
+                buffer = buf,
+                dataSize = size
+            };
         }
 
         public override IEnumerable<BigFileFileRead> ReadAllFiles(List<YetiObject> files, IOBuffers buffers, BigFileFlags flags)
         {
-            throw new NotImplementedException();
+            foreach (YetiObject obj in files)
+            {
+                yield return ReadFile(obj, buffers, flags);
+            }
         }
 
         //public override int ReadFileRaw(YetiObject file, IOBuffers buffers, BigFileFlags flags)

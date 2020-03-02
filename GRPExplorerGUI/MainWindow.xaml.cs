@@ -97,7 +97,7 @@ namespace GRPExplorerGUI
             {
                 Directory = new System.IO.DirectoryInfo(path),
                 Flags = BigFileFlags.Decompress | BigFileFlags.UseThreading,
-                Threads = 1,
+                Threads = 6,
             };
 
             unpacker = new BigFileUnpacker(bigFileview.BigFileViewModel.BigFile);
