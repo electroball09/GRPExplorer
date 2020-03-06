@@ -328,7 +328,8 @@ ASALocalRun/
 [Bb]uild/
 [Bb]uilds/
 Assets/AssetStoreTools*
-DLL/
+
+!dont remove.txt
 
 */Assets/StandardUnity/
 configuration/**.meta
