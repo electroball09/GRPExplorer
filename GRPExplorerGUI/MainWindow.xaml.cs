@@ -38,8 +38,6 @@ namespace GRPExplorerGUI
         public MainWindow()
         {
             InitializeComponent();
-
-            btnFindKey.Click += BtnFindKey_Click;
             
             LogModel logModel = new LogModel();
             logInterface = logModel.LogProxy;
@@ -50,27 +48,63 @@ namespace GRPExplorerGUI
             TypewriteTextblock("...................", lblLoadingEllipses, new TimeSpan(0, 0, 2));
         }
 
-        private void BtnFindKey_Click(object sender, RoutedEventArgs e)
+        private int GetSearchValue()
         {
-            try
+            if (radFormatHex.IsChecked == true)
             {
-                int val = Convert.ToInt32(txtFindKey.Text, 16);
-                lastText = txtFindKey.Text;
-
-                SetFile(val);
+                try
+                {
+                    int val = Convert.ToInt32(txtSearchBox.Text, 16);
+                    lastText = txtSearchBox.Text;
+                    return val;
+                }
+                catch (Exception ex)
+                {
+                    txtSearchBox.Text = lastText;
+                    Log(ex.Message);
+                    return -1;
+                }
             }
-            catch (Exception ex)
+            else
             {
-                txtFindKey.Text = lastText;
-                Log(ex.Message);
+                try
+                {
+                    int val = int.Parse(txtSearchBox.Text);
+                    lastText = txtSearchBox.Text;
+                    return val;
+                }
+                catch (Exception ex)
+                {
+                    txtSearchBox.Text = lastText;
+                    Log(ex.Message);
+                    return -1;
+                }
             }
         }
 
-        private void SetFile(int key)
+        private void BtnSearchKey_Click(object sender, RoutedEventArgs e)
+        {
+            int key = GetSearchValue();
+            if (key != -1)
+            {
+                SetFileByKey(key);
+            }
+        }
+
+        private void BtnSearchIndex_Click(object sender, RoutedEventArgs e)
+        {
+            int ind = GetSearchValue();
+            if (ind != -1)
+            {
+                SetFileByFATIndex(ind);
+            }
+        }
+
+        private void SetFileByKey(int key)
         {
             if (bigFileview.BigFileViewModel == null)
             {
-                Log("no.");
+                Log("No bigfile is loaded!");
                 return;
             }
 
@@ -82,6 +116,38 @@ namespace GRPExplorerGUI
             else
             {
                 Log("File key not found!");
+            }
+        }
+
+        private void SetFileByFATIndex(int index)
+        {
+            if (bigFileview.BigFileViewModel == null)
+            {
+                Log("No bigfile is loaded!");
+                return;
+            }
+
+            YetiObject[] list = bigFileview.BigFileViewModel.BigFile.FileMap.FilesList;
+
+            if (index < 0)
+            {
+                Log("Index must be >= 0!");
+                return;
+            }
+            if (index >= list.Length)
+            {
+                Log(string.Format("Index is out of bounds of the FAT! ({0} > {1})", index, list.Length));
+                return;
+            }
+
+            YetiObject file = list[index];
+            if (file != null)
+            {
+                bigFileview.FolderTree.SelectedFile = file;
+            }
+            else
+            {
+                Log("File not found!");
             }
         }
 

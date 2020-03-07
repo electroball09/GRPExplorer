@@ -66,6 +66,21 @@ namespace GRPExplorerLib.BigFile
             }
         }
 
+        public int FATIndex
+        {
+            get
+            {
+                int ind = 0;
+                for (int i = 0; i < MappingData.FilesList.Length; i++)
+                {
+                    if (MappingData.FilesList[i] == this)
+                        break;
+                    ind++;
+                }
+                return ind;
+            }
+        }
+
         public YetiObject(IBigFileFileInfo _fileInfo, BigFileFolder _parentFolder)
         {
             FileInfo = _fileInfo;

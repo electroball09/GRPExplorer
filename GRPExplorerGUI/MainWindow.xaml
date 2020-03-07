@@ -16,8 +16,18 @@
                 <Label x:Name="lblLoadingEllipses" Padding="0,4,4,4" Content="..."/>
             </StackPanel>
         </StatusBar>
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="1200" Margin="0,25,0,10" Grid.ColumnSpan="3">
-            <View:BigFileView x:Name="bigFileview" HorizontalAlignment="Stretch" Width="1200" Margin="10,0,0,0" VerticalAlignment="Top" ScrollViewer.CanContentScroll="True" Height="654"/>
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="1200" Margin="0,25,0,30">
+            <StackPanel Orientation="Vertical" Height="30">
+                <StackPanel Orientation="Horizontal">
+                    <Label x:Name="lblSearch" Content="Find:" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtSearchBox" HorizontalAlignment="Left" Height="22" Margin="0,0,4,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="120"/>
+                    <RadioButton x:Name="radFormatHex" IsChecked="True" VerticalAlignment="Center" Margin="0,0,4,0" Content="hex"/>
+                    <RadioButton x:Name="radFormatInt" VerticalAlignment="Center" Margin="0,0,4,0" Content="int"/>
+                    <Button x:Name="btnSearchKey"   Margin="4,4,0,4" Click="BtnSearchKey_Click" Content="Search Key"/>
+                    <Button x:Name="btnSearchIndex" Margin="4,4,0,4" Click="BtnSearchIndex_Click" Content="Search FAT index"/>
+                </StackPanel>
+            </StackPanel>
+            <View:BigFileView x:Name="bigFileview" HorizontalAlignment="Stretch" Width="1200" Margin="10,0,-10,0" VerticalAlignment="Top" ScrollViewer.CanContentScroll="True" Height="631"/>
             <View:LogView x:Name="logView" HorizontalAlignment="Stretch" Height="110" MaxHeight="110" Margin="10,0,0,654" />
         </StackPanel>
         <Menu x:Name="menu" Height="20" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" Grid.ColumnSpan="3">
@@ -26,17 +36,9 @@
                 <MenuItem x:Name="menuOpenUnpackedBigfile" Header="Unpacked..." Click="MenuOpenUnpackedBigfile_Click"/>
             </MenuItem>
             <MenuItem Header="Tools">
-                <MenuItem Header="Find...">
-                    <StackPanel Orientation="Horizontal">
-                        <Label x:Name="lblFindKey" Content="Key:" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        <TextBox x:Name="txtFindKey" HorizontalAlignment="Left" Height="22" Margin="0,0,4,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="120"/>
-                        <Button x:Name="btnFindKey" Content="Find" HorizontalAlignment="Left" VerticalAlignment="Center" Width="74"/>
-                    </StackPanel>
-                </MenuItem>
                 <MenuItem x:Name="menuFEUtoSWF" Header="FEUtoSWF" Click="MenuFEUtoSWF_Click"/>
                 <MenuItem x:Name="menuBigfilePacking" Header="Bigfile Packing" Click="MenuBigfilePacking_Click"/>
             </MenuItem>
         </Menu>
-
     </Grid>
 </Window>
