@@ -92,6 +92,7 @@ namespace GRPExplorerLib.BigFile
             public Stopwatch stopwatch = new Stopwatch();
 
             public int progress;
+            public int numFilesUnpacked;
         }
 
         public const int MAX_UNPACK_THREADS = 16;
@@ -183,6 +184,7 @@ namespace GRPExplorerLib.BigFile
                     unpackThreads[i].count = dividedCount;
                     unpackThreads[i].threadID = i;
                     unpackThreads[i].OnWorkDoneCallback = internal_OnThreadFinished;
+                    unpackThreads[i].numFilesUnpacked = 0;
                 }
                 unpackThreads[options.Threads - 1].count += dividedRemainder; //add the remainder onto the last info
 
@@ -203,6 +205,7 @@ namespace GRPExplorerLib.BigFile
                 unpackThreads[0].count = bigFile.FileMap.FilesList.Length;
                 unpackThreads[0].threadID = 0;
                 unpackThreads[0].OnWorkDoneCallback = internal_OnThreadFinished;
+                unpackThreads[0].numFilesUnpacked = 0;
 
                 internal_UnpackFiles(unpackThreads[0]); //teehee
 
@@ -288,71 +291,35 @@ namespace GRPExplorerLib.BigFile
                 {
                     int size = reads.Current.dataSize;
                     int[] header = reads.Current.header;
-                    if (size != -1)
-                    {
-                        int headerCount = header.Length;
-                        dataFS.Write(info.buffers[size], 0, size);
 
-                        headerFS.Write(headerCount.ToByteArray(info.buffers[4]), 0, 4);
-                        for (int j = 0; j < headerCount; j++)
-                        {
-                            headerFS.Write(header[j].ToByteArray(info.buffers[4]), 0, 4);
-                            if (header[j] == 0)
-                                log.Error("{0:X8} {1} {2}", header[j], headerCount, files[i].NameWithExtension);
-                        }
+                    if (reads.Current.IsError())
+                    {
+                        log.Error($"Can't unpack {files[i].NameWithExtension} - read returned error");
                     }
                     else
                     {
-                        log.Error("Can't unpack file {0} because size is -1", files[i].Name);
+                        if (size != -1)
+                        {
+                            int headerCount = header.Length;
+                            dataFS.Write(info.buffers[size], 0, size);
+
+                            headerFS.Write(headerCount.ToByteArray(info.buffers[4]), 0, 4);
+                            for (int j = 0; j < headerCount; j++)
+                            {
+                                headerFS.Write(header[j].ToByteArray(info.buffers[4]), 0, 4);
+                                if (header[j] == 0)
+                                    log.Error("Header error - {0:X8} {1} {2}", header[j], headerCount, files[i].NameWithExtension);
+                            }
+
+                            info.numFilesUnpacked++;
+                        }
+                        else
+                        {
+                            log.Error("Can't unpack {0} - size is -1", files[i].NameWithExtension);
+                        }
                     }
                 }
             }
-
-            //int index = -1;
-            //foreach (int size in info.bigFile.FileReader.ReadAllRaw(files, info.buffers, info.options.Flags))
-            //{
-            //    index++;
-
-            //    info.progress = index;
-
-            //    log.Info("Unpacking file {0}", files[index].Name);
-
-            //    //********************************************//
-            //    //DON'T FORGET THE ******* UNPACK SUBDIRECTORY//
-            //    //********************************************//
-            //    string dataFileName = info.options.Directory.FullName + "\\" 
-            //                        + BigFileConst.UNPACK_DIR + "\\" 
-            //                        + info.fileMapping[files[index].FileInfo.Key].FileName;
-
-            //    string headerFileName = dataFileName + BigFileConst.UNPACKED_HEADER_FILE_EXTENSION;
-
-            //    IEnumerable<int> p = info.bigFile.FileReader.ReadAllData(files, info.buffers, info.options.Flags);
-
-            //    using (FileStream dataFS = File.Create(dataFileName))
-            //    using (FileStream headerFS = File.Create(headerFileName))
-            //    {
-            //        if (size != -1)
-            //        {
-            //            int headerCount = BitConverter.ToInt32(info.buffers[size], 0);
-            //            int dataOffset = headerCount * 4 + 4;
-
-            //            if (dataOffset > size)
-            //            {
-            //                log.Error("Hmmm... something's wrong here");
-            //                headerFS.Write(info.buffers[size], 0, size);
-            //            }
-            //            else
-            //            {
-            //                dataFS.Write(info.buffers[size], dataOffset, size - dataOffset);
-            //                headerFS.Write(info.buffers[size], 0, dataOffset);
-            //            }
-            //        }
-            //        else
-            //        {
-            //            log.Error("Can't unpack file {0} because size is -1", files[index].Name);
-            //        }
-            //    }
-            //}
 
             log.Info("Unpack thread (ID:" + info.threadID + ") finished work!");
             info.isUnpacking = false;
@@ -372,7 +339,7 @@ namespace GRPExplorerLib.BigFile
                 {
                     if (unpackThreads[i] != null)
                     {
-                        string str = string.Format("  {0,6}        {1,4}s  {2,6}   {3,6}", i, unpackThreads[i].stopwatch.ElapsedMilliseconds / 1000, unpackThreads[i].startIndex, unpackThreads[i].count);
+                        string str = $"  {i, 6}        {unpackThreads[i].stopwatch.ElapsedMilliseconds / 1000, 4}s  {unpackThreads[i].startIndex, 6}   {unpackThreads[i].count, 6}  {unpackThreads[i].numFilesUnpacked, 6}";
                         log.Info(str);
                     }
                 }

@@ -31,6 +31,14 @@ namespace UnityIntegration.Components
                 if (textures.Count > 0)
                     Material.SetTexture("_MainTex", textures[0].texture);
 
+                foreach (var tex in textures)
+                    if (tex.yetiObject.Name.Contains("NM"))
+                    {
+                        
+                        Material.SetTexture("_BumpMap", tex.texture);
+                        break;
+                    }
+
                 objectRepository.GetRepository<Material>().Add(yetiObject, Material);
             }
         }

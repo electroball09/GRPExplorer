@@ -99,7 +99,7 @@ namespace UnityIntegration.Components
 
             foreach (YetiObject obj in gol.ObjectList)
             {
-                log.Info("Instantiating object {0}", obj.NameWithExtension);
+                //log.Info("Instantiating object {0}", obj.NameWithExtension);
 
                 YetiObjectConverter.GetConverter(obj).Convert(obj, null, loadContext);
 
@@ -116,7 +116,8 @@ namespace UnityIntegration.Components
             if (wil != null)
                 foreach (YetiWorld subWorld in wil.IncludeList)
                 {
-                    YetiObjectConverter.GetConverter(subWorld.Object).Convert(subWorld.Object, null, loadContext);
+                    if (subWorld != null)
+                        YetiObjectConverter.GetConverter(subWorld.Object).Convert(subWorld.Object, null, loadContext);
                 }
 
             LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
@@ -143,7 +144,7 @@ namespace UnityIntegration.Components
             {
                 Destroy(obj);
 
-                log.Info("Destroying object {0}", obj.name);
+                //log.Info("Destroying object {0}", obj.name);
 
                 count++;
                 if (count > 50)
@@ -161,7 +162,7 @@ namespace UnityIntegration.Components
                 {
                     obj.Unload();
 
-                    log.Info("Unloading object {0}", obj.NameWithExtension);
+                    //log.Info("Unloading object {0}", obj.NameWithExtension);
 
                     count++;
                     if (count > 50)

@@ -85,6 +85,11 @@ namespace UnityIntegration
 
         }
 
+        public static Vector4 ConvertToUnity(this System.Numerics.Vector4 from)
+        {
+            return new Vector4(from.X, from.Y, from.Z, from.W);
+        }
+
         public static Vector3 ConvertToUnity(this System.Numerics.Vector3 from)
         {
             return new Vector3(from.X, from.Y, from.Z);

@@ -41,7 +41,9 @@ namespace UnityIntegration.Components
             }
             else
             {
-                texture = new Texture2D(mdata.Width, mdata.Height, formatMap[mdata.Format], false)
+                bool isNormal = payload.Object.Name.Contains("NM");
+
+                texture = new Texture2D(mdata.Width, mdata.Height, formatMap[mdata.Format], false, isNormal)
                 {
                     wrapMode = TextureWrapMode.Repeat
                 };

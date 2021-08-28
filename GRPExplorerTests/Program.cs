@@ -708,13 +708,13 @@ namespace GRPExplorerTests
 
                 for (int i = 0; i < mdata.VertexCount; i++)
                 {
-                    YetiVertex v = mdata.Vertices[i];
+                    //YetiVertex v = mdata.Vertices[i];
                     for (int j = 0; j < 8; j++)
                     {
-                        valuesBone[j][0] = Math.Min(valuesBone[j][0], v.boneData.datas[j]);
-                        valuesBone[j][1] = Math.Max(valuesBone[j][1], v.boneData.datas[j]);
-                        valuesOther[j][0] = Math.Min(valuesOther[j][0], v.otherData.datas[j]);
-                        valuesOther[j][1] = Math.Max(valuesOther[j][1], v.otherData.datas[j]);
+                        //valuesBone[j][0] = Math.Min(valuesBone[j][0], v.boneData.datas[j]);
+                        //valuesBone[j][1] = Math.Max(valuesBone[j][1], v.boneData.datas[j]);
+                        //valuesOther[j][0] = Math.Min(valuesOther[j][0], v.otherData.datas[j]);
+                        //valuesOther[j][1] = Math.Max(valuesOther[j][1], v.otherData.datas[j]);
                     }
 
                     //maxValuesOther[0] = Math.Max(maxValuesOther[0], mdata.Vertices[i].otherData.UNK_01);

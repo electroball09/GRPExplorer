@@ -37,37 +37,37 @@ namespace UnityIntegration
 
         void Update()
         {
-            if (!ClickMe)
-                return;
+            //if (!ClickMe)
+            //    return;
 
-            ClickMe = false;
+            //ClickMe = false;
 
-            if (LibManager.BigFile == null)
-                return;
+            //if (LibManager.BigFile == null)
+            //    return;
 
-            int key = Convert.ToInt32(FileKeyHex, 16);
+            //int key = Convert.ToInt32(FileKeyHex, 16);
 
-            YetiObject obj = LibManager.BigFile.FileMap[key];
-            if (obj == null)
-                return;
+            //YetiObject obj = LibManager.BigFile.FileMap[key];
+            //if (obj == null)
+            //    return;
 
-            YetiMeshData meshData = obj.ArchetypeAs<YetiMeshData>();
-            if (meshData == null)
-                return;
+            //YetiMeshData meshData = obj.ArchetypeAs<YetiMeshData>();
+            //if (meshData == null)
+            //    return;
 
-            LibManager.BigFile.FileLoader.LoadObjectSimple(obj);
+            //LibManager.BigFile.FileLoader.LoadObjectSimple(obj);
 
-            mesh.Clear();
-            Vector3[] verts = meshData.RawVertices.ConvertToUnity();
-            Vector2[] uvs = meshData.UVs.ConvertToUnity();
-            mesh.vertices = verts;
-            mesh.uv = uvs;
-            mesh.triangles = meshData.Triangles;
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
+            //mesh.Clear();
+            //Vector3[] verts = meshData.RawVertices.ConvertToUnity();
+            //Vector2[] uvs = meshData.UVs.ConvertToUnity();
+            //mesh.vertices = verts;
+            //mesh.uv = uvs;
+            //mesh.triangles = meshData.Triangles;
+            //mesh.RecalculateNormals();
+            //mesh.RecalculateBounds();
 
-            bounds = new Vector3(meshData.CenterOffset.X, meshData.CenterOffset.Y, meshData.CenterOffset.Z);
-            bounds2 = mesh.bounds.size;
+            //bounds = new Vector3(meshData.CenterOffset.X, meshData.CenterOffset.Y, meshData.CenterOffset.Z);
+            //bounds2 = mesh.bounds.size;
         }
     }
 }

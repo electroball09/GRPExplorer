@@ -42,7 +42,7 @@ namespace UnityIntegration
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Tab))
+            if (Input.GetKeyDown(KeyCode.LeftControl))
                 showMenu = !showMenu;
         }
 
@@ -59,7 +59,7 @@ namespace UnityIntegration
         private void DoNoMenuGUI()
         {
             Rect rect = new Rect(Screen.width - 250f, 0, 250f, 25f);
-            GUI.Label(rect, "TAB for menu");
+            GUI.Label(rect, "LCTRL for menu");
         }
 
         private void DoBrowsingGUI()

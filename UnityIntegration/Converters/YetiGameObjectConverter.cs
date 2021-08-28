@@ -41,6 +41,14 @@ namespace UnityIntegration.Converters
                 gameObject.transform.localScale = scale;
             }
 
+            //if (yetiObject.Name.ToLower().Contains("light"))
+            //{
+            //    var l = gameObject.AddComponent<Light>();
+            //    l.type = LightType.Point;
+            //    l.range = 7.5f;
+            //    l.intensity = 1f;
+            //}
+
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(gameObject, yetiObject);
 
             foreach (YetiObject subObj in yetiObject.ObjectReferences)

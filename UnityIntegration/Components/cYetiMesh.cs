@@ -6,6 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityIntegration.Converters;
+using UnityEngine.Rendering;
+using System.IO;
+using Unity.Collections;
 
 namespace UnityIntegration.Components
 {
@@ -14,20 +17,24 @@ namespace UnityIntegration.Components
     {
         static Material meshMat;
 
+        public int VertexCount;
+        public int TriangleCount;
+
         public Vector3 calcBounds;
-        public Vector3 yetiBounds;
+        public Vector3 yetiOffset;
+        public float uniformScale;
 
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
 
         public List<cYetiMaterial> materials;
 
+        public YetiSubmeshData[] submeshData;
+
         public void LoadMesh(YetiMeshData meshData, YetiObjectRepository objectRepository)
         {
             if (!meshMat)
                 meshMat = (Material)Resources.Load("MeshTestMat");
-
-            //gameObject.transform.localPosition = meshData.CenterOffset.ConvertToUnity().ConvertYetiToUnityCoords();
 
             meshFilter = gameObject.AddComponent<MeshFilter>();
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
@@ -39,30 +46,37 @@ namespace UnityIntegration.Components
             }
             else
             {
-                Vector3[] vertices = new Vector3[meshData.VertexCount];
-                Color[] vColors = new Color[meshData.VertexCount];
-                Vector2[] uvs = new Vector2[meshData.VertexCount];
-
-                for (int i = 0; i < meshData.VertexCount; i++)
+                mesh = new Mesh();
+                NativeArray<YetiVertex> meshfloats = new NativeArray<YetiVertex>(meshData.VertexCount, Allocator.Temp);
+                for (int i = 0; i < meshfloats.Length; i++)
                 {
-                    YetiVertex v = meshData.Vertices[i];
-                    vertices[i] = v.vertexPos.ConvertToUnity();
-                    //vColors[i] = new Color(v.vertexColor.X, v.vertexColor.Y, v.vertexColor.Z, v.vertexColor.W);
-                    vColors[i] = new Color(v.boneData.datas[4] / 255f, v.boneData.datas[5] / 255f, v.boneData.datas[6] / 255f, v.boneData.datas[7] / 255f);
-                    vColors[i] *= new Color(v.boneData.datas[0] / 255f, v.boneData.datas[1] / 255f, v.boneData.datas[2] / 255f, v.boneData.datas[3] / 255f);
-                    uvs[i] = meshData.Vertices[i].uv0.ConvertToUnity();
+                    meshfloats[i] = meshData.Vertices[i];
                 }
-
-                mesh = new Mesh
+                VertexAttributeDescriptor[] descriptors = new VertexAttributeDescriptor[]
                 {
-                    vertices = vertices,
-                    uv = uvs,
-                    triangles = meshData.Triangles,
-                    colors = vColors,
+                    new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, 0),
+                    new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4, 0),
+                    new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, 0),
+                    new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2, 0),
+                    new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 2, 0),
+                    new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 2, 0),
+                    new VertexAttributeDescriptor(VertexAttribute.TexCoord4, VertexAttributeFormat.Float32, 2, 0),
                 };
+
+                mesh.SetVertexBufferParams(meshData.VertexCount, descriptors);
+                mesh.SetVertexBufferData(meshfloats, 0, 0, meshData.VertexCount);
+
+                mesh.SetIndexBufferParams(meshData.IndexCount, IndexFormat.UInt16);
+                NativeArray<ushort> indices = new NativeArray<ushort>(meshData.Indices, Allocator.Temp);
+                mesh.SetIndexBufferData(indices, 0, 0, indices.Length);
+                SubMeshDescriptor smd = new SubMeshDescriptor(0, meshData.IndexCount);
+                mesh.SetSubMesh(0, smd);
+
                 mesh.RecalculateBounds();
                 mesh.RecalculateNormals();
                 mesh.RecalculateTangents();
+
+                submeshData = meshData.SubmeshData;
 
                 objectRepository.GetRepository<Mesh>().Add(yetiObject, mesh);
             }
@@ -71,13 +85,22 @@ namespace UnityIntegration.Components
 
             meshRenderer.material = meshMat;
 
+            //transform.localPosition = meshData.CenterOffset.ConvertToUnity();
+            //transform.localScale = Vector3.one * meshData.UniformScale;
+
             calcBounds = mesh.bounds.size;
-            yetiBounds = meshData.CenterOffset.ConvertToUnity().ConvertYetiToUnityCoords();
+            yetiOffset = meshData.CenterOffset.ConvertToUnity();//.ConvertYetiToUnityCoords();
+            uniformScale = meshData.UniformScale;
+            VertexCount = meshData.VertexCount;
+            TriangleCount = meshData.IndexCount;
         }
 
         public void SetMaterials(List<cYetiMaterial> mats)
         {
             materials = mats;
+            var m = new Material[mats.Count];
+            for (int i = 0; i < mats.Count; i++)
+                m[i] = mats[i].Material;
             meshRenderer.material = mats[0].Material;
         }
     }

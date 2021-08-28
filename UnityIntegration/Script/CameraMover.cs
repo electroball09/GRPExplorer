@@ -59,28 +59,59 @@ namespace UnityIntegration.Script
             transform.position += dir;
         }
 
+        void DebugShaderToggle(Rect rect, string text, string keyword)
+        {
+            if (Shader.IsKeywordEnabled(keyword))
+            {
+                if (GUI.Button(rect, $">{text}<"))
+                    Shader.DisableKeyword(keyword);
+            }
+            else
+            {
+                if (GUI.Button(rect, text))
+                    Shader.EnableKeyword(keyword);
+            }
+        }
+
+        int debugCoord = 0;
         void OnGUI()
         {
-            Rect rect = new Rect(Screen.width / 2 - 125, Screen.height - 25, 250, 25);
-            string str = string.Format("Speed: {0}   Slow: {1}", speeds[speedIndex], isSlow);
+            Rect rect = new Rect(Screen.width / 2 - 200, Screen.height - 25, 250, 25);
+            string str = string.Format("Speed (scroll): {0}   Slow (shift): {1}", speeds[speedIndex], isSlow);
             GUI.Label(rect, str);
             rect.y -= rect.height;
             rect.width = rect.width / 2;
-            if (GUI.Button(rect, "Toggle UV Debug"))
-            {
-                if (Shader.IsKeywordEnabled("_UV_DEBUG"))
-                    Shader.DisableKeyword("_UV_DEBUG");
-                else
-                    Shader.EnableKeyword("_UV_DEBUG");
-            }
+            Rect rect2 = new Rect(rect);
+            rect.y -= rect2.height;
+            string newCoord = GUI.TextField(rect2, debugCoord.ToString());
+            int.TryParse(newCoord, out debugCoord);
+            debugCoord = Mathf.Clamp(debugCoord, 0, 4);
+            DebugShaderToggle(rect, "UV Debug", $"_UV_DEBUG_{debugCoord}");
+            //if (GUI.Button(rect, "Toggle UV Debug"))
+            //{
+            //    if (Shader.IsKeywordEnabled("_UV_DEBUG"))
+            //        Shader.DisableKeyword("_UV_DEBUG");
+            //    else
+            //        Shader.EnableKeyword("_UV_DEBUG");
+            //}
             rect.x += rect.width;
-            if (GUI.Button(rect, "Toggle VColor Debug"))
-            {
-                if (Shader.IsKeywordEnabled("_VERTEX_COLOR_DEBUG"))
-                    Shader.DisableKeyword("_VERTEX_COLOR_DEBUG");
-                else
-                    Shader.EnableKeyword("_VERTEX_COLOR_DEBUG");
-            }
+            DebugShaderToggle(rect, "VC Debug", "_VERTEX_COLOR_DEBUG");
+            //if (GUI.Button(rect, "Toggle VColor Debug"))
+            //{
+            //    if (Shader.IsKeywordEnabled("_VERTEX_COLOR_DEBUG"))
+            //        Shader.DisableKeyword("_VERTEX_COLOR_DEBUG");
+            //    else
+            //        Shader.EnableKeyword("_VERTEX_COLOR_DEBUG");
+            //}
+            rect.x += rect.width;
+            DebugShaderToggle(rect, "Normal Debug", "_NORMAL_DEBUG");
+            //if (GUI.Button(rect, "Toggle Normal Debug"))
+            //{
+            //    if (Shader.IsKeywordEnabled("_NORMAL_DEBUG"))
+            //        Shader.DisableKeyword("_NORMAL_DEBUG");
+            //    else
+            //        Shader.EnableKeyword("_NORMAL_DEBUG");
+            //}
         }
 
         IEnumerator InterpCoroutine(GameObject obj)
