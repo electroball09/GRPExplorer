@@ -18,36 +18,35 @@ namespace UnityIntegration.Converters
         {
             YetiGameObject obj = yetiObject.ArchetypeAs<YetiGameObject>();
 
-            Matrix4x4 matrix = obj.Matrix.ConvertToUnity();
-
-            Vector3 pos;
-            Quaternion rot;
-            Vector3 scale;
-            IntegrationUtil.DecomposeMatrix(ref matrix, out pos, out rot, out scale);
-
-            rot = rot.ConvertYetiToUnityRotation();
-            pos = pos.ConvertYetiToUnityCoords();
-
             GameObject gameObject = new GameObject(yetiObject.NameWithExtension);
+
+            var yetiCmp = cYetiObjectReference.AddYetiComponent<cYetiGameObject>(gameObject, yetiObject);
+            yetiCmp.SetYetiGameObject(obj);
+            yetiCmp.UpdateTransformFromMatrix();
+
+            //Matrix4x4 matrix = obj.Matrix.ToUnity();
+
+            //Vector3 pos;
+            //Quaternion rot;
+            //Vector3 scale;
+            //IntegrationUtil.DecomposeMatrix(ref matrix, out pos, out rot, out scale);
+
+            //rot = rot.ConvertYetiToUnityRotation();
+            //pos = pos.ConvertYetiToUnityCoords();
+
             context.worldObjects.Add(gameObject);
             if (parentObject)
             {
                 gameObject.transform.SetParent(parentObject.transform, false);
             }
-            else
-            {
-                gameObject.transform.position = pos;
-                gameObject.transform.rotation = rot;
-                gameObject.transform.localScale = scale;
-            }
 
-            //if (yetiObject.Name.ToLower().Contains("light"))
-            //{
-            //    var l = gameObject.AddComponent<Light>();
-            //    l.type = LightType.Point;
-            //    l.range = 7.5f;
-            //    l.intensity = 1f;
-            //}
+            if (yetiObject.Name.ToLower().Contains("light"))
+            {
+                var l = gameObject.AddComponent<Light>();
+                l.type = LightType.Point;
+                l.range = 7.5f;
+                l.intensity = 1f;
+            }
 
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(gameObject, yetiObject);
 

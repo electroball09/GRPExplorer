@@ -116,7 +116,34 @@ namespace UnityIntegration
             return arr;
         }
 
-        public static Matrix4x4 ConvertToUnity(this System.Numerics.Matrix4x4 from)
+        public static Matrix4x4 ToUnity(this System.Numerics.Matrix4x4 from)
+        {
+            from = System.Numerics.Matrix4x4.Transpose(from);
+            return new Matrix4x4()
+            {
+                m00 = from.M11,
+                m01 = from.M12,
+                m02 = from.M13,
+                m03 = from.M14,
+
+                m10 = from.M21,
+                m11 = from.M22,
+                m12 = from.M23,
+                m13 = from.M24,
+
+                m20 = from.M31,
+                m21 = from.M32,
+                m22 = from.M33,
+                m23 = from.M34,
+
+                m30 = from.M41,
+                m31 = from.M42,
+                m32 = from.M43,
+                m33 = from.M44,
+            };
+        }
+
+        public static Matrix4x4 ToUnityNoTranspose(this System.Numerics.Matrix4x4 from)
         {
             return new Matrix4x4()
             {
@@ -146,7 +173,7 @@ namespace UnityIntegration
         {
             Matrix4x4[] arr = new Matrix4x4[from.Length];
             for (int i = 0; i < from.Length; i++)
-                arr[i] = from[i].ConvertToUnity();
+                arr[i] = from[i].ToUnity();
             return arr;
         }
 
@@ -163,7 +190,7 @@ namespace UnityIntegration
         public static Quaternion ConvertYetiToUnityRotation(this Quaternion from)
         {
             //return Quaternion.Euler(from.eulerAngles.x, from.eulerAngles.z, from.eulerAngles.y);
-            return Quaternion.Euler(-from.eulerAngles.y, from.eulerAngles.z, from.eulerAngles.x);
+            return Quaternion.Euler(from.eulerAngles.y, -from.eulerAngles.z, from.eulerAngles.x);
         }
         
         /// <summary>
