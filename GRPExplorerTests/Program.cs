@@ -142,6 +142,7 @@ namespace GRPExplorerTests
             TestGAOFlags,
             DebugLoad,
             PrintAllFilesOfType,
+            CompareSubmeshes,
         };
 
         static void Main(string[] args)
@@ -767,6 +768,79 @@ namespace GRPExplorerTests
             {
                 Out.WriteLine("{0:X8} - {1}", obj.FileInfo.Key, obj.NameWithExtension);
             }
+        }
+
+        static void CompareSubmeshes()
+        {
+            Out.Write("File path: ");
+            string path = Out.ReadLine();
+
+            LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
+
+            var bigFile = BigFile.OpenBigFile(path);
+            bigFile.LoadFromDisk();
+
+            selectmesh:
+
+            Out.Write("Mesh key: ");
+            int key = Convert.ToInt32(Out.ReadLine(), 16);
+            if (key == 0)
+                Environment.Exit(420);
+
+            var obj = bigFile.FileMap[key];
+            if (obj.FileInfo.FileType != YetiObjectType.msd)
+                Environment.Exit(9000);
+
+            IOBuffers buf = new IOBuffers();
+            var read = bigFile.FileReader.ReadFile(obj, buf, BigFileFlags.Decompress);
+
+            if (read.IsError())
+                Environment.Exit(1337);
+
+            obj.Load(buf[read.dataSize], read.dataSize);
+
+            var mesh = obj.ArchetypeAs<YetiMeshData>();
+
+            if (mesh.SubmeshData.Length <= 1)
+                Environment.Exit(911);
+
+            selectsubmesh:
+
+            Out.WriteLine($"Submesh count: {mesh.SubmeshData.Length}");
+            Out.Write("Submesh A: ");
+            int submesh1 = int.Parse(Out.ReadLine());
+            Out.Write("Submesh B: ");
+            int submesh2 = int.Parse(Out.ReadLine());
+
+            for (int i = 0; i < 128; i++)
+            {
+                if (mesh.SubmeshData[submesh1].RawBytes[i] == mesh.SubmeshData[submesh2].RawBytes[i])
+                {
+                    if (mesh.SubmeshData[submesh1].RawBytes[i] == 0)
+                        Console.ForegroundColor = ConsoleColor.White;
+                    else
+                        Console.ForegroundColor = ConsoleColor.Green;
+
+                    Out.Write($" {mesh.SubmeshData[submesh1].RawBytes[i]:X2}  ");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Out.Write($"{mesh.SubmeshData[submesh1].RawBytes[i]:X2}/{mesh.SubmeshData[submesh2].RawBytes[i]:X2}");
+                }
+
+                if (i != 0 && i % 8 == 0)
+                    Out.Write("\n");
+            }
+            Out.Write("\n");
+
+            Console.ForegroundColor = ConsoleColor.White;
+            Out.Write("1 for new mesh, 2 for new submesh");
+            int.TryParse(Out.ReadLine(), out int selection);
+            if (selection == 1)
+                goto selectmesh;
+            if (selection == 2)
+                goto selectsubmesh;
         }
     }
 }

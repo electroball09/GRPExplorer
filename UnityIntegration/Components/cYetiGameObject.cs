@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GRPExplorerLib.BigFile;
 using GRPExplorerLib.YetiObjects;
 using UnityEngine;
+
 namespace UnityIntegration.Components
 {
     public class cYetiGameObject : cYetiObjectReference
@@ -18,10 +19,30 @@ namespace UnityIntegration.Components
         public Matrix4x4 YetiMatrix;
         public Matrix4x4 ConvertedMatrix;
 
+        public cYetiLayer Layer;
+
         public void SetYetiGameObject(YetiGameObject obj)
         {
             YetiMatrix = obj.Matrix.ToUnityNoTranspose();
             ConvertedMatrix = obj.Matrix.ToUnity();
+        }
+
+        public void SetYetiLayer(cYetiLayer layer)
+        {
+            Layer = layer;
+            if (Layer)
+                layer.OnLayerToggled += OnLayerToggled;
+        }
+
+        void OnDestroy()
+        {
+            if (Layer)
+                Layer.OnLayerToggled -= OnLayerToggled;
+        }
+
+        void OnLayerToggled(bool isToggledOn)
+        {
+            gameObject.SetActive(isToggledOn);
         }
 
         public void UpdateTransformFromMatrix()

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using GRPExplorerLib.Logging;
 using UnityIntegration.Converters;
+using UnityIntegration.Script;
 using System.Threading;
 
 namespace UnityIntegration.Components
@@ -20,6 +21,8 @@ namespace UnityIntegration.Components
 
         public YetiWorldLoadContext loadContext;
         public YetiWorld thisWorld;
+
+        public GameObject LayersObject;
 
         public Action afterLoadedCallback;
 
@@ -84,6 +87,9 @@ namespace UnityIntegration.Components
 
             //LogManager.GlobalLogFlags = LogFlags.All;
 
+            LayersObject = new GameObject("LAYERS");
+            LayersObject.transform.parent = transform;
+
             YetiGameObjectList gol = world.GameObjectList;
             YetiWorldIncludeList wil = world.SubWorldList;
 
@@ -117,7 +123,7 @@ namespace UnityIntegration.Components
                 foreach (YetiWorld subWorld in wil.IncludeList)
                 {
                     if (subWorld != null)
-                        YetiObjectConverter.GetConverter(subWorld.Object).Convert(subWorld.Object, null, loadContext);
+                        YetiObjectConverter.GetConverter(subWorld.Object).Convert(subWorld.Object, gameObject, loadContext);
                 }
 
             LogManager.GlobalLogFlags = LogFlags.Error | LogFlags.Info;
@@ -136,9 +142,14 @@ namespace UnityIntegration.Components
 
             log.Info("Unloading world {0}", yetiObject.NameWithExtension);
 
-            int count = 0;
+            if (!cYetiLight.isToggledOn)
+                cYetiLight.ToggleAllLights();
+            if (!GAOIdentifier.areIdentifiersVisible)
+                GAOIdentifier.ToggleIdentifiersVisible();
 
             DebugMsg dMsg = DebugMsgMgr.inst.NewPermMessage("Destroying world " + yetiObject.NameWithExtension);
+
+            int count = 0;
 
             foreach (GameObject obj in loadContext.worldObjects)
             {

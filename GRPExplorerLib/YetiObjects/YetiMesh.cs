@@ -58,6 +58,8 @@ namespace GRPExplorerLib.YetiObjects
     [Serializable]
     public struct YetiSubmeshData
     {
+        public byte[] RawBytes;
+
         public short UNK_01;
         public short UNK_02;
         public short UNK_03;
@@ -74,24 +76,32 @@ namespace GRPExplorerLib.YetiObjects
 
         public uint[] UNK_ARR;
 
-        public void Load(BinaryReader br)
+        public void Load(MemoryStream ms)
         {
-            UNK_01 = br.ReadInt16();
-            UNK_02 = br.ReadInt16();
-            UNK_03 = br.ReadInt16();
-            UNK_04 = br.ReadInt16();
-            UNK_05 = br.ReadInt16();
-            UNK_11 = br.ReadInt16();
-            UNK_12 = br.ReadInt16();
-            UNK_13 = br.ReadInt16();
-            UNK_14 = br.ReadInt16();
-            UNK_15 = br.ReadInt16();
-            NegativeOneSanityCheck = br.ReadInt32();
-            if (NegativeOneSanityCheck != -1)
-                LogManager.Error("Negative one sanity check failed wtf did you do");
-            UNK_ARR = new uint[26];
-            for (int i = 0; i < UNK_ARR.Length; i++)
-                UNK_ARR[i] = br.ReadUInt32();
+            RawBytes = new byte[128];
+            ms.Read(RawBytes, 0, 128);
+
+            using (MemoryStream ms2 = new MemoryStream(RawBytes))
+            using (BinaryReader br = new BinaryReader(ms2))
+            {
+
+                UNK_01 = br.ReadInt16();
+                UNK_02 = br.ReadInt16();
+                UNK_03 = br.ReadInt16();
+                UNK_04 = br.ReadInt16();
+                UNK_05 = br.ReadInt16();
+                UNK_11 = br.ReadInt16();
+                UNK_12 = br.ReadInt16();
+                UNK_13 = br.ReadInt16();
+                UNK_14 = br.ReadInt16();
+                UNK_15 = br.ReadInt16();
+                NegativeOneSanityCheck = br.ReadInt32();
+                if (NegativeOneSanityCheck != -1)
+                    LogManager.Error("Negative one sanity check failed wtf did you do");
+                UNK_ARR = new uint[26];
+                for (int i = 0; i < UNK_ARR.Length; i++)
+                    UNK_ARR[i] = br.ReadUInt32();
+            }
         }
     }
 
@@ -188,7 +198,7 @@ namespace GRPExplorerLib.YetiObjects
                 {
                     YetiSubmeshData data = new YetiSubmeshData();
 
-                    data.Load(br);
+                    data.Load(ms);
 
                     SubmeshData[i] = data;
                 }
@@ -211,23 +221,18 @@ namespace GRPExplorerLib.YetiObjects
                     Vector3 vertPos = new Vector3(-snorm16ToFloat(y), snorm16ToFloat(z), snorm16ToFloat(x)) * s;
                     vertPos += CenterOffset;
 
-                    RawVertices[i] = vertPos;
-
-                    Vector2 uv = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f);
-
-                    Vector4 color = new Vector4(snorm16ToFloat(br.ReadInt16()), snorm16ToFloat(br.ReadInt16()), 0, 0);
-
                     YetiVertex vert = new YetiVertex()
                     {
                         vertexPos = vertPos,
-                        vertexColor = color,
-                        uv0 = uv,
-                        uv1 = new Vector2(br.ReadInt16() / 65535f, br.ReadInt16() / 65535f),
-                        uv2 = new Vector2(br.ReadInt16() / 65535f, br.ReadInt16() / 65535f),
-                        uv3 = new Vector2(br.ReadInt16() / 65535f, br.ReadInt16() / 65535f),
-                        uv4 = new Vector2(br.ReadInt16() / 65535f, br.ReadInt16() / 65535f),
+                        uv0 = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f),
+                        uv1 = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f),
+                        uv2 = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f),
+                        uv3 = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f),
+                        uv4 = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f),
+                        vertexColor = new Vector4(snorm16ToFloat(br.ReadInt16()), snorm16ToFloat(br.ReadInt16()), 0, 0),
                     };
 
+                    RawVertices[i] = vertPos;
                     Vertices[i] = vert;
                 }
 

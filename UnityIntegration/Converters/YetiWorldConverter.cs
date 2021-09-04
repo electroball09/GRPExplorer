@@ -64,6 +64,8 @@ namespace UnityIntegration.Converters
                 return;
 
             GameObject gameObject = new GameObject("_WORLD " + yetiObject.Name);
+            if (parentObject)
+                gameObject.transform.parent = parentObject.transform;
 
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(gameObject, yetiObject);
             cYetiWorld world = cYetiObjectReference.AddYetiComponent<cYetiWorld>(gameObject, yetiObject);

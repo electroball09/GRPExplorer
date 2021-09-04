@@ -7,6 +7,7 @@ using GRPExplorerLib.BigFile;
 using GRPExplorerLib.YetiObjects;
 using UnityEngine;
 using UnityIntegration.Components;
+using UnityIntegration.Script;
 
 namespace UnityIntegration.Converters
 {
@@ -20,19 +21,17 @@ namespace UnityIntegration.Converters
 
             GameObject gameObject = new GameObject(yetiObject.NameWithExtension);
 
+            GameObject prim = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            prim.transform.parent = gameObject.transform;
+            prim.transform.localPosition = Vector3.zero;
+            prim.transform.localScale = Vector3.one * 0.3f;
+            prim.AddComponent<GAOIdentifier>();
+
+            cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(gameObject, yetiObject);
+
             var yetiCmp = cYetiObjectReference.AddYetiComponent<cYetiGameObject>(gameObject, yetiObject);
             yetiCmp.SetYetiGameObject(obj);
             yetiCmp.UpdateTransformFromMatrix();
-
-            //Matrix4x4 matrix = obj.Matrix.ToUnity();
-
-            //Vector3 pos;
-            //Quaternion rot;
-            //Vector3 scale;
-            //IntegrationUtil.DecomposeMatrix(ref matrix, out pos, out rot, out scale);
-
-            //rot = rot.ConvertYetiToUnityRotation();
-            //pos = pos.ConvertYetiToUnityCoords();
 
             context.worldObjects.Add(gameObject);
             if (parentObject)
@@ -40,23 +39,63 @@ namespace UnityIntegration.Converters
                 gameObject.transform.SetParent(parentObject.transform, false);
             }
 
-            if (yetiObject.Name.ToLower().Contains("light"))
+            if (obj.LightType != YetiLightType.NONE)
             {
-                var l = gameObject.AddComponent<Light>();
-                l.type = LightType.Point;
-                l.range = 7.5f;
-                l.intensity = 1f;
+                cYetiObjectReference.AddYetiComponent<cYetiLight>(gameObject, yetiObject).SetLight(obj);
             }
 
-            cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(gameObject, yetiObject);
+            YetiObjectConverter lvm1Conv = null;
+            YetiObjectConverter lvm2Conv = null;
 
+            foreach (YetiObject subObj in yetiObject.ObjectReferences)
+            {
+                YetiObject lvm1 = null;
+                YetiObject lvm2 = null;
+
+                if (subObj != null)
+                {
+                    if (subObj.Name.Contains("LVM"))
+                    {
+                        if (subObj.Name.Contains("LVMColor"))
+                            lvm2 = subObj;
+                        else
+                            lvm1 = subObj;
+                    }
+                }
+
+                if (lvm1 != null && lvm1.FileInfo.FileType == YetiObjectType.tga)
+                {
+                    lvm1Conv = GetConverter(lvm1);
+                    lvm1Conv.Convert(lvm1, gameObject, context);
+                }
+
+                if (lvm2 != null && lvm2.FileInfo.FileType == YetiObjectType.tga)
+                {
+                    lvm2Conv = GetConverter(lvm2);
+                    lvm2Conv.Convert(lvm2, gameObject, context);
+                }
+            }
+
+            YetiObjectConverter gotConverter = null;
             foreach (YetiObject subObj in yetiObject.ObjectReferences)
             {
                 if (subObj == null)
                     continue;
 
                 if (subObj.Is<YetiGraphicObjectTable>())
-                    GetConverter(subObj).Convert(subObj, gameObject, context);
+                {
+                    gotConverter = GetConverter(subObj);
+                    (gotConverter as YetiGraphicObjectTableConverter).LVMMap = lvm1Conv?.Components[0] as cYetiTexture;
+                    (gotConverter as YetiGraphicObjectTableConverter).LVMColorMap = lvm2Conv?.Components[0] as cYetiTexture;
+                    gotConverter.Convert(subObj, gameObject, context);
+                }
+
+                if (subObj.Is<YetiLayer>())
+                {
+                    var layerConv = GetConverter(subObj) as YetiLayerConverter;
+                    layerConv.Convert(subObj, gameObject, context);
+                    yetiCmp.SetYetiLayer(layerConv.Components[0] as cYetiLayer);
+                }
             }
         }
     }
@@ -64,6 +103,9 @@ namespace UnityIntegration.Converters
     public class YetiGraphicObjectTableConverter : YetiObjectConverter
     {
         public override Type ArchetypeType => typeof(YetiGraphicObjectTable);
+
+        public cYetiTexture LVMMap;
+        public cYetiTexture LVMColorMap;
 
         public override void Convert(YetiObject yetiObject, GameObject parentObject, YetiWorldLoadContext context)
         {
@@ -129,6 +171,7 @@ namespace UnityIntegration.Converters
                 foreach (KeyValuePair<YetiObject, (cYetiMesh mesh, List<cYetiMaterial> materials)> kvp in meshes)
                 {
                     kvp.Value.mesh.SetMaterials(kvp.Value.materials);
+                    kvp.Value.mesh.SetLVMMaps(LVMMap, LVMColorMap);
                 }
             }
             else

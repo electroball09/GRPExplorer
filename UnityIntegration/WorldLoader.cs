@@ -20,7 +20,8 @@ namespace UnityIntegration
         {
             CurrentWorld,
             Worlds,
-            Files
+            Files,
+            Layers
         }
 
         public bool showMenu = true;
@@ -97,6 +98,14 @@ namespace UnityIntegration
             }
             else
                 GUI.Label(rect, "Files");
+            rect.y += rect.height;
+            if (mode != BrowserMode.Layers)
+            {
+                if (GUI.Button(rect, "Layers"))
+                    mode = BrowserMode.Layers;
+            }
+            else
+                GUI.Label(rect, "Layers");
 
             switch (mode)
             {
@@ -224,6 +233,11 @@ namespace UnityIntegration
                 btnRect.y += btnRect.height;
             }
             GUI.EndScrollView();
+        }
+
+        private void DoLayersGUI()
+        {
+
         }
     }
 }

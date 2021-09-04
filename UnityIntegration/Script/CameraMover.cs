@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityIntegration.Components;
 
 namespace UnityIntegration.Script
 {
@@ -63,7 +64,7 @@ namespace UnityIntegration.Script
         {
             if (Shader.IsKeywordEnabled(keyword))
             {
-                if (GUI.Button(rect, $">{text}<"))
+                if (GUI.Button(rect, $">{text}"))
                     Shader.DisableKeyword(keyword);
             }
             else
@@ -86,32 +87,21 @@ namespace UnityIntegration.Script
             string newCoord = GUI.TextField(rect2, debugCoord.ToString());
             int.TryParse(newCoord, out debugCoord);
             debugCoord = Mathf.Clamp(debugCoord, 0, 4);
+            rect.x -= rect.width;
+            if (GUI.Button(rect, "GAO idents Tgl"))
+                GAOIdentifier.ToggleIdentifiersVisible();
+            rect.x += rect.width;
             DebugShaderToggle(rect, "UV Debug", $"_UV_DEBUG_{debugCoord}");
-            //if (GUI.Button(rect, "Toggle UV Debug"))
-            //{
-            //    if (Shader.IsKeywordEnabled("_UV_DEBUG"))
-            //        Shader.DisableKeyword("_UV_DEBUG");
-            //    else
-            //        Shader.EnableKeyword("_UV_DEBUG");
-            //}
             rect.x += rect.width;
             DebugShaderToggle(rect, "VC Debug", "_VERTEX_COLOR_DEBUG");
-            //if (GUI.Button(rect, "Toggle VColor Debug"))
-            //{
-            //    if (Shader.IsKeywordEnabled("_VERTEX_COLOR_DEBUG"))
-            //        Shader.DisableKeyword("_VERTEX_COLOR_DEBUG");
-            //    else
-            //        Shader.EnableKeyword("_VERTEX_COLOR_DEBUG");
-            //}
             rect.x += rect.width;
             DebugShaderToggle(rect, "Normal Debug", "_NORMAL_DEBUG");
-            //if (GUI.Button(rect, "Toggle Normal Debug"))
-            //{
-            //    if (Shader.IsKeywordEnabled("_NORMAL_DEBUG"))
-            //        Shader.DisableKeyword("_NORMAL_DEBUG");
-            //    else
-            //        Shader.EnableKeyword("_NORMAL_DEBUG");
-            //}
+            rect.x -= rect.width * 3;
+            rect.y -= rect.height;
+            DebugShaderToggle(rect, "LVM Debug", "_ENABLE_LVM_DEBUG");
+            rect.x += rect.width;
+            if (GUI.Button(rect, "Toggle lights"))
+                cYetiLight.ToggleAllLights();
         }
 
         IEnumerator InterpCoroutine(GameObject obj)

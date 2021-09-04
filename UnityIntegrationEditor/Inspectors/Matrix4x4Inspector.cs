@@ -16,6 +16,7 @@ namespace UnityIntegrationEditor.Inspectors
         {
             cYetiGameObject obj = target as cYetiGameObject;
 
+            obj.TransformFromMatrix = EditorGUILayout.Toggle("Transform from matrix", obj.TransformFromMatrix);
             obj.UseYetiMatrix = EditorGUILayout.Toggle("Use Yeti Matrix", obj.UseYetiMatrix);
             obj.ConvertPosition = EditorGUILayout.Toggle("Convert Position", obj.ConvertPosition);
             obj.ConvertRotation = EditorGUILayout.Toggle("Convert Rotation", obj.ConvertRotation);

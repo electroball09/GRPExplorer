@@ -103,5 +103,18 @@ namespace UnityIntegration.Components
                 m[i] = mats[i].Material;
             meshRenderer.material = mats[0].Material;
         }
+
+        public void SetLVMMaps(cYetiTexture lvm, cYetiTexture lvmColor)
+        {
+            MaterialPropertyBlock bl = new MaterialPropertyBlock();
+            if (lvm && lvm.texture)
+            {
+                bl.SetTexture("_LVM", lvm?.texture);
+                bl.SetFloat("_AO", 1f);
+            }
+            if (lvmColor && lvmColor.texture)
+                bl.SetTexture("_LVMColor", lvmColor?.texture);
+            meshRenderer.SetPropertyBlock(bl);
+        }
     }
 }
