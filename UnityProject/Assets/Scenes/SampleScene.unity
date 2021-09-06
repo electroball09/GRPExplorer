@@ -244,7 +244,7 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 170076733}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
@@ -619,11 +619,6 @@ MonoBehaviour:
   m_Script: {fileID: 271760416, guid: 4a467c85725f9f74ba1cdfb9af47002c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _BakedAOStrength: 1
-  _BakedShadowStrength: 1
-  _IndirectStrength: 1
-  _DirectStrength: 1
-  _LVMColorDebug: 0
 --- !u!1 &964646180
 GameObject:
   m_ObjectHideFlags: 0

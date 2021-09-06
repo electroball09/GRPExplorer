@@ -9,33 +9,29 @@ namespace UnityIntegration.Script
 {
     public class ShadingDebug : MonoBehaviour
     {
-        public float _BakedAOStrength = 0;
-        public float _BakedShadowStrength = 0;
-        public float _IndirectStrength = 0;
-        public float _DirectStrength = 0;
-
-        public float _LVMColorDebug = 0;
-
         void OnGUI()
         {
-            Rect rect = new Rect(0, Screen.height / 2, 250, 25);
-            _BakedAOStrength = DoSlider(ref rect, "Baked AO", "_BakedAOStrength", _BakedAOStrength);
-            _BakedShadowStrength = DoSlider(ref rect, "Baked Shadow", "_BakedShadowStrength", _BakedShadowStrength);
-            _IndirectStrength = DoSlider(ref rect, "Indirect", "_IndirectStrength", _IndirectStrength);
-            _DirectStrength = DoSlider(ref rect, "Direct", "_DirectStrength", _DirectStrength);
-            _LVMColorDebug = DoSlider(ref rect, "Debug", "_LVMColorDebug", _LVMColorDebug);
+            Rect rect = new Rect(0, (Screen.height / 2) - 150, 175, 25);
+            DoSlider(ref rect, "Baked AO", "_BakedAOStrength");
+            DoSlider(ref rect, "Baked Shadow", "_BakedShadowStrength");
+            DoSlider(ref rect, "Indirect", "_IndirectStrength");
+            DoSlider(ref rect, "Direct", "_DirectStrength");
+            DoSlider(ref rect, "LVM_R", "_LVM_R");
+            DoSlider(ref rect, "LVM_G", "_LVM_G");
+            DoSlider(ref rect, "LVM_B", "_LVM_B");
+            DoSlider(ref rect, "LVM_A", "_LVM_A");
         }
 
-        private float DoSlider(ref Rect rect, string label, string shaderParam, float value)
+        private void DoSlider(ref Rect rect, string label, string shaderParam)
         {
             float oldX = rect.x;
             Label(ref rect, label);
+            float value = Shader.GetGlobalFloat(shaderParam);
             float val = GUI.HorizontalSlider(rect, value, 0, 1);
             if (val != value)
                 Shader.SetGlobalFloat(shaderParam, val);
             rect.x = oldX;
             rect.y += rect.height;
-            return val;
         }
 
         private void Label(ref Rect rect, string label)

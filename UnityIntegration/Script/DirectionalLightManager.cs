@@ -38,6 +38,7 @@ namespace UnityIntegration
         public void SetLightParams(Color color, float intensity)
         {
             light.color = color;
+            Shader.SetGlobalColor("_DirectionalLightColor", color);
             light.intensity = intensity;
         }
     }

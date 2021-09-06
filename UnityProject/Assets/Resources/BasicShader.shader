@@ -17,12 +17,11 @@
         LOD 200
 
         CGPROGRAM
-        #pragma multi_compile __ _UV_DEBUG_0 _UV_DEBUG_1 _UV_DEBUG_2 _UV_DEBUG_3 _UV_DEBUG_4
+        #pragma multi_compile __ _UV_DEBUG_1 _UV_DEBUG_2 _UV_DEBUG_3 _UV_DEBUG_4
         #pragma multi_compile __ _VERTEX_COLOR_DEBUG
-        #pragma multi_compile __ _NORMAL_DEBUG
         #pragma multi_compile __ _ENABLE_LVM_DEBUG
 
-        #pragma surface surf Standard fullforwardshadows
+        #pragma surface surf NoLighting noambient noforwardadd noshadows
 
         #pragma target 3.0
 
@@ -31,12 +30,19 @@
         sampler2D _LVM;
         sampler2D _LVMColor;
 
+        float _LVMColorContribution;
+
         float _BakedAOStrength;
         float _BakedShadowStrength;
         float _IndirectStrength;
         float _DirectStrength;
 
-        float _LVMColorDebug;
+        float _LVM_R;
+        float _LVM_G;
+        float _LVM_B;
+        float _LVM_A;
+
+        fixed4 _DirectionalLightColor;
 
         struct Input
         {
@@ -57,11 +63,37 @@
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_INSTANCING_BUFFER_END(Props)
 
-        void surf (Input IN, inout SurfaceOutputStandard o)
+        fixed4 LightingNoLighting(SurfaceOutput s, fixed3 lightDir, fixed atten)
         {
-            // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-            o.Albedo = c.rgb;
+            return half4(s.Albedo, s.Alpha);
+        }
+
+        void surf (Input IN, inout SurfaceOutput o)
+        {
+
+#if _UV_DEBUG_1
+            o.Albedo = float4(frac(IN.uv1_MainTex.x), frac(IN.uv1_MainTex.y), 0, 0);
+            return;
+#endif
+#if _UV_DEBUG_2
+            o.Albedo = float4(frac(IN.uv2_LVM.x), frac(IN.uv2_LVM.y), 0, 0);
+            return;
+#endif
+#if _UV_DEBUG_3
+            o.Albedo = float4(frac(IN.uv3_LVMColor.x), frac(IN.uv3_LVMColor.y), 0, 0);
+            return;
+#endif
+#if _UV_DEBUG_4
+            o.Albedo = float4(frac(IN.uv4_LVMColor.x), frac(IN.uv4_LVMColor.y), 0, 0);
+            return;
+#endif
+#if _VERTEX_COLOR_DEBUG
+            o.Albedo = IN.color;
+            return;
+#endif
+
+            fixed4 texColor = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            o.Albedo = texColor.rgb;
 
             fixed4 n = tex2D (_BumpMap, IN.uv_BumpMap);
             n.xz = n.zx;
@@ -75,46 +107,27 @@
             fixed2 lvmColorIndirectUV = fixed2((IN.uv2_LVM.x * .5f) + .5f, IN.uv2_LVM.y);
             fixed4 tmpLvmIndirect = tex2D(_LVMColor, lvmColorIndirectUV);
             fixed4 lvmIndirect = tmpLvmIndirect * fixed4(1, 1, 1, 0) * _IndirectStrength;
-            fixed4 lvmBakedShadow = tmpLvmIndirect.a * _BakedShadowStrength;
-
-            o.Occlusion = lvmAOCol.r;
+            fixed4 lvmBakedShadow = tmpLvmIndirect.a * _DirectionalLightColor * _BakedShadowStrength;
 
             fixed4 finalLvmColor = lvmDirectCol + lvmIndirect + lvmBakedShadow;
+            fixed3 ambientColor = texColor.rgb * lvmAOCol.r * fixed3(.034, .034, .034);
+            fixed3 litColor = texColor.rgb * finalLvmColor;
 
-            o.Albedo += finalLvmColor;
+            fixed3 finalColor = max(ambientColor, litColor);
 
-            fixed3 colorLerp = lerp(o.Albedo, finalLvmColor.rgb, _LVMColorDebug);
+            fixed3 finalLvmLerp = lerp(texColor.rgb, finalColor, _LVMColorContribution);
 
-            o.Albedo = colorLerp;
+            o.Albedo = finalLvmLerp;
 
 #if _ENABLE_LVM_DEBUG
-            o.Albedo = tex2D(_LVM, IN.uv2_LVM);
-#endif
-#if _UV_DEBUG_0
-			o.Albedo = float4(frac(IN.uv_MainTex.x), frac(IN.uv_MainTex.y), 0, 0);
-#endif
-#if _UV_DEBUG_1
-            o.Albedo = float4(frac(IN.uv1_MainTex.x), frac(IN.uv1_MainTex.y), 0, 0);
-#endif
-#if _UV_DEBUG_2
-            o.Albedo = float4(frac(IN.uv2_LVM.x), frac(IN.uv2_LVM.y), 0, 0);
-#endif
-#if _UV_DEBUG_3
-            o.Albedo = float4(frac(IN.uv3_LVMColor.x), frac(IN.uv3_LVMColor.y), 0, 0);
-#endif
-#if _UV_DEBUG_4
-            o.Albedo = float4(frac(IN.uv4_LVMColor.x), frac(IN.uv4_LVMColor.y), 0, 0);
-#endif
-#if _VERTEX_COLOR_DEBUG
-			o.Albedo = IN.color;
-#endif
-#if _NORMAL_DEBUG
-            o.Albedo = (o.Normal + 1) / 2;
+            fixed4 lvm = tex2D(_LVM, IN.uv2_LVM);
+            fixed4 lvmFinal = lvm * fixed4(_LVM_R, _LVM_G, _LVM_B, 0);
+            fixed4 lvmA = lvm.a;
+            lvmFinal = lerp(lvmFinal, lvmA, _LVM_A);
+            o.Albedo = lvmFinal;
 #endif
 
-            // Metallic and smoothness come from slider variables
-            o.Metallic = _Metallic;
-            o.Smoothness = _Glossiness;
+            o.Specular = 1;
         }
         ENDCG
     }

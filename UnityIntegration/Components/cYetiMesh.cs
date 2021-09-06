@@ -113,7 +113,10 @@ namespace UnityIntegration.Components
                 bl.SetFloat("_AO", 1f);
             }
             if (lvmColor && lvmColor.texture)
+            {
                 bl.SetTexture("_LVMColor", lvmColor?.texture);
+                bl.SetFloat("_LVMColorContribution", 1);
+            }
             meshRenderer.SetPropertyBlock(bl);
         }
     }

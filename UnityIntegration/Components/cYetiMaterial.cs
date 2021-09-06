@@ -45,6 +45,11 @@ namespace UnityIntegration.Components
 
         public Material Material;
 
+        void OnDestroy()
+        {
+            DestroyImmediate(Material);
+        }
+
         public void LoadMaterial(YetiMaterial yetiMaterial, List<cYetiTexture> textures, YetiObjectRepository objectRepository)
         {
             CheckMaterials();
