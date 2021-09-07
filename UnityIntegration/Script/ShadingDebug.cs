@@ -9,6 +9,8 @@ namespace UnityIntegration.Script
 {
     public class ShadingDebug : MonoBehaviour
     {
+        public Color ambientColor;
+
         void OnGUI()
         {
             Rect rect = new Rect(0, (Screen.height / 2) - 150, 175, 25);
@@ -16,18 +18,20 @@ namespace UnityIntegration.Script
             DoSlider(ref rect, "Baked Shadow", "_BakedShadowStrength");
             DoSlider(ref rect, "Indirect", "_IndirectStrength");
             DoSlider(ref rect, "Direct", "_DirectStrength");
+            DoSlider(ref rect, "Ambient Strength", "_AmbientStrength", 0f, .1f);
             DoSlider(ref rect, "LVM_R", "_LVM_R");
             DoSlider(ref rect, "LVM_G", "_LVM_G");
             DoSlider(ref rect, "LVM_B", "_LVM_B");
             DoSlider(ref rect, "LVM_A", "_LVM_A");
+            Shader.SetGlobalColor("_AmbientColor", ambientColor);
         }
 
-        private void DoSlider(ref Rect rect, string label, string shaderParam)
+        private void DoSlider(ref Rect rect, string label, string shaderParam, float valueMin = 0f, float valueMax = 1f)
         {
             float oldX = rect.x;
             Label(ref rect, label);
             float value = Shader.GetGlobalFloat(shaderParam);
-            float val = GUI.HorizontalSlider(rect, value, 0, 1);
+            float val = GUI.HorizontalSlider(rect, value, valueMin, valueMax);
             if (val != value)
                 Shader.SetGlobalFloat(shaderParam, val);
             rect.x = oldX;

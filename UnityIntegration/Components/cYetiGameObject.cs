@@ -61,7 +61,9 @@ namespace UnityIntegration.Components
             if (ConvertPosition)
                 pos = pos.ConvertYetiToUnityCoords();
             if (ConvertRotation)
+            {
                 rot = rot.ConvertYetiToUnityRotation();
+            }
 
             transform.SetPositionAndRotation(pos, rot);
             transform.localScale = scale;

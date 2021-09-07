@@ -27,12 +27,7 @@ namespace UnityIntegration
         public void MatchTransform(Transform t)
         {
             Debug.Log("dir light matching transform");
-            transform.SetPositionAndRotation(t.position, t.rotation);
-            Vector3 euler = transform.rotation.eulerAngles;
-            euler.x += 180f;
-            euler.y += 90f;
-
-            transform.rotation = Quaternion.Euler(euler);
+            transform.SetPositionAndRotation(t.position, t.rotation * Quaternion.Euler(0, 180f, 90f));
         }
 
         public void SetLightParams(Color color, float intensity)

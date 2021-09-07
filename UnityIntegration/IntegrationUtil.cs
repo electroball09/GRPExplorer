@@ -183,9 +183,7 @@ namespace UnityIntegration
 
         public static Quaternion ConvertYetiToUnityRotation(this Quaternion from)
         {
-            //return Quaternion.Euler(from.eulerAngles.x, from.eulerAngles.z, from.eulerAngles.y);
-            return Quaternion.Euler(-from.eulerAngles.y, -from.eulerAngles.z, -from.eulerAngles.x);
-            //return from;
+            return Quaternion.Euler(from.eulerAngles.x, -from.eulerAngles.z, from.eulerAngles.y);
         }
         
         /// <summary>

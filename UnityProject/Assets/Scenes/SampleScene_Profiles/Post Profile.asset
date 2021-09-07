@@ -87,7 +87,7 @@ MonoBehaviour:
     value: 0
   postExposure:
     overrideState: 1
-    value: 1.32
+    value: 1.4
   contrast:
     overrideState: 0
     value: 0
@@ -1347,8 +1347,8 @@ MonoBehaviour:
     overrideState: 1
     value: 1
   threshold:
-    overrideState: 0
-    value: 1
+    overrideState: 1
+    value: 0.2
   softKnee:
     overrideState: 0
     value: 0.5
@@ -1356,11 +1356,11 @@ MonoBehaviour:
     overrideState: 0
     value: 65472
   diffusion:
-    overrideState: 0
+    overrideState: 1
     value: 7
   anamorphicRatio:
-    overrideState: 0
-    value: 0
+    overrideState: 1
+    value: 1
   color:
     overrideState: 0
     value: {r: 1, g: 1, b: 1, a: 1}

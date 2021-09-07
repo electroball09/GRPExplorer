@@ -21,7 +21,7 @@
         #pragma multi_compile __ _VERTEX_COLOR_DEBUG
         #pragma multi_compile __ _ENABLE_LVM_DEBUG
 
-        #pragma surface surf NoLighting noambient noforwardadd noshadows
+        #pragma surface surf NoLighting noambient noforwardadd novertexlights
 
         #pragma target 3.0
 
@@ -36,6 +36,11 @@
         float _BakedShadowStrength;
         float _IndirectStrength;
         float _DirectStrength;
+
+        fixed4 _AmbientColor;
+        float _AmbientStrength;
+
+        float _SpecularPower;
 
         float _LVM_R;
         float _LVM_G;
@@ -65,7 +70,10 @@
 
         fixed4 LightingNoLighting(SurfaceOutput s, fixed3 lightDir, fixed atten)
         {
-            return half4(s.Albedo, s.Alpha);
+            fixed3 ndotl = saturate(dot(lightDir, s.Normal));
+            fixed3 color = (s.Albedo * _AmbientColor.rgb * _AmbientStrength) + s.Albedo * ndotl;
+            fixed3 finalLerp = lerp(color, s.Albedo, _LVMColorContribution);
+            return fixed4(finalLerp, s.Alpha);
         }
 
         void surf (Input IN, inout SurfaceOutput o)
@@ -92,8 +100,18 @@
             return;
 #endif
 
+#if _ENABLE_LVM_DEBUG
+            fixed4 lvm = tex2D(_LVM, IN.uv2_LVM);
+            fixed4 lvmFinal = lvm * fixed4(_LVM_R, _LVM_G, _LVM_B, 0);
+            fixed4 lvmA = lvm.a;
+            lvmFinal = lerp(lvmFinal, lvmA, _LVM_A);
+            o.Albedo = lvmFinal;
+            return;
+#endif
+
+            o.Specular = _SpecularPower;
+
             fixed4 texColor = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-            o.Albedo = texColor.rgb;
 
             fixed4 n = tex2D (_BumpMap, IN.uv_BumpMap);
             n.xz = n.zx;
@@ -106,28 +124,18 @@
 
             fixed2 lvmColorIndirectUV = fixed2((IN.uv2_LVM.x * .5f) + .5f, IN.uv2_LVM.y);
             fixed4 tmpLvmIndirect = tex2D(_LVMColor, lvmColorIndirectUV);
-            fixed4 lvmIndirect = tmpLvmIndirect * fixed4(1, 1, 1, 0) * _IndirectStrength;
+            fixed4 lvmIndirect = tmpLvmIndirect * fixed4(1, 1, 1, 0) * _IndirectStrength * lvmAOCol.r;
             fixed4 lvmBakedShadow = tmpLvmIndirect.a * _DirectionalLightColor * _BakedShadowStrength;
 
             fixed4 finalLvmColor = lvmDirectCol + lvmIndirect + lvmBakedShadow;
-            fixed3 ambientColor = texColor.rgb * lvmAOCol.r * fixed3(.034, .034, .034);
+            fixed3 ambientColor = texColor.rgb * lvmAOCol.r * _AmbientStrength * _AmbientColor.rgb;
             fixed3 litColor = texColor.rgb * finalLvmColor;
 
-            fixed3 finalColor = max(ambientColor, litColor);
+            fixed3 finalColor = ambientColor + litColor;
 
-            fixed3 finalLvmLerp = lerp(texColor.rgb, finalColor, _LVMColorContribution);
+            fixed3 finalLvmLerp = lerp(texColor, finalColor, _LVMColorContribution);
 
             o.Albedo = finalLvmLerp;
-
-#if _ENABLE_LVM_DEBUG
-            fixed4 lvm = tex2D(_LVM, IN.uv2_LVM);
-            fixed4 lvmFinal = lvm * fixed4(_LVM_R, _LVM_G, _LVM_B, 0);
-            fixed4 lvmA = lvm.a;
-            lvmFinal = lerp(lvmFinal, lvmA, _LVM_A);
-            o.Albedo = lvmFinal;
-#endif
-
-            o.Specular = 1;
         }
         ENDCG
     }

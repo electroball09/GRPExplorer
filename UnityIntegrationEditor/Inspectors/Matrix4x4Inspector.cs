@@ -29,6 +29,8 @@ namespace UnityIntegrationEditor.Inspectors
 
             if (obj.yetiObject != null)
                 obj.UpdateTransformFromMatrix();
+
+            EditorGUILayout.ObjectField("Layer", obj.Layer, typeof(cYetiLayer), false);
         }
 
         public static void DrawMatrix(string name, ref Matrix4x4 matrix)
