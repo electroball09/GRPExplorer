@@ -17,11 +17,13 @@
         LOD 200
 
         CGPROGRAM
+        #include "AutoLight.cginc"
+
         #pragma multi_compile __ _UV_DEBUG_1 _UV_DEBUG_2 _UV_DEBUG_3 _UV_DEBUG_4
         #pragma multi_compile __ _VERTEX_COLOR_DEBUG
         #pragma multi_compile __ _ENABLE_LVM_DEBUG
 
-        #pragma surface surf NoLighting noambient noforwardadd novertexlights
+        #pragma surface surf NoLighting fullforwardshadows// noambient novertexlights noforwardadd
 
         #pragma target 3.0
 
@@ -39,6 +41,8 @@
 
         fixed4 _AmbientColor;
         float _AmbientStrength;
+
+        float _DebugLVMFade;
 
         float _SpecularPower;
 
@@ -72,7 +76,7 @@
         {
             fixed3 ndotl = saturate(dot(lightDir, s.Normal));
             fixed3 color = (s.Albedo * _AmbientColor.rgb * _AmbientStrength) + s.Albedo * ndotl;
-            fixed3 finalLerp = lerp(color, s.Albedo, _LVMColorContribution);
+            fixed3 finalLerp = lerp(color, s.Albedo, _LVMColorContribution * (1 - _DebugLVMFade));
             return fixed4(finalLerp, s.Alpha);
         }
 

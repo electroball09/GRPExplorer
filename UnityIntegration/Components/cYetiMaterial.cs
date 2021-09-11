@@ -25,6 +25,7 @@ namespace UnityIntegration.Components
         {
             { Convert.ToInt32("AD00A2AD", 16), "FootstepCutout" },
             { Convert.ToInt32("AD00F0A4", 16), "TransparentAdditive" },
+            { Convert.ToInt32("11800B53", 16), "TransparentAdditive" },
             { Convert.ToInt32("6B800408", 16), "UnlitTransparent" },
         };
 

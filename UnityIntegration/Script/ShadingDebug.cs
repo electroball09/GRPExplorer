@@ -19,10 +19,6 @@ namespace UnityIntegration.Script
             DoSlider(ref rect, "Indirect", "_IndirectStrength");
             DoSlider(ref rect, "Direct", "_DirectStrength");
             DoSlider(ref rect, "Ambient Strength", "_AmbientStrength", 0f, .1f);
-            DoSlider(ref rect, "LVM_R", "_LVM_R");
-            DoSlider(ref rect, "LVM_G", "_LVM_G");
-            DoSlider(ref rect, "LVM_B", "_LVM_B");
-            DoSlider(ref rect, "LVM_A", "_LVM_A");
             Shader.SetGlobalColor("_AmbientColor", ambientColor);
         }
 

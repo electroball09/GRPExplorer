@@ -175,7 +175,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: de5c0ecf04b59cc4394bb4d139beda01, type: 2}
+  - {fileID: 2100000, guid: babafe0e10619084d9288a2763f8df67, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -470,7 +470,7 @@ MonoBehaviour:
   volumeTrigger: {fileID: 534669905}
   volumeLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 256
   stopNaNPropagation: 1
   finalBlitToCameraTarget: 0
   antialiasingMode: 0
@@ -525,7 +525,7 @@ GameObject:
   m_Component:
   - component: {fileID: 786758786}
   - component: {fileID: 786758785}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Post
   m_TagString: Untagged
   m_Icon: {fileID: 0}

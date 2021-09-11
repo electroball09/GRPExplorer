@@ -34,6 +34,7 @@ namespace UnityIntegration
         {
             light.color = color;
             Shader.SetGlobalColor("_DirectionalLightColor", color);
+            Shader.SetGlobalFloat("_DirectionalLightIntensity", intensity);
             light.intensity = intensity;
         }
     }

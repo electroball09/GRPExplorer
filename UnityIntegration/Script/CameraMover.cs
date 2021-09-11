@@ -74,6 +74,20 @@ namespace UnityIntegration.Script
             }
         }
 
+        void DebugShaderValue(Rect rect, string text, string keyword)
+        {
+            if (Shader.GetGlobalFloat(keyword) == 0)
+            {
+                if (GUI.Button(rect, text))
+                    Shader.SetGlobalFloat(keyword, 1f);
+            }
+            else
+            {
+                if (GUI.Button(rect, $">{text}"))
+                    Shader.SetGlobalFloat(keyword, 0);
+            }
+        }
+
         int debugCoord = 0;
         void OnGUI()
         {
@@ -91,17 +105,19 @@ namespace UnityIntegration.Script
             if (GUI.Button(rect, "GAO idents Tgl"))
                 GAOIdentifier.ToggleIdentifiersVisible();
             rect.x += rect.width;
-            DebugShaderToggle(rect, "UV Debug", $"_UV_DEBUG_{debugCoord}");
+            DebugShaderValue(rect, "UV Debug", $"_DEBUG_UV{debugCoord}");
             rect.x += rect.width;
-            DebugShaderToggle(rect, "VC Debug", "_VERTEX_COLOR_DEBUG");
+            DebugShaderToggle(rect, "Debug", "_DEBUG_VIEW");
             rect.x += rect.width;
-            DebugShaderToggle(rect, "Normal Debug", "_NORMAL_DEBUG");
+            DebugShaderValue(rect, "Normal Debug", "_DEBUG_NORMAL");
             rect.x -= rect.width * 3;
             rect.y -= rect.height;
             DebugShaderToggle(rect, "LVM Debug", "_ENABLE_LVM_DEBUG");
             rect.x += rect.width;
             if (GUI.Button(rect, "Toggle lights"))
                 cYetiLight.ToggleAllLights();
+            rect.x += rect.width;
+            DebugShaderValue(rect, "VC Debug", "_DEBUG_VERTEX_COLOR");
         }
 
         IEnumerator InterpCoroutine(GameObject obj)

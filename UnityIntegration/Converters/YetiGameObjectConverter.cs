@@ -96,6 +96,11 @@ namespace UnityIntegration.Converters
                     layerConv.Convert(subObj, gameObject, context);
                     yetiCmp.SetYetiLayer(layerConv.Components[0] as cYetiLayer);
                 }
+
+                if (subObj.Is<YetiCubemap>())
+                {
+                    GetConverter(subObj).Convert(subObj, gameObject, context);
+                }
             }
         }
     }
