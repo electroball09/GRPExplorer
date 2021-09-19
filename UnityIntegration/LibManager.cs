@@ -7,6 +7,7 @@ using GRPExplorerLib.BigFile;
 using GRPExplorerLib.Logging;
 using UnityEngine;
 using System.IO;
+using Microsoft.Win32;
 
 namespace UnityIntegration
 {

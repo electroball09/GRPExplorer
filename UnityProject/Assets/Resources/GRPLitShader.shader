@@ -1,7 +1,3 @@
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
 Shader "GRP/Lit Basic"
 {
     Properties
@@ -15,7 +11,7 @@ Shader "GRP/Lit Basic"
     {
         Pass
         {
-            Tags { }
+            Tags { "Queue" = "Geometry" "LightMode" = "ForwardBase" }
             CGPROGRAM
             #pragma multi_compile __ SHADOWS_SCREEN
             #pragma multi_compile __ _DEBUG_VIEW
@@ -134,32 +130,36 @@ Shader "GRP/Lit Basic"
                 fixed2 lvmColorDirectUV = fixed2(lvmUv.x * .5f, lvmUv.y);
                 fixed4 tmpLvmDirect = tex2D(_LVMColor, lvmColorDirectUV);
                 fixed4 lvmDirectCol = tmpLvmDirect * fixed4(1, 1, 1, 0) * _DirectStrength;
-                fixed4 lvmAOCol = tmpLvmDirect.a + (1 - _BakedAOStrength * _LVMColorContribution);
+                fixed4 lvmAOCol = lerp(1, tmpLvmDirect.a, _LVMColorContribution);
 
                 fixed2 lvmColorIndirectUV = fixed2((lvmUv.x * .5f) + .5f, lvmUv.y);
                 fixed4 tmpLvmIndirect = tex2D(_LVMColor, lvmColorIndirectUV);
                 fixed4 lvmIndirect = tmpLvmIndirect * fixed4(1, 1, 1, 0) * _IndirectStrength * lvmAOCol.r;
-                fixed4 lvmBakedShadow = tmpLvmIndirect.a * _DirectionalLightColor * _BakedShadowStrength;
+                fixed4 lvmBakedShadow = tmpLvmIndirect.a;
 
-                float attenuation = 0;
-#if defined(SHADOWS_SCREEN)
-                attenuation = SHADOW_ATTENUATION(i);
+                float attenuation = max(lvmBakedShadow, 1 - _LVMColorContribution);
                 //return attenuation;
-                //lvmBakedShadow += _DirectionalLightColor * attenuation;
+#if defined(SHADOWS_SCREEN)
+                attenuation = min(SHADOW_ATTENUATION(i), attenuation);
 #endif
+                //return attenuation;
 
                 fixed4 ambientCube = texCUBE(_Cubemap, i.worldRefl);
                 //return ambientCube;
 
-                fixed4 finalLvmColor = lvmDirectCol + lvmIndirect + lvmBakedShadow;
+                fixed4 lvmAggregate = lvmDirectCol + lvmIndirect;
                 fixed3 ambientColor = texColor.rgb * _AmbientColor.rgb * lvmAOCol.r * _AmbientStrength;
-                ambientColor += texColor.rgb * _DirectionalLightColor * attenuation;
-                fixed3 litColor = texColor.rgb * finalLvmColor;
+                //return fixed4(ambientColor, 1);
+                fixed3 dirLightColor = attenuation * _DirectionalLightColor *_DirectionalLightIntensity;
+                //return fixed4(dirLightColor, 1);
+                fixed3 litColor = texColor.rgb * (lvmAggregate + dirLightColor);
+                //return fixed4(litColor, 1);
 
                 fixed3 finalColor = ambientColor + litColor;
+                fixed3 finalColorNoLVM = ambientColor + (texColor.rgb * dirLightColor);
+                //return fixed4(finalColorNoLVM, 1);
 
-                fixed3 finalLvmLerp = lerp(ambientColor, finalColor, _LVMColorContribution);
-                //finalLvmLerp += (_DirectionalLightColor * attenuation) * (1 - _LVMColorContribution);
+                fixed3 finalLvmLerp = lerp(finalColorNoLVM, finalColor, _LVMColorContribution);
 
                 return fixed4(finalLvmLerp, texColor.a);
             }

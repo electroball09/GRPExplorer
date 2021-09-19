@@ -9,6 +9,8 @@ namespace UnityIntegration.Script
 {
     public class GAOIdentifier : MonoBehaviour
     {
+        static Material gaoMat;
+
         delegate void SetVisible(bool vis);
         static event SetVisible OnVisibleToggled;
 
@@ -24,8 +26,12 @@ namespace UnityIntegration.Script
 
         void Start()
         {
+            if (!gaoMat)
+                gaoMat = (Material)Resources.Load("GAOIdentifierMaterial");
+
             mr = GetComponent<MeshRenderer>();
             mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            mr.sharedMaterial = gaoMat;
 
             OnVisibleToggled += GAOIdentifier_OnVisibleToggled;
         }

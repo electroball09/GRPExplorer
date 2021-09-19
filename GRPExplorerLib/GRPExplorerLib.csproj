@@ -60,6 +60,7 @@
     <Compile Include="YetiObjects\YetiObjectArchetype.cs" />
     <Compile Include="YetiObjects\YetiCurve.cs" />
     <Compile Include="YetiObjects\YetiGameObject.cs" />
+    <Compile Include="YetiObjects\YetiShader.cs" />
     <Compile Include="YetiObjects\YetiTexture.cs" />
     <Compile Include="YetiObjects\YetiWorld.cs" />
     <Compile Include="BigFile\Files\BigFileFileLoader.cs" />
