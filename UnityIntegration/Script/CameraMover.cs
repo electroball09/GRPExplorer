@@ -30,6 +30,11 @@ namespace UnityIntegration.Script
 
         Coroutine interpCoroutine;
 
+        void Start()
+        {
+            GetComponent<Camera>().depthTextureMode = DepthTextureMode.DepthNormals;
+        }
+
         void Update()
         {
             Vector2 scroll = Input.mouseScrollDelta;
@@ -101,7 +106,9 @@ namespace UnityIntegration.Script
             string newCoord = GUI.TextField(rect2, debugCoord.ToString());
             int.TryParse(newCoord, out debugCoord);
             debugCoord = Mathf.Clamp(debugCoord, 0, 4);
-            rect.x -= rect.width;
+            rect2.x += rect2.width;
+            if (GUI.Button(rect2, "Tgl Shadow Mode"))
+                cYetiMesh.SwitchShadowMode();
             if (GUI.Button(rect, "GAO idents Tgl"))
                 GAOIdentifier.ToggleIdentifiersVisible();
             rect.x += rect.width;

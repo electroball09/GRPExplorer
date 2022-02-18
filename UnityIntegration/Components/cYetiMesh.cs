@@ -15,7 +15,17 @@ namespace UnityIntegration.Components
     [RequireComponent(typeof(cYetiObjectReference))]
     public class cYetiMesh : cYetiObjectReference
     {
+        delegate void ChangeShadowModeDelegate(bool isEnabled);
+        static event ChangeShadowModeDelegate OnChangeShadowMode;
+        static bool separateShadowCastersEnabled = true;
+        public static void SwitchShadowMode()
+        {
+            separateShadowCastersEnabled = !separateShadowCastersEnabled;
+            OnChangeShadowMode?.Invoke(separateShadowCastersEnabled);
+        }
+
         static Material meshMat;
+        static Material shadowMat;
 
         public int VertexCount;
         public int TriangleCount;
@@ -27,17 +37,61 @@ namespace UnityIntegration.Components
         public MeshFilter meshFilter;
         public MeshRenderer meshRenderer;
 
+        public GameObject shadowObject;
+        public MeshFilter shadowFilter;
+        public MeshRenderer shadowRenderer;
+
         public List<cYetiMaterial> materials;
 
         public YetiSubmeshData[] submeshData;
 
+        void Awake()
+        {
+            OnChangeShadowMode += CYetiMesh_OnChangeShadowMode;
+        }
+
+        void OnDestroy()
+        {
+            OnChangeShadowMode -= CYetiMesh_OnChangeShadowMode;
+        }
+
+        private void CYetiMesh_OnChangeShadowMode(bool isEnabled)
+        {
+            if (isEnabled)
+            {
+                meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
+                shadowRenderer.enabled = true;
+            }
+            else
+            {
+                meshRenderer.shadowCastingMode = ShadowCastingMode.On;
+                shadowRenderer.enabled = false;
+            }
+        }
+
         public void LoadMesh(YetiMeshData meshData, YetiObjectRepository objectRepository)
         {
             if (!meshMat)
+            {
                 meshMat = (Material)Resources.Load("MeshTestMat");
+                shadowMat = (Material)Resources.Load("ShadowMat");
+            }
 
             meshFilter = gameObject.AddComponent<MeshFilter>();
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            meshRenderer.sharedMaterial = meshMat;
+
+            shadowObject = new GameObject("ShadowCaster");
+            shadowObject.transform.parent = transform;
+            shadowObject.transform.localPosition = Vector3.zero;
+            shadowObject.transform.localRotation = Quaternion.identity;
+            shadowFilter = shadowObject.AddComponent<MeshFilter>();
+            shadowRenderer = shadowObject.AddComponent<MeshRenderer>();
+            shadowRenderer.sharedMaterial = shadowMat;
+            shadowRenderer.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+            shadowRenderer.receiveShadows = false;
+
+            CYetiMesh_OnChangeShadowMode(separateShadowCastersEnabled);
 
             Mesh mesh = null;
             if (objectRepository.GetRepository<Mesh>().ContainsKey(yetiObject))
@@ -82,11 +136,7 @@ namespace UnityIntegration.Components
             }
 
             meshFilter.mesh = mesh;
-
-            meshRenderer.material = meshMat;
-
-            //transform.localPosition = meshData.CenterOffset.ConvertToUnity();
-            //transform.localScale = Vector3.one * meshData.UniformScale;
+            shadowFilter.mesh = mesh;
 
             calcBounds = mesh.bounds.size;
             yetiOffset = meshData.CenterOffset.ConvertToUnity();//.ConvertYetiToUnityCoords();
@@ -110,7 +160,6 @@ namespace UnityIntegration.Components
             if (lvm && lvm.texture)
             {
                 bl.SetTexture("_LVM", lvm?.texture);
-                bl.SetFloat("_AO", 1f);
             }
             if (lvmColor && lvmColor.texture)
             {

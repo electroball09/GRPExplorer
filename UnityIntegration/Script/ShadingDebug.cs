@@ -19,6 +19,10 @@ namespace UnityIntegration.Script
             DoSlider(ref rect, "Indirect", "_IndirectStrength");
             DoSlider(ref rect, "Direct", "_DirectStrength");
             DoSlider(ref rect, "Ambient Strength", "_AmbientStrength", 0f, .1f);
+            DoSlider(ref rect, "Debug R", "_DebugR");
+            DoSlider(ref rect, "Debug G", "_DebugG");
+            DoSlider(ref rect, "Debug B", "_DebugB");
+            DoSlider(ref rect, "Debug A", "_DebugA");
             Shader.SetGlobalColor("_AmbientColor", ambientColor);
         }
 

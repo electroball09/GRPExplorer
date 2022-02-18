@@ -18,6 +18,7 @@ namespace UnityIntegration.Converters
         {
             GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
             thisObj.transform.SetParent(gameObject.transform, false);
+            thisObj.isStatic = true;
 
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(thisObj, yetiObject);
 
@@ -44,6 +45,7 @@ namespace UnityIntegration.Converters
 
             GameObject thisObj = new GameObject(yetiObject.NameWithExtension);
             thisObj.transform.SetParent(gameObject.transform, false);
+            thisObj.isStatic = true;
 
             cYetiObjectReference.AddYetiComponent<cYetiObjectReference>(thisObj, yetiObject);
 

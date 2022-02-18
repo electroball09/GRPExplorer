@@ -47,6 +47,7 @@ Shader "GRP/Lit Basic"
 
             fixed4 _DirectionalLightColor;
             float _DirectionalLightIntensity;
+            float _DirectionalLightEnabled;
 
             float _DEBUG_NORMAL;
             float _DEBUG_UV0;
@@ -55,12 +56,17 @@ Shader "GRP/Lit Basic"
             float _DEBUG_UV3;
             float _DEBUG_UV4;
             float _DEBUG_VERTEX_COLOR;
+            float _DebugR;
+            float _DebugG;
+            float _DebugB;
+            float _DebugA;
 
             struct appdata
             {
                 float4 vertex : POSITION;
                 float3 normal : NORMAL;
                 float4 color : COLOR;
+                float4 tangent : TANGENT;
                 float2 uv0 : TEXCOORD0;
                 float2 uv1 : TEXCOORD1;
                 float2 uv2 : TEXCOORD2;
@@ -80,6 +86,7 @@ Shader "GRP/Lit Basic"
                 float2 uv4 : TEXCOORD4;
                 SHADOW_COORDS(5)
                 float3 worldRefl : TEXCOORD6;
+                float3 lightDir : TEXCOORD7;
             };
 
             v2f vert (appdata v)
@@ -98,12 +105,28 @@ Shader "GRP/Lit Basic"
 
                 TRANSFER_SHADOW(o);
 
+                fixed3 worldTangent = UnityObjectToWorldDir(v.tangent.xyz);
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 float3 worldViewDir = normalize(UnityWorldSpaceViewDir(worldPos));
                 float3 worldNormal = UnityObjectToWorldNormal(v.normal);
+                fixed3 worldBinormal = cross(worldNormal, worldTangent) * v.tangent.w;
+
                 o.worldRefl = reflect(-worldViewDir, worldNormal);
 
+                float3x3 worldToTangent = float3x3(worldTangent, worldBinormal, worldNormal);
+
+                // Transform the light and view dir from world space to tangent space
+                o.lightDir = mul(worldToTangent, WorldSpaceLightDir(v.vertex));
+
                 return o;
+            }
+
+            float3 DecodeNormal(float4 norm)
+            {
+                float3 decoded = norm.xyz * 2 - 1;
+                decoded.xz = decoded.zx;
+                decoded.z = sqrt(1 - saturate(dot(decoded.xy, decoded.xy)));
+                return normalize(decoded);
             }
 
             fixed4 frag(v2f i) : SV_Target
@@ -117,25 +140,32 @@ Shader "GRP/Lit Basic"
                 col.xy += i.uv4 * _DEBUG_UV4;
                 col.xyz += (i.normal + 1) / 2 * _DEBUG_NORMAL;
                 col.xyz += i.color.rgb * _DEBUG_VERTEX_COLOR;
+                col.rgb *= float3(_DebugR, _DebugG, _DebugB) + col.a * _DebugA;
                 return col;
 #endif
 
-                fixed4 texColor = tex2D(_MainTex, i.uv0);
+                //return float4(i.lightDir, 1);
+                //return tex2D(_LVM, i.uv1);
 
-                /*fixed4 n = tex2D(_BumpMap, i.uv0);
-                n.xz = n.zx;*/
+                //return float4(i.lightDir, 1);
+                fixed4 texColor = tex2D(_MainTex, i.uv0);
+                float3 tangentNormal = DecodeNormal(tex2D(_BumpMap, i.uv0));
+                //return fixed4(tangentNormal, 1);
+                float dirLight = max(0, dot(tangentNormal, normalize(i.lightDir)));
+                dirLight = lerp(1, dirLight, _DirectionalLightEnabled);
+                //return float4(dirLight, 1);
 
                 fixed2 lvmUv = i.uv1;
 
                 fixed2 lvmColorDirectUV = fixed2(lvmUv.x * .5f, lvmUv.y);
                 fixed4 tmpLvmDirect = tex2D(_LVMColor, lvmColorDirectUV);
                 fixed4 lvmDirectCol = tmpLvmDirect * fixed4(1, 1, 1, 0) * _DirectStrength;
-                fixed4 lvmAOCol = lerp(1, tmpLvmDirect.a, _LVMColorContribution);
+                fixed4 lvmAOCol = lerp(1, tmpLvmDirect.a, _LVMColorContribution * _BakedAOStrength);
 
                 fixed2 lvmColorIndirectUV = fixed2((lvmUv.x * .5f) + .5f, lvmUv.y);
                 fixed4 tmpLvmIndirect = tex2D(_LVMColor, lvmColorIndirectUV);
                 fixed4 lvmIndirect = tmpLvmIndirect * fixed4(1, 1, 1, 0) * _IndirectStrength * lvmAOCol.r;
-                fixed4 lvmBakedShadow = tmpLvmIndirect.a;
+                fixed4 lvmBakedShadow = lerp(1, tmpLvmIndirect.a, _BakedShadowStrength);
 
                 float attenuation = max(lvmBakedShadow, 1 - _LVMColorContribution);
                 //return attenuation;
@@ -150,7 +180,7 @@ Shader "GRP/Lit Basic"
                 fixed4 lvmAggregate = lvmDirectCol + lvmIndirect;
                 fixed3 ambientColor = texColor.rgb * _AmbientColor.rgb * lvmAOCol.r * _AmbientStrength;
                 //return fixed4(ambientColor, 1);
-                fixed3 dirLightColor = attenuation * _DirectionalLightColor *_DirectionalLightIntensity;
+                fixed3 dirLightColor = attenuation * dirLight * _DirectionalLightColor * _DirectionalLightIntensity;
                 //return fixed4(dirLightColor, 1);
                 fixed3 litColor = texColor.rgb * (lvmAggregate + dirLightColor);
                 //return fixed4(litColor, 1);

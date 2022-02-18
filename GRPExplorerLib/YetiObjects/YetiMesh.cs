@@ -226,11 +226,15 @@ namespace GRPExplorerLib.YetiObjects
                         vertexPos = vertPos,
                         uv0 = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f),
                         uv1 = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f),
-                        uv2 = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f),
-                        uv3 = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f),
-                        uv4 = new Vector2(br.ReadInt16() / 1024f, br.ReadInt16() / 1024f),
-                        vertexColor = new Vector4(snorm16ToFloat(br.ReadInt16()), snorm16ToFloat(br.ReadInt16()), 0, 0),
+                        uv2 = new Vector2(br.ReadUInt16() / 65535f, br.ReadUInt16() / 65535f),
+                        vertexColor = new Vector4(br.ReadByte() / 255f, br.ReadByte() / 255f, br.ReadByte() / 255f, br.ReadByte() / 255f),
+                        //uv3 = new Vector2(br.ReadInt16() / 65535f, br.ReadInt16() / 65535f),
+                        //uv4 = new Vector2(br.ReadInt16() / 65535f, br.ReadInt16() / 65535f),
+                        uv3 = new Vector2(br.ReadByte() / 255f, br.ReadByte() / 255f),
+                        uv4 = new Vector2(br.ReadByte() / 255f, br.ReadByte() / 255f),
                     };
+
+                    br.ReadInt32();
 
                     RawVertices[i] = vertPos;
                     Vertices[i] = vert;

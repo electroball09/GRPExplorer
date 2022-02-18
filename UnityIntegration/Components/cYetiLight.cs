@@ -41,6 +41,7 @@ namespace UnityIntegration.Components
         public void SetLight(YetiGameObject obj)
         {
             unityLight = gameObject.AddComponent<Light>();
+            unityLight.enabled = false;
 
             if (obj.LightType == YetiLightType.Point)
                 SetPointLight(obj, unityLight);

@@ -24,6 +24,12 @@ namespace UnityIntegration
             light = GetComponent<Light>();
         }
 
+        void FixedUpdate()
+        {
+            Shader.SetGlobalVector("_DirectionalLightDirection", new Vector4(transform.forward.x, transform.forward.y, transform.forward.z, 1));
+            Shader.SetGlobalFloat("_DirectionalLightEnabled", light.enabled ? 1f : 0f);
+        }
+
         public void MatchTransform(Transform t)
         {
             Debug.Log("dir light matching transform");

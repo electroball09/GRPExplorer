@@ -20,8 +20,9 @@ namespace UnityIntegration.Converters
             YetiGameObject obj = yetiObject.ArchetypeAs<YetiGameObject>();
 
             GameObject gameObject = new GameObject(yetiObject.NameWithExtension);
+            gameObject.isStatic = true;
 
-            GameObject prim = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            GameObject prim = GameObject.CreatePrimitive(PrimitiveType.Cube);
             prim.transform.parent = gameObject.transform;
             prim.transform.localPosition = Vector3.zero;
             prim.transform.localScale = Vector3.one * 0.3f;
