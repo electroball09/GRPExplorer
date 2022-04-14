@@ -41,7 +41,13 @@ namespace GRPExplorerLib.BigFile.Files
             }
         }
 
-        public IEnumerable<YetiObject> LoadObjectRecursive(YetiObject obj, HashSet<YetiObject> alreadyLoaded)
+        public struct ObjectLoad
+        {
+            public YetiObject yetiObject;
+            public int dataSize;
+        }
+
+        public IEnumerable<ObjectLoad> LoadObjectRecursive(YetiObject obj, HashSet<YetiObject> alreadyLoaded)
         {
             HashSet<YetiObject> loadedList;
             if (alreadyLoaded != null)
@@ -49,7 +55,7 @@ namespace GRPExplorerLib.BigFile.Files
             else
                 loadedList = new HashSet<YetiObject>();
 
-            IEnumerable<YetiObject> Recurse(YetiObject toLoad)
+            IEnumerable<ObjectLoad> Recurse(YetiObject toLoad)
             {
                 if (loadedList.Contains(toLoad))
                     yield break;
@@ -64,13 +70,13 @@ namespace GRPExplorerLib.BigFile.Files
                     bigFile.FileUtil.AddReferencesToObject(toLoad, fileRead.header);
                     toLoad.Load(buffer[fileRead.dataSize], fileRead.dataSize);
 
-                    yield return toLoad;
+                    yield return new ObjectLoad() { yetiObject = toLoad, dataSize = fileRead.dataSize };
 
                     foreach (YetiObject refObj in toLoad.ObjectReferences)
                     {
                         if (refObj != null)
                         {
-                            foreach (YetiObject nextLoad in Recurse(refObj))
+                            foreach (ObjectLoad nextLoad in Recurse(refObj))
                             {
                                 yield return nextLoad;
                             }
@@ -79,9 +85,9 @@ namespace GRPExplorerLib.BigFile.Files
                 }
             }
 
-            foreach (YetiObject loadedObj in Recurse(obj))
+            foreach (ObjectLoad loadedObj in Recurse(obj))
             {
-                if (loadedObj != null)
+                if (loadedObj.dataSize > 0)
                     yield return loadedObj;
             }
         }

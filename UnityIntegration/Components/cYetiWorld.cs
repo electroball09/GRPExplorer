@@ -63,15 +63,19 @@ namespace UnityIntegration.Components
             {
                 log.Info("loading world {0}", world.Object.Name);
 
+                int totalDataSize = 0;
                 if (loadContext.g_loadedList.Count == 0)
-                    foreach (YetiObject obj in LibManager.BigFile.FileLoader.LoadObjectRecursive(world.Object, loadContext.g_loadedList))
+                    foreach (GRPExplorerLib.BigFile.Files.BigFileFileLoader.ObjectLoad obj in 
+                        LibManager.BigFile.FileLoader.LoadObjectRecursive(world.Object, loadContext.g_loadedList))
                     {
+                        totalDataSize += obj.dataSize;
                         count++;
                     }
 
                 bgLoadThread = null;
 
                 log.Info("Background loading thread ended");
+                log.Info($"Loaded {totalDataSize / 1024f / 1024f}MB total ({totalDataSize})");
             }
 
             bgLoadThread = new Thread(new ThreadStart(tLoadWorld))
