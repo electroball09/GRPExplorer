@@ -1,0 +1,11 @@
+﻿global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Numerics;
+global using System.Text;
+global using System.Threading.Tasks;
+global using GRiPE.Code.Renderer;
+global using GRiPE.Code.Util;
+global using Blazor.Extensions.Canvas;
+global using Blazor.Extensions.Canvas.Model;
+global using Blazor.Extensions.Canvas.WebGL;

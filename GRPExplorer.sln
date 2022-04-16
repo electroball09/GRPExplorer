@@ -13,11 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnityIntegration", "UnityIn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnityIntegrationEditor", "UnityIntegrationEditor\UnityIntegrationEditor.csproj", "{34E16EEA-8642-4227-A892-635FB595A1FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRPeditor.Server", "GRPeditor\Server\GRPeditor.Server.csproj", "{AF2AE5E6-0FD7-4925-9795-B4BBAE8C2641}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GRiPE.Server", "GRiPE\Server\GRiPE.Server.csproj", "{DABE07B6-00A0-4897-8D6B-FF3B23A6BA60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRPeditor.Client", "GRPeditor\Client\GRPeditor.Client.csproj", "{067E8040-5D7C-4502-9597-DB7F74812497}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GRiPE.Client", "GRiPE\Client\GRiPE.Client.csproj", "{0F2B23E2-1F9D-43C2-BE2E-3847E2E78642}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRPeditor.Shared", "GRPeditor\Shared\GRPeditor.Shared.csproj", "{5040E4BA-422F-43E9-A9BE-BB58A7D10C0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GRiPE.Code", "GRiPE\Shared\GRiPE.Code.csproj", "{C8B4B367-8737-48BD-A58D-C37070E708F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,18 +45,18 @@ Global
 		{34E16EEA-8642-4227-A892-635FB595A1FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34E16EEA-8642-4227-A892-635FB595A1FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34E16EEA-8642-4227-A892-635FB595A1FB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AF2AE5E6-0FD7-4925-9795-B4BBAE8C2641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AF2AE5E6-0FD7-4925-9795-B4BBAE8C2641}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AF2AE5E6-0FD7-4925-9795-B4BBAE8C2641}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AF2AE5E6-0FD7-4925-9795-B4BBAE8C2641}.Release|Any CPU.Build.0 = Release|Any CPU
-		{067E8040-5D7C-4502-9597-DB7F74812497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{067E8040-5D7C-4502-9597-DB7F74812497}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{067E8040-5D7C-4502-9597-DB7F74812497}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{067E8040-5D7C-4502-9597-DB7F74812497}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5040E4BA-422F-43E9-A9BE-BB58A7D10C0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5040E4BA-422F-43E9-A9BE-BB58A7D10C0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5040E4BA-422F-43E9-A9BE-BB58A7D10C0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5040E4BA-422F-43E9-A9BE-BB58A7D10C0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DABE07B6-00A0-4897-8D6B-FF3B23A6BA60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DABE07B6-00A0-4897-8D6B-FF3B23A6BA60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DABE07B6-00A0-4897-8D6B-FF3B23A6BA60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DABE07B6-00A0-4897-8D6B-FF3B23A6BA60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F2B23E2-1F9D-43C2-BE2E-3847E2E78642}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F2B23E2-1F9D-43C2-BE2E-3847E2E78642}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F2B23E2-1F9D-43C2-BE2E-3847E2E78642}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F2B23E2-1F9D-43C2-BE2E-3847E2E78642}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8B4B367-8737-48BD-A58D-C37070E708F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8B4B367-8737-48BD-A58D-C37070E708F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8B4B367-8737-48BD-A58D-C37070E708F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8B4B367-8737-48BD-A58D-C37070E708F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

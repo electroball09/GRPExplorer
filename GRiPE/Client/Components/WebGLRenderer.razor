@@ -1,0 +1,78 @@
+﻿@using System.Runtime.InteropServices
+@using System.Diagnostics;
+
+@inject WebGLShaderCache shaderCache
+
+<BECanvas Width="640" Height="480" @ref="_canvas" />
+
+<MudText>@string.Format("{0:F3}", delta)</MudText>
+<MudText>@string.Format("{0:F3}", time)</MudText>
+<MudText>@string.Format("{0:F3}", measuredDelta)</MudText>
+<MudNumericField @bind-Value="maxDelta" />
+
+@code
+{
+    BECanvasComponent? _canvas;
+    WebGLContext? _gl;
+
+    DateTime initTime;
+
+    double time = 0;
+    double delta = 0;
+    double measuredDelta = 0;
+
+    Stopwatch deltaWatch = new Stopwatch();
+
+    double maxDelta = 33.3333;
+
+    CachedShader pointShader;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        await Task.Delay(500);
+
+        initTime = DateTime.UtcNow;
+
+        _gl = await _canvas.CreateWebGLAsync();
+
+        pointShader = await shaderCache.FetchShaderAsync(_gl, "point.glsl");
+
+        BasicPointRenderer points = new BasicPointRenderer();
+        points.PointLocations.Add(new Vector2(-1, -1));
+        points.PointLocations.Add(new Vector2(1, 1));
+
+        while (true)
+        {
+            await BeginRenderLoop();
+
+            StateHasChanged();
+
+            points.PointLocations[0] = new Vector2(-1, -(float)Math.Sin(time ));
+            points.PointLocations[1] = new Vector2(1, (float)Math.Sin(time));
+
+            await points.Render(_gl, shaderCache);
+
+            await EndRenderLoop();
+
+            var delay = Math.Clamp(maxDelta - delta, 0, maxDelta);
+            await Task.Delay(TimeSpan.FromMilliseconds(delay));
+        }
+    }
+
+    private async Task BeginRenderLoop()
+    {
+        time = (DateTime.UtcNow - initTime).TotalSeconds;
+        measuredDelta = deltaWatch.Elapsed.TotalMilliseconds;
+        deltaWatch.Restart();
+
+        await _gl!.ClearColorAsync(0, 0, 0, 1);
+        await _gl.ClearAsync(BufferBits.COLOR_BUFFER_BIT);
+    }
+
+    private async Task EndRenderLoop()
+    {
+        delta = ((double)deltaWatch.ElapsedTicks / Stopwatch.Frequency) * 1000f;
+    }
+}
