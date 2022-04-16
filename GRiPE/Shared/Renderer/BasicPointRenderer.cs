@@ -23,7 +23,7 @@ namespace GRiPE.Code.Renderer
 
             var buffer = await gl.CreateBufferAsync();
             await gl.BindBufferAsync(BufferType.ARRAY_BUFFER, buffer);
-            await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, PointLocations.BackingArray, BufferUsageHint.DYNAMIC_DRAW);
+            await gl.BufferDataAsync(BufferType.ARRAY_BUFFER, PointLocations.FloatArray, BufferUsageHint.DYNAMIC_DRAW);
 
             var index = await gl.GetAttribLocationAsync(pointShader.ShaderProgram, "pos");
             await gl.VertexAttribPointerAsync((uint)index, 2, DataType.FLOAT, false, 0, 0);

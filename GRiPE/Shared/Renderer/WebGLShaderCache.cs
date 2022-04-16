@@ -79,6 +79,7 @@ namespace GRiPE.Code.Renderer
 
             Dictionary<string, int> attribLocations = new();
             Dictionary<string, WebGLUniformLocation> uniformLocations = new();
+            await Task.CompletedTask;
             //uint numAttribs = await gl.GetProgramParameterAsync<uint>(program, ProgramParameter.ACTIVE_ATTRIBUTES);
             //uint numUniforms = await gl.GetProgramParameterAsync<uint>(program, ProgramParameter.ACTIVE_UNIFORMS);
             //Console.WriteLine($"numAttribs: {numAttribs}  numUniforms: {numUniforms}");

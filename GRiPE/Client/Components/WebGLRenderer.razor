@@ -9,6 +9,7 @@
 <MudText>@string.Format("{0:F3}", time)</MudText>
 <MudText>@string.Format("{0:F3}", measuredDelta)</MudText>
 <MudNumericField @bind-Value="maxDelta" />
+<MudButton OnClick="UpdateUI">Update UI</MudButton>
 
 @code
 {
@@ -25,7 +26,10 @@
 
     double maxDelta = 33.3333;
 
-    CachedShader pointShader;
+    List<GRiPERenderer> renderersToDraw = new List<GRiPERenderer>();
+    BasicPointRenderer points = new BasicPointRenderer();
+
+    protected void UpdateUI() => StateHasChanged();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -37,22 +41,21 @@
 
         _gl = await _canvas.CreateWebGLAsync();
 
-        pointShader = await shaderCache.FetchShaderAsync(_gl, "point.glsl");
-
-        BasicPointRenderer points = new BasicPointRenderer();
         points.PointLocations.Add(new Vector2(-1, -1));
         points.PointLocations.Add(new Vector2(1, 1));
+        renderersToDraw.Add(points);
 
         while (true)
         {
             await BeginRenderLoop();
 
-            StateHasChanged();
+            //StateHasChanged();
 
-            points.PointLocations[0] = new Vector2(-1, -(float)Math.Sin(time ));
-            points.PointLocations[1] = new Vector2(1, (float)Math.Sin(time));
+            points.PointLocations[0] = new Vector2(-(float)Math.Sin(time * 1.8426f + 1.4675) * 0.95f, -(float)Math.Sin(time ));
+            points.PointLocations[1] = new Vector2((float)Math.Sin(time + .874), (float)Math.Sin(time * 1.2589f));
 
-            await points.Render(_gl, shaderCache);
+            foreach (var renderer in renderersToDraw)
+                await renderer.Render(_gl, shaderCache);
 
             await EndRenderLoop();
 
@@ -73,6 +76,7 @@
 
     private async Task EndRenderLoop()
     {
+        await Task.CompletedTask;
         delta = ((double)deltaWatch.ElapsedTicks / Stopwatch.Frequency) * 1000f;
     }
 }
