@@ -3,9 +3,9 @@ using System.Collections;
 
 namespace GRiPE.Code.Util
 {
-    public class SerializedVector2Array : FloatBackedArray<Vector2> //: IEnumerable<Vector2>
+    public class Vector2Array : FloatBackedArray<Vector2> //: IEnumerable<Vector2>
     {
-        protected override int FloatWidth => 2;
+        public override int FloatWidth => 2;
         protected override Vector2 FromFloats(ReadOnlySpan<float> floats) => new Vector2(floats);
         protected override void ToFloats(Vector2 value, Span<float> floats) => value.CopyTo(floats);
         //float[] array = new float[0];

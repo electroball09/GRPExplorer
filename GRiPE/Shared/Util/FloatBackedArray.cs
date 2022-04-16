@@ -3,21 +3,25 @@ using System.Collections;
 
 namespace GRiPE.Code.Util
 {
+    public delegate void Modifier<T>(ref T item);
+
     public abstract class FloatBackedArray<T> : IEnumerable<T>
     {
         public float[] FloatArray => array;
         public int Length => numItems;
 
+        public int ArrayResizeModifier => FloatWidth * 4;
+
         private float[] array;
         private int numItems = 0;
 
-        protected abstract int FloatWidth { get; }
+        public abstract int FloatWidth { get; }
         protected abstract T FromFloats(ReadOnlySpan<float> floats);
         protected abstract void ToFloats(T value, Span<float> floats);
 
         public FloatBackedArray()
         {
-            array = new float[FloatWidth * 4];
+            array = new float[ArrayResizeModifier];
         }
 
         public T this[int index]
@@ -28,11 +32,11 @@ namespace GRiPE.Code.Util
 
         public void Add(T item)
         {
-            numItems++;
-            if (array.Length < numItems * FloatWidth)
+            if (array.Length < (numItems + 1) * FloatWidth)
             {
-                Array.Resize(ref array, array.Length * 2);
+                Array.Resize(ref array, array.Length + ArrayResizeModifier);
             }
+            this[numItems++] = item;
         }
 
         public void Remove(int index)
@@ -40,6 +44,13 @@ namespace GRiPE.Code.Util
             int actualIndex = index * FloatWidth;
             Array.Copy(array, actualIndex + FloatWidth, array, actualIndex, array.Length - (actualIndex + FloatWidth));
             numItems--;
+        }
+
+        public void Modify(int index, Modifier<T> modifier)
+        {
+            T value = this[index];
+            modifier(ref value);
+            this[index] = value;
         }
 
         public IEnumerator<T> GetEnumerator()

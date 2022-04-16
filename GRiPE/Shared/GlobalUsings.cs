@@ -6,6 +6,7 @@ global using System.Text;
 global using System.Threading.Tasks;
 global using GRiPE.Code.Renderer;
 global using GRiPE.Code.Util;
+global using GRiPE.Code.Types;
 global using Blazor.Extensions.Canvas;
 global using Blazor.Extensions.Canvas.Model;
 global using Blazor.Extensions.Canvas.WebGL;

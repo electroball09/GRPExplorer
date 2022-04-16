@@ -1,5 +1,6 @@
 ﻿@using System.Runtime.InteropServices
 @using System.Diagnostics;
+@using GRiPE.Code.Types;
 
 @inject WebGLShaderCache shaderCache
 
@@ -10,6 +11,11 @@
 <MudText>@string.Format("{0:F3}", measuredDelta)</MudText>
 <MudNumericField @bind-Value="maxDelta" />
 <MudButton OnClick="UpdateUI">Update UI</MudButton>
+
+@foreach (var point in points.Points)
+{
+    <MudText>@point.ToString()</MudText>
+}
 
 @code
 {
@@ -24,10 +30,11 @@
 
     Stopwatch deltaWatch = new Stopwatch();
 
-    double maxDelta = 33.3333;
+    double maxDelta = 16.6667;
 
     List<GRiPERenderer> renderersToDraw = new List<GRiPERenderer>();
     BasicPointRenderer points = new BasicPointRenderer();
+    BasicLineRenderer lines = new BasicLineRenderer();
 
     protected void UpdateUI() => StateHasChanged();
 
@@ -41,22 +48,51 @@
 
         _gl = await _canvas.CreateWebGLAsync();
 
-        points.PointLocations.Add(new Vector2(-1, -1));
-        points.PointLocations.Add(new Vector2(1, 1));
+        Point p = new Point() { color = new(0, 1, 0, .25f), size = 5f };
+        points.Points.Add(p);
+        points.Points.Add(p);
+
+        lines.Lines.Add(new Line
+        {
+            start = new(-1, -1),
+            end = new(1, 1),
+            color = new(0, 0, 1, 1)
+        });
+        lines.Lines.Add(new Line
+        {
+            start = new(1, 1),
+            end = new(-1, .5f),
+            color = new(0, 0, 1, 1)
+        });
+
+        await points.InitResources(_gl, shaderCache);
+        await lines.InitResources(_gl, shaderCache);
+
         renderersToDraw.Add(points);
+        renderersToDraw.Add(lines);
 
         while (true)
         {
+            await _gl.BeginBatchAsync();
             await BeginRenderLoop();
 
-            //StateHasChanged();
-
-            points.PointLocations[0] = new Vector2(-(float)Math.Sin(time * 1.8426f + 1.4675) * 0.95f, -(float)Math.Sin(time ));
-            points.PointLocations[1] = new Vector2((float)Math.Sin(time + .874), (float)Math.Sin(time * 1.2589f));
+            points.Points.Modify(0, 
+                (ref Point point) =>
+                {
+                    point.position = new Vector2(-(float)Math.Sin(time * 1.8426f + 1.4675) * 0.95f, -(float)Math.Sin(time));
+                });
+            points.Points.Modify(1, 
+                (ref Point point) => 
+                {
+                    point.position = new Vector2((float)Math.Sin(time + .874), (float)Math.Sin(time * 1.2589f));
+                    point.color = new((float)(Math.Sin(time) + 1) / 10 + .3f, (float)Math.Sin(time * 2), (float)Math.Sin(time * .5f), 1f);
+                    point.size = (float)((Math.Sin(time * 1.5) + 1) * 10 + 5);
+                });
 
             foreach (var renderer in renderersToDraw)
                 await renderer.Render(_gl, shaderCache);
-
+                
+            await _gl.EndBatchAsync();
             await EndRenderLoop();
 
             var delay = Math.Clamp(maxDelta - delta, 0, maxDelta);

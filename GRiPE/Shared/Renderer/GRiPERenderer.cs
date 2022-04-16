@@ -12,6 +12,7 @@ namespace GRiPE.Code.Renderer
     public abstract class GRiPERenderer
     {
         public abstract Task InitResources(WebGLContext gl, WebGLShaderCache shaderCache);
+        public abstract Task DestroyResources(WebGLContext gl, WebGLShaderCache shaderCache);
         public abstract Task Render(WebGLContext gl, WebGLShaderCache shaderCache);
     }
 }
