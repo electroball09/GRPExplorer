@@ -330,6 +330,7 @@ ASALocalRun/
 Assets/AssetStoreTools*
 DLL/
 !dont remove.txt
+UnityProject/**.sln
 
 */Assets/StandardUnity/
 configuration/**.meta
@@ -343,7 +344,6 @@ StandardUnity/**.meta
 ExportedObj/
 .consulo/
 *.unityproj
-*.sln
 *.suo
 *.tmp
 *.user
