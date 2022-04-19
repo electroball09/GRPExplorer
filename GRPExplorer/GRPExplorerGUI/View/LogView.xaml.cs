@@ -44,7 +44,7 @@ namespace GRPExplorerGUI.View
         {
             try
             {
-                Application.Current.Dispatcher.Invoke
+                Application.Current?.Dispatcher.Invoke
                     (() =>
                     {
                         if (Log.LogProxy.Messages.Count == lastCount)

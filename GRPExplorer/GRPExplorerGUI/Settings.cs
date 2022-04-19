@@ -45,7 +45,10 @@ namespace GRPExplorerGUI
         {
             get
             {
-                return GetValue(defaultValue: Environment.CurrentDirectory) as string;
+                var dir = GetValue(defaultValue: Environment.CurrentDirectory) as string;
+                if (!Directory.Exists(dir))
+                    dir = Environment.CurrentDirectory;
+                return dir;
             }
             set
             {
@@ -57,7 +60,10 @@ namespace GRPExplorerGUI
         {
             get
             {
-                return GetValue(defaultValue: Environment.CurrentDirectory) as string;
+                var dir = GetValue(defaultValue: Environment.CurrentDirectory) as string;
+                if (!Directory.Exists(dir))
+                    dir = Environment.CurrentDirectory;
+                return dir;
             }
             set
             {

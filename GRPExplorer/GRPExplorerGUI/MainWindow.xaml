@@ -8,7 +8,7 @@
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         x:Class="GRPExplorerGUI.MainWindow"
         mc:Ignorable="d"
-        Title="{Binding Path=bigFileview.BigFileViewModel.BigFile.MetadataFileInfo.DirectoryName, FallbackValue='GRPExplorer'}" Height="867.554" Width="1230" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+        Title="{Binding Path=bigFileview.BigFileViewModel.BigFile.MetadataFileInfo.DirectoryName, FallbackValue='GRPExplorer'}" Height="800" Width="1230" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
     <Grid>
         <StatusBar VerticalAlignment="Bottom" Height="30" Grid.ColumnSpan="3">
             <StackPanel x:Name="stkLoadingReferences" Visibility="Collapsed" Orientation="Horizontal">
