@@ -1,0 +1,26 @@
+﻿@if (Points != null)
+{
+    @foreach (var point in Points.Points)
+    {
+        <br />@point.ToString()
+        <br />@point.ToString()
+        <br />@point.ToString()
+        <br />@point.ToString()
+        <br />@point.ToString()
+        <br />@point.ToString()
+        <br />@point.ToString()
+        <br />@point.ToString()
+        <br />@point.ToString()
+    }
+}
+
+
+@code {
+    [Parameter]
+    public BasicPointRenderer? Points { get; set; } 
+
+    public void Update()
+    {
+        StateHasChanged();
+    }
+}

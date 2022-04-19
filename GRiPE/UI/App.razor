@@ -1,0 +1,30 @@
+﻿@using System.Runtime.InteropServices
+
+@inject SessionId sid
+
+<MudLayout Class="absolute width:100% height:100% overflow-hidden">
+    <MudAppBar>
+        <MudText Typo="Typo.h5" Class="ml-3">GRiPE</MudText>
+        <MudSpacer />
+        <MudText Typo="Typo.caption">sid: @sid.ToString()</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+    </MudAppBar>
+    <MudMainContent Class="overflow-scroll">
+        <GRiPE.UI.Pages.Index />
+    </MudMainContent>
+</MudLayout>
+
+<MudThemeProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+@code {
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    static extern bool AllocConsole();
+
+    protected override void OnInitialized()
+    {
+        AllocConsole();
+    }
+}
