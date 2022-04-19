@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GRPExplorerLib\GRPExplorerLib.csproj" />
+    <ProjectReference Include="..\..\GRPExplorer\GRPExplorerLib\GRPExplorerLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
