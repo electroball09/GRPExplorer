@@ -2,19 +2,20 @@
 
 @inject SessionId sid
 
-<MudLayout Class="absolute width:100% height:100% overflow-hidden">
-    <MudAppBar>
+<MudLayout>
+    <MudAppBar Dense Fixed>
         <MudText Typo="Typo.h5" Class="ml-3">GRiPE</MudText>
         <MudSpacer />
         <MudText Typo="Typo.caption">sid: @sid.ToString()</MudText>
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+        <MudIconButton Icon="@Icons.Filled.Close" Color="Color.Error" OnClick="CloseApp" />
     </MudAppBar>
-    <MudMainContent Class="overflow-scroll">
+    <MudMainContent Style="fixed">
         <GRiPE.UI.Pages.Index />
     </MudMainContent>
 </MudLayout>
 
-<MudThemeProvider/>
+<MudThemeProvider Theme="@theme"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
@@ -27,4 +28,44 @@
     {
         AllocConsole();
     }
+
+    private void CloseApp()
+    {
+        Environment.Exit(0);
+    }
+
+    MudTheme theme = new MudTheme()
+        {
+            Palette = DocsDarkPalette
+        };
+
+    private static readonly Palette DocsDarkPalette  = new()
+        {
+            Primary = "#0d183b",
+            Surface= "#0d0f12",
+            Background = "#0d0f12",
+            BackgroundGrey = "#151521",
+            AppbarText = "#92929f",
+            AppbarBackground = "#0d183b",
+            DrawerBackground = "#0d0f12",
+            ActionDefault = "#74718e",
+            ActionDisabled = "#9999994d",
+            ActionDisabledBackground = "#605f6d4d",
+            TextPrimary = "#b2b0bf",
+            TextSecondary = "#92929f",
+            TextDisabled = "#ffffff33",
+            DrawerIcon = "#92929f",
+            DrawerText = "#92929f",
+            GrayLight = "#2a2833",
+            GrayLighter = "#1e1e2d",
+            Info = "#4a86ff",
+            Success = "#3dcb4e",
+            Warning = "#ccc039",
+            Error = "#e00429",
+            LinesDefault = "#33323e",
+            TableLines = "#33323e",
+            Divider = "#292838",
+            OverlayLight = "#1e1e2d80"
+
+        };
 }

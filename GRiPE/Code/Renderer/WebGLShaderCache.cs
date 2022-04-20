@@ -40,7 +40,7 @@ namespace GRiPE.Code.Renderer
 
         readonly static Dictionary<WebGLContext, WebGLShaderCache> shaderCaches = new();
 
-        public const string SHADER_FOLDER = "shader/";
+        public const string SHADER_FOLDER = "shader";
         readonly Dictionary<string, (string vert, string frag)> cachedShaderSources = new();
         readonly Dictionary<string, CachedShader> cachedShaders = new();
 
@@ -122,20 +122,20 @@ namespace GRiPE.Code.Renderer
 
         private async Task<WebGLProgram> CreateShaderProgram(WebGLContext gl, (WebGLShader vert, WebGLShader frag) compiledShader)
         {
-            //await gl.BeginBatchAsync();
+            await gl.BeginBatchAsync();
             var program = await gl.CreateProgramAsync();
             await gl.AttachShaderAsync(program, compiledShader.vert);
             await gl.AttachShaderAsync(program, compiledShader.frag);
             await gl.LinkProgramAsync(program);
             LogInfo("program", await gl.GetProgramInfoLogAsync(program));
-            //await gl.EndBatchAsync();
+            await gl.EndBatchAsync();
 
             return program;
         }
 
         private async Task<(WebGLShader vert, WebGLShader frag)> CompileShader(WebGLContext gl, (string vert, string frag) shaderSources)
         {
-            //await gl.BeginBatchAsync();
+            await gl.BeginBatchAsync();
             var vert = await gl.CreateShaderAsync(ShaderType.VERTEX_SHADER);
             await gl.ShaderSourceAsync(vert, shaderSources.vert);
             await gl.CompileShaderAsync(vert);
@@ -145,7 +145,7 @@ namespace GRiPE.Code.Renderer
             await gl.ShaderSourceAsync(frag, shaderSources.frag);
             await gl.CompileShaderAsync(frag);
             LogInfo("frag", await gl.GetShaderInfoLogAsync(frag));
-            //await gl.EndBatchAsync();
+            await gl.EndBatchAsync();
 
             return (vert, frag);
         }

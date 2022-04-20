@@ -1,18 +1,29 @@
-﻿@if (Points != null)
-{
-    @foreach (var point in Points.Points)
+﻿<div class="flex-grow-1" style="overflow:auto;height:100%;">
+    @if (Points != null)
     {
-        <br />@point.ToString()
-        <br />@point.ToString()
-        <br />@point.ToString()
-        <br />@point.ToString()
-        <br />@point.ToString()
-        <br />@point.ToString()
-        <br />@point.ToString()
-        <br />@point.ToString()
-        <br />@point.ToString()
+        @foreach (var point in Points.Points)
+        {
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+            <MudText>@point.ToString()</MudText>
+        }
     }
-}
+</div>
 
 
 @code {
@@ -21,6 +32,6 @@
 
     public void Update()
     {
-        StateHasChanged();
+        //StateHasChanged();
     }
 }
