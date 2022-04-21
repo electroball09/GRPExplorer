@@ -1,4 +1,5 @@
 ﻿@using System.Runtime.InteropServices
+@using System.Diagnostics
 
 @inject SessionId sid
 
@@ -7,8 +8,7 @@
         <MudText Typo="Typo.h5" Class="ml-3">GRiPE</MudText>
         <MudSpacer />
         <MudText Typo="Typo.caption">sid: @sid.ToString()</MudText>
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-        <MudIconButton Icon="@Icons.Filled.Close" Color="Color.Error" OnClick="CloseApp" />
+        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Edge="Edge.End" />
     </MudAppBar>
     <MudMainContent Style="fixed">
         <GRiPE.UI.Pages.Index />
@@ -24,9 +24,15 @@
     [return: MarshalAs(UnmanagedType.Bool)]
     static extern bool AllocConsole();
 
+    [DllImport("User32.dll", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShowWindow([In] IntPtr hWnd, [In] int nCmdShow);
+
     protected override void OnInitialized()
     {
         AllocConsole();
+        IntPtr handle = Process.GetCurrentProcess().MainWindowHandle;
+        ShowWindow(handle, 6);
     }
 
     private void CloseApp()
@@ -42,8 +48,8 @@
     private static readonly Palette DocsDarkPalette  = new()
         {
             Primary = "#0d183b",
-            Surface= "#0d0f12",
-            Background = "#0d0f12",
+            Surface= "#1c1c1c",
+            Background = "#121212",
             BackgroundGrey = "#151521",
             AppbarText = "#92929f",
             AppbarBackground = "#0d183b",

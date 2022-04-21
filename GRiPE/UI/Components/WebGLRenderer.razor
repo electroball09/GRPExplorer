@@ -5,60 +5,23 @@
 @using System.Threading;
 
 @inject WebGLShaderCache shaderCache
-<MudPaper Elevation="0" MaxHeight="100%" Class="ma-2 pb-4 overflow-scroll">
-    <div class="display:fixed width:400px height:250px">
+
+<div class="ma-2 pb-4 overflow-hidden" style="max-height:100%">
+    <div class="display:absolute width:400px height:250px">
         <BECanvas Width="400" Height="250" @ref="_canvas" />
     </div>
 
-    <MudText>@string.Format("{0:F3}", delta)</MudText>
-    <MudText>@string.Format("{0:F3}", time)</MudText>
-    <MudText>@string.Format("{0:F3}", measuredDelta)</MudText>
+    <MudText Typo="Typo.body2">@string.Format("{0:F3}", delta)</MudText>
+    <MudText Typo="Typo.body2">@string.Format("{0:F3}", time)</MudText>
+    <MudText Typo="Typo.body2">@string.Format("{0:F3}", measuredDelta)</MudText>
     <MudNumericField @bind-Value="maxDelta" />
     <MudButton OnClick="UpdateUI">Update UI</MudButton>
 
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-    <MudText>PLACEHOLDER TEXT</MudText>
-</MudPaper>
+    <div class="overflow-scroll" style="max-width:100%">
+        <PointsDisplay Points="@points" @ref="pointsDisplay" />
+    </div>
+</div>
 
-@*<PointsDisplay Points="@points" @ref="pointsDisplay" />*@
 
 @code
 {

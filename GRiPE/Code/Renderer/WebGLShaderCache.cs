@@ -152,7 +152,7 @@ namespace GRiPE.Code.Renderer
 
         private async Task<(string vert, string frag)> LoadShaderSource(WebGLContext gl, string fileName)
         {
-            //await sourceSemaphore.WaitAsync();
+            await sourceSemaphore.WaitAsync();
 
             if (!fileName.EndsWith(".glsl"))
                 fileName += ".glsl";
@@ -203,7 +203,7 @@ namespace GRiPE.Code.Renderer
                 return shaderSource;
             }
             cachedShaderSources.Add(fileName, sources);
-            //sourceSemaphore.Release();
+            sourceSemaphore.Release();
 
             return sources;
         }

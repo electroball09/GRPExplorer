@@ -34,5 +34,36 @@ namespace GRiPE.App
 
             Resources.Add("services", serviceCollection.BuildServiceProvider());
         }
+
+        private void quit_Click(object sender, RoutedEventArgs e)
+        {
+            Environment.Exit(0);
+        }
+
+        private void maximize_Click(object sender, RoutedEventArgs e)
+        {
+            if (WindowState != WindowState.Maximized)
+            {
+                //WindowState = WindowState.Maximized;
+                Left = 0;
+                Top = 0;
+                Width = SystemParameters.WorkArea.Width;
+                Height = SystemParameters.WorkArea.Height;
+            }
+            else
+            {
+                WindowState = WindowState.Normal;
+            }
+        }
+
+        private void minimize_Click(object sender, RoutedEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
     }
 }

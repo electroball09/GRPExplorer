@@ -9,9 +9,16 @@
         xmlns:Components="clr-namespace:GRiPE.UI.Pages;assembly=GRiPE.UI"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" 
-        WindowStyle="ThreeDBorderWindow" WindowState="Maximized" WindowStartupLocation="CenterScreen">
+        WindowStyle="None" WindowState="Normal" WindowStartupLocation="CenterScreen">
     <Grid>
-        <blazor:BlazorWebView HostPage="wwwroot\index.html" Services="{StaticResource services}">
+        <Grid MouseLeftButtonDown="Grid_MouseLeftButtonDown" Height="25" VerticalAlignment="Top" Background="#FF121212">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Click="minimize_Click" x:Name="minimize" BorderThickness="0" Height="22" Width="100" Margin="0,0,5,0">-</Button>
+                <Button Click="maximize_Click" x:Name="maximize" BorderThickness="0" Height="22" Width="100" Margin="0,0,5,0">+</Button>
+                <Button Click="quit_Click" x:Name="quit" BorderThickness="0" Height="22"  Width="100" Margin="0,0,5,0" Background="Firebrick">X</Button>
+            </StackPanel>
+        </Grid>
+        <blazor:BlazorWebView HostPage="wwwroot\index.html" Services="{StaticResource services}" Margin="0,25,0,0">
             <blazor:BlazorWebView.RootComponents>
                 <blazor:RootComponent Selector="#app" ComponentType="{x:Type UI:App}"/>
             </blazor:BlazorWebView.RootComponents>
