@@ -9,6 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
+    <PackageReference Include="Config.Net" Version="4.19.0" />
+    <PackageReference Include="Config.Net.Json" Version="4.19.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\GRPExplorer\GRPExplorerLib\GRPExplorerLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>

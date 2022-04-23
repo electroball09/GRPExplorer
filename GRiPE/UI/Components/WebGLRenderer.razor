@@ -6,9 +6,9 @@
 
 @inject WebGLShaderCache shaderCache
 
-<div class="ma-2 pb-4 overflow-hidden" style="max-height:100%">
-    <div class="display:absolute width:400px height:250px">
-        <BECanvas Width="400" Height="250" @ref="_canvas" />
+<div class="ma-2 pb-4 overflow-scroll" style="max-height:100%">
+    <div class="display:absolute width:640px height:480px">
+        <BECanvas Width="640" Height="480" @ref="_canvas" />
     </div>
 
     <MudText Typo="Typo.body2">@string.Format("{0:F3}", delta)</MudText>
@@ -17,7 +17,7 @@
     <MudNumericField @bind-Value="maxDelta" />
     <MudButton OnClick="UpdateUI">Update UI</MudButton>
 
-    <div class="overflow-scroll" style="max-width:100%">
+    <div cstyle="max-width:100%">
         <PointsDisplay Points="@points" @ref="pointsDisplay" />
     </div>
 </div>

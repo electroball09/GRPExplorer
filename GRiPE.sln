@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GRiPE.UI", "GRiPE\UI\GRiPE.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GRiPE.Runtime", "GRiPE\Runtime\GRiPE.Runtime.csproj", "{3DFCF06A-5303-41E4-AAF7-8B751DAF5F2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GRPExplorerLib", "GRPExplorer\GRPExplorerLib\GRPExplorerLib.csproj", "{2B40EF25-718F-47DB-9ED5-EFCA5DCAAB96}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{3DFCF06A-5303-41E4-AAF7-8B751DAF5F2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DFCF06A-5303-41E4-AAF7-8B751DAF5F2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DFCF06A-5303-41E4-AAF7-8B751DAF5F2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B40EF25-718F-47DB-9ED5-EFCA5DCAAB96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B40EF25-718F-47DB-9ED5-EFCA5DCAAB96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B40EF25-718F-47DB-9ED5-EFCA5DCAAB96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B40EF25-718F-47DB-9ED5-EFCA5DCAAB96}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

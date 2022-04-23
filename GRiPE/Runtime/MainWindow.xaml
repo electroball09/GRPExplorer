@@ -8,20 +8,21 @@
         xmlns:UI="clr-namespace:GRiPE.UI;assembly=GRiPE.UI"
         xmlns:Components="clr-namespace:GRiPE.UI.Pages;assembly=GRiPE.UI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" 
-        WindowStyle="None" WindowState="Normal" WindowStartupLocation="CenterScreen">
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded"
+        WindowStyle="None" SizeChanged="Window_SizeChanged">
     <Grid>
-        <Grid MouseLeftButtonDown="Grid_MouseLeftButtonDown" Height="25" VerticalAlignment="Top" Background="#FF121212">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <blazor:BlazorWebView x:Name="blazorThing" HostPage="wwwroot\index.html" Services="{StaticResource services}" Margin="0,25,0,0">
+            <blazor:BlazorWebView.RootComponents>
+                <blazor:RootComponent Parameters="{StaticResource parameters}" Selector="#app" ComponentType="{x:Type UI:App}" />
+            </blazor:BlazorWebView.RootComponents>
+        </blazor:BlazorWebView>
+        <Grid Visibility="Visible" Panel.ZIndex="10" MouseLeftButtonDown="Grid_MouseLeftButtonDown" MouseLeftButtonUp="Grid_MouseLeftButtonUp" 
+              Height="25" VerticalAlignment="Top" Background="#FF121212">
+            <StackPanel Visibility="Collapsed" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Click="minimize_Click" x:Name="minimize" BorderThickness="0" Height="22" Width="100" Margin="0,0,5,0">-</Button>
                 <Button Click="maximize_Click" x:Name="maximize" BorderThickness="0" Height="22" Width="100" Margin="0,0,5,0">+</Button>
                 <Button Click="quit_Click" x:Name="quit" BorderThickness="0" Height="22"  Width="100" Margin="0,0,5,0" Background="Firebrick">X</Button>
             </StackPanel>
         </Grid>
-        <blazor:BlazorWebView HostPage="wwwroot\index.html" Services="{StaticResource services}" Margin="0,25,0,0">
-            <blazor:BlazorWebView.RootComponents>
-                <blazor:RootComponent Selector="#app" ComponentType="{x:Type UI:App}"/>
-            </blazor:BlazorWebView.RootComponents>
-        </blazor:BlazorWebView>
     </Grid>
 </Window>

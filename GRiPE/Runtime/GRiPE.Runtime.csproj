@@ -8,6 +8,7 @@
 	</PropertyGroup>
 	
     <ItemGroup>
+	    <PackageReference Include="Config.Net" Version="4.19.0" />
 	    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="6.0.200-preview.14.5099" />
 	    <PackageReference Include="mudblazor" Version="6.0.9" />
     </ItemGroup>

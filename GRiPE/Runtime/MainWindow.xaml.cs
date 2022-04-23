@@ -18,6 +18,7 @@ using MudBlazor.Services;
 using System.Net.Http;
 using GRiPE.Code.Renderer;
 using GRiPE.Code.Util;
+using GRiPE.Code.Config;
 
 namespace GRiPE.App
 {
@@ -25,14 +26,42 @@ namespace GRiPE.App
     {
         public MainWindow()
         {
+            WindowState = GRiPEConfig.Config.Maximized ? WindowState.Maximized : WindowState.Normal;
+            MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
+            MaxWidth = SystemParameters.MaximizedPrimaryScreenWidth;
+            Left = GRiPEConfig.Config.WindowLeft;
+            Top = GRiPEConfig.Config.WindowTop;
+
+            //blazor initialization
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddBlazorWebView();
             serviceCollection.AddMudServices();
             serviceCollection.AddScoped<WebGLShaderCache>();
-            serviceCollection.AddScoped(sp => new HttpClient() );
+            serviceCollection.AddScoped(sp => new HttpClient());
             serviceCollection.AddScoped<SessionId>();
+            serviceCollection.AddScoped((_) => GRiPEConfig.Config);
 
+            //setting parameters on App.razor
+            Dictionary<string, object> parameters = new();
+            parameters.Add("QuitFunc", () => Environment.Exit(0));
+            parameters.Add("MaximizeFunc", () =>
+            {
+                bool shouldBeMaximized = WindowState != WindowState.Maximized;
+                WindowState = shouldBeMaximized ? WindowState.Maximized : WindowState.Normal;
+                GRiPEConfig.Config.Maximized = shouldBeMaximized;
+                UpdateWebviewMargin();
+                return shouldBeMaximized;
+            });
+            parameters.Add("MinimizeFunc", () => { WindowState = WindowState.Minimized; });
+
+            //add resources, these won't show up in the xaml but they work
+            Resources.Add("parameters", parameters);
             Resources.Add("services", serviceCollection.BuildServiceProvider());
+        }
+
+        private void UpdateWebviewMargin()
+        {
+            blazorThing.Margin = new Thickness(0, WindowState == WindowState.Maximized ? 0 : 25, 0, 0);
         }
 
         private void quit_Click(object sender, RoutedEventArgs e)
@@ -42,18 +71,6 @@ namespace GRiPE.App
 
         private void maximize_Click(object sender, RoutedEventArgs e)
         {
-            if (WindowState != WindowState.Maximized)
-            {
-                //WindowState = WindowState.Maximized;
-                Left = 0;
-                Top = 0;
-                Width = SystemParameters.WorkArea.Width;
-                Height = SystemParameters.WorkArea.Height;
-            }
-            else
-            {
-                WindowState = WindowState.Normal;
-            }
         }
 
         private void minimize_Click(object sender, RoutedEventArgs e)
@@ -63,7 +80,39 @@ namespace GRiPE.App
 
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            //var mousePos = PointToScreen(Mouse.GetPosition(this));
+            //WindowState = WindowState.Normal;
+            //Left = mousePos.X;
+            //Top = mousePos.Y;
             DragMove();
+        }
+
+        private void Grid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            GRiPEConfig.Config.WindowLeft = Left;
+            GRiPEConfig.Config.WindowTop = Top;
+        }
+
+        bool changedFromLoad = false;
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            UpdateWebviewMargin();
+            changedFromLoad = true;
+            Width = GRiPEConfig.Config.WindowWidth;
+            Height = GRiPEConfig.Config.WindowHeight;
+            changedFromLoad = false;
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            //this gets called from framework as window loads as well as Window_Loaded above setting the size
+            //so make sure we're not saving the default values of the window
+            if (!changedFromLoad && IsLoaded)
+            {
+                //MessageBox.Show(changedFromLoad.ToString());
+                GRiPEConfig.Config.WindowWidth = e.NewSize.Width;
+                GRiPEConfig.Config.WindowHeight = e.NewSize.Height;
+            }
         }
     }
 }

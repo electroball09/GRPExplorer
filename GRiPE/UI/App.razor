@@ -4,11 +4,23 @@
 @inject SessionId sid
 
 <MudLayout>
-    <MudAppBar Dense Fixed>
+    <MudAppBar onmousedown="@AppbarClick" Fixed>
         <MudText Typo="Typo.h5" Class="ml-3">GRiPE</MudText>
         <MudSpacer />
-        <MudText Typo="Typo.caption">sid: @sid.ToString()</MudText>
-        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Edge="Edge.End" />
+        <MudStack Class="pa-0" Spacing="0">
+            <MudStack Row>
+                <MudSpacer />
+                <MudPaper Class="pa-0 ma-0">
+                    <MudIconButton Class="pl-4 pr-4" Size="@Size.Small" Icon="@Icons.Filled.ExpandMore" OnClick="Minimize" />
+                    <MudIconButton Class="pl-4 pr-4" Size="@Size.Small" Icon="@MaximizeIcon" OnClick="Maximize" />
+                    <MudIconButton Class="pl-4 pr-4" Size="@Size.Small" Icon="@Icons.Material.Filled.Close" Color="Color.Error" OnClick="CloseApp" />
+                </MudPaper>
+            </MudStack>
+            <MudStack Row Spacing="2">
+                <MudText Class="pt-1" Typo="Typo.caption">sid: @sid.ToString()</MudText>
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Edge="Edge.End" />
+            </MudStack>
+        </MudStack>
     </MudAppBar>
     <MudMainContent Style="fixed">
         <GRiPE.UI.Pages.Index />
@@ -28,6 +40,17 @@
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool ShowWindow([In] IntPtr hWnd, [In] int nCmdShow);
 
+    [Parameter]
+    public Action? QuitFunc { get; set; }
+    [Parameter]
+    public Func<bool>? MaximizeFunc { get; set; }
+    [Parameter]
+    public Action? MinimizeFunc { get; set; }
+    [Parameter]
+    public Action? DragFunc { get; set; }
+
+    private string MaximizeIcon = Icons.Filled.Fullscreen;
+
     protected override void OnInitialized()
     {
         AllocConsole();
@@ -35,9 +58,29 @@
         ShowWindow(handle, 6);
     }
 
+    private void AppbarClick()
+    {
+        //DragFunc!();
+    }
+
     private void CloseApp()
     {
-        Environment.Exit(0);
+        QuitFunc!();
+    }
+
+    private void Minimize()
+    {
+        MinimizeFunc!();
+    }
+
+    private void Maximize()
+    {
+        MaximizeIcon = MaximizeFunc!() ? Icons.Filled.FullscreenExit : Icons.Filled.Fullscreen;
+    }
+
+    private void Drag()
+    {
+        DragFunc!();
     }
 
     MudTheme theme = new MudTheme()

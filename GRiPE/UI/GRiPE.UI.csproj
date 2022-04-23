@@ -19,12 +19,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Config.Net" Version="4.19.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.4" />
     <PackageReference Include="mudblazor" Version="6.0.9" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\GRPExplorer\GRPExplorerLib\GRPExplorerLib.csproj" />
     <ProjectReference Include="..\Code\GRiPE.Code.csproj" />
   </ItemGroup>
 
